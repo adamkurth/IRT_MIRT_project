@@ -1,4 +1,4 @@
-
+# Multidimensional Item Response Theory (MIRT) simulation code
 
 # True values of model paramters ------------------------------------------
 
@@ -34,8 +34,28 @@ colnames(response.data) <- c("I1", "I2", "I3", "I4")
 
 mirt.out <- mirt::mirt(data = response.data, model = 1, itemtype = '3PL')
 
+  # "mirt.out" =  results from mirt analysis
+  # "data = response data" is the data matrix
+  # "model = 1" refers to the model should have 1 dimension
+  # "itemtype = '3PL'" specifies that the item in the test should be a 3 parameter logistic model
+
 # See the estimated item parameters
 mirt::coef(mirt.out, simplify=T, IRTparts=T)
+
+# "coef()" function extracts the estimated parameters from the mirt analysis
+# "simplify=T" simplifies the output if possible (into vector or matrix), otherwise a list
+# " IRTparts = T " specifies the output should be a IRT parameter matrix (T = discrimination, F = original parameterization)
+
+# OUTPUT:
+# $items = df with estimated item parameters. row = items, col = parameters
+  # (a1 = discrimination, d = difficulty, g = guessing, u = upper asymptote)
+
+# $means = vector that contains the estimated mean of the latent trait (F1 in this case with a mean of 0)
+
+# $cov = matrix that contains the estimated covariance matrix of the latent trait (F1 in this case with a variance of 1) 
+
+# Note: only trait F1 in this case so $cov is a 1x1 matrix.
+ 
 
 # Calculate estimation accuracy -------------------------------------------
 
@@ -50,3 +70,5 @@ RMSE.b
 c.est <- mirt::coef(mirt.out, simplify=T, IRTparts=T)$items[, 3]
 RMSE.c <- sqrt(mean((c - c.est) ^ 2))
 RMSE.c
+
+# "RMSE" = root mean square error
