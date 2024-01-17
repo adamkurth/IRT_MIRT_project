@@ -34,10 +34,10 @@ colnames(response.data) <- c("I1", "I2", "I3", "I4")
 
 mirt.out <- mirt::mirt(data = response.data, model = 1, itemtype = '3PL')
 
-  # "mirt.out" =  results from mirt analysis
-  # "data = response data" is the data matrix
-  # "model = 1" refers to the model should have 1 dimension
-  # "itemtype = '3PL'" specifies that the item in the test should be a 3 parameter logistic model
+# "mirt.out" =  results from mirt analysis
+# "data = response data" is the data matrix
+# "model = 1" refers to the model should have 1 dimension
+# "itemtype = '3PL'" specifies that the item in the test should be a 3 parameter logistic model
 
 # See the estimated item parameters
 mirt::coef(mirt.out, simplify=T, IRTparts=T)
@@ -72,3 +72,22 @@ RMSE.c <- sqrt(mean((c - c.est) ^ 2))
 RMSE.c
 
 # "RMSE" = root mean square error
+
+
+# Plot the estimated item parameters --------------------------------------
+library(ggplot2)
+
+plot.data <- data.frame(
+  Item = rep(c("I1", "I2", "I3", "I4"), each = 2),
+  Parameter = rep(c("a", "b", "c"), times = 4),
+  Value = c(a, b, c, a.est, b.est, c.est),
+  Type = rep(c("True", "Estimated"), each = 12)
+)
+
+ggplot(plot.data, aes(x = Item, y = Value, fill = Type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ Parameter, scales = "free") +
+  theme_minimal() +
+  labs(x = "Item", y = "Parameter Value", fill = "Type",
+       title = "True vs. Estimated Item Parameters")
+
