@@ -142,7 +142,7 @@ mirt.out <- mirt::mirt(data = response.data, model = 1, itemtype = "2PL")
 
 # Understanding input arguments of mirt::mirt function -----------------
 
-
+# further documentaiton please see practice/objective.md
 ?mirt::mirt # for more info on the mirt package
 
 # some arguments
@@ -175,3 +175,6 @@ mirt.out <- mirt::mirt(data = response.data, model = 1, itemtype = "2PL")
 #  'empiricalhist_Woods' or 'EHW' = as above, but Woods' correction is applied to the variance estimate. 
 #  'Davidian-#' = estimates semi-parametric Davidian curves, where # is the number of Davidian paramters to estimate. 
 #       e.g. 'Davidian-2' estimates a 2-parameter Davidian curve.
+
+# Report RMSE ----------------------------------------------------------
+

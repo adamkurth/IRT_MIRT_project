@@ -2,8 +2,8 @@
 
 This is just a quick summarization to understand what the MIRT package in R actually does, and some things that I should focus on to get started. 
 
-# First, 
-## Overarching Understanding
+## First, 
+### Overarching Understanding
 
 - **Objective**: The goal is to estimate the parameters (a, b, c) of the test items based on the responses of the individuals. These parameters are then used to understand how different items function in measuring latent traits (ability/aptitude).
 
@@ -11,8 +11,8 @@ This is just a quick summarization to understand what the MIRT package in R actu
 
 - **Model**: Model fitting involves finding the best set of item parameters that explain the observed responses, this is where we optimize. 
 
-# Second,
-## Optimization in MIRT
+## Second,
+### Optimization in MIRT
 
 - Optimizing is at the heart of MIRT model, the idea is to find the parameters that maximize the likelihood of observing the data.
 
@@ -20,8 +20,8 @@ This is just a quick summarization to understand what the MIRT package in R actu
 
 - **Algorithm**: Algorithms like the Newton-Raphson algorithm, the EM algorithm is used for optimization. These algorithms iteratively adjust parameters to find max log-likelihood. Each iteration involves calculating the log-likelihood and adjusting the parameters (to maximize) based on the algorithm's rules. 
 
-# Third,
-## Key Arguments in `mirt` 
+## Third,
+### Some Key Arguments in `mirt` 
 
 - **method**: This argument type specifies the method to be used. Common methods include 'MH-RM' (Metropolis-Hastings Robbins-Monro), 'EM' (Expectation-Maximization), etc.
 
