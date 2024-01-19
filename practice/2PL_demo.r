@@ -43,10 +43,10 @@ colnames(response.data) <- c("I1", "I2", "I3", "I4")
 
 # Calibrate item parameters using the mirt package, default settings ------
 # record time to convergence and estimation accuracy ---------------------
-start_time = Sys.time() #start time
+start.time = Sys.time() #start time
 mirt.out <- mirt::mirt(data = response.data, model = 1, itemtype = "2PL", storeEMhistory=TRUE) # 2PL model with history tracking
-end_time = Sys.time() # end time
-time_to_conv = end_time - start_time
+end.time = Sys.time() # end time
+time.to.conv = end.time - start.time
 
 # mirt.out <- mirt::mirt() function fits a maximum likelihood (posterier) factor analysis model to the data (dichotomus/polytomous)
 # output: 
@@ -102,7 +102,7 @@ df <- data.frame("a.discrim" = a, "b.difficulty" = b, "c.guessing" = c,
                 "a.est" = a.est, "b.est" = b.est, "c.est" = c.est,
                 "RMSE.a" = RMSE.a, "RMSE.b" = RMSE.b, "RMSE.c" = RMSE.c)
 
-df$time_to_conv <- time_to_conv
+df$time.to.conv <- time.to.conv
 
 # to extract history use extract.mirt() function
 # params <- extract.mirt(mirt.out, 'parvec') #parameter vector
@@ -137,21 +137,99 @@ itemplot(mirt.out, item = 3, type = "trace", auto.key =  list(columns = 4, legen
 itemplot(mirt.out, item = 4, type = "trace", auto.key =  list(columns = 4, legend = TRUE), 
          main = "Item Characteristic Curves (ICC) for Item 4")
 
+# ICC shows the probability of a positive response to each item as a function of the latent trait. 
+# x-axis = latent trait (theta) 
+# y-axis = probability of positive response (get question right)
+# progression of the curves across the iterations of the EM algorithm gives an idea of how the parameter estimates for each item are converging 
+
+
 # Plot test information fucntion (TIF) ----------------------------------------------------------
 
-plot(mirt.out, type = "info", auto.key =  list(columns = 4, legend = TRUE), main = "Test Information Function (TIF)")
+plot(mirt.out, type = "info", auto.key =  list(columns = 4, legend = TRUE), 
+    main = "Test Information Function (TIF)")
+
+# Test Information Funciton (TIF)
+# TIF provides information about the reliability of a test at different levels of a trait being measured.
+# it is a functin of the item parameters and indicates where on the trait scale the test is most imformative.
+
+# What is information?
+# "information" is inversely related to the variance of the estimated ability level (theta) 
+# the more information provided by a test means more percision in meaning the trait at a particular level 
+
+# What am I looking at?
+# x-axis = latent trait (theta)
+# y-axis = information (reliability) of the test at a particular level of the latent trait
+
+# Why is this useful? 
+# TIF is useful for test developers to evaluate and improve tests, specifically identifying which parts of the trait continuum are well-assessed and which are not.
+# test with a TIF has a high peak at certain ability leels but low information at others might be very effective for examinees around that peak, but less reliable elsewhere.
+# one might aim for a TIF that provides a uniform level of high information across the range of ability levels.
+
 
 # Plot person-item map ----------------------------------------------------------
 
-plot(mirt.out, type = "map", auto.key =  list(columns = 4, legend = TRUE), main = "Person-Item Map")
+# retrieving coef()$items difficutly estimates
+item.difficulties <- coef(mirt.out, simplify = TRUE)$items[, 2]
+item.difficulties <- data.frame(Item = paste("Item", 1:4), Difficulty = item.difficulties)
 
+# retrieving f-scores (person ability estimates)
+person.abilities <- fscores(mirt.out)
+person.abilities <- data.frame(Ability = person.abilities)
+
+item.difficulties.long <- item.difficulties[rep(seq_len(nrow(item.difficulties)), each = nrow(person.abilities)), ]
+item.difficulties.long <- item.difficulties[rep(1:nrow(item.difficulties), each = length(person.abilities)), ]
+
+# difficulties with person abilities
+plot_data <- data.frame(
+    Item = item.difficulties.long$Item,
+    Difficulty = item.difficulties.long$Difficulty,
+    Ability = person.abilities
+  )
+
+ggplot(plot_data, aes(x = F1, y = Difficulty, color = Item)) +
+    geom_point() +
+    labs(title = "Person-Item Map", x = "Person Ability", y = "Item Difficulty") +
+    theme_minimal() +
+    scale_color_brewer(palette = "Set1")
+
+# Person-Item Map
+# this map usually represents the distribution of person abilities in relation to item difficulties.
+# It helps in understanding how well the item on a test are targeted to the ability of the test takers.
 
 # Plot factor loadings ----------------------------------------------------------
 
-plot(mirt.out, type = "loadings", auto.key =  list(columns = 4, legend = TRUE), main = "Factor Loadings")
+# retrieves items and parameters
+loadings <- coef(mirt.out, simplify = TRUE)$items
+loadings.long <- reshape2::melt(loadings)
+colnames(loadings.long) <- c("Item", "Parameter", "Value")
+
+ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Factor Loadings", x = "Item Parameters", y = "Factor Loadings") +
+    theme_minimal() +
+    scale_fill_brewer(palette = "Set1")
+
+# Factor Loadings
+# In multidimensional IRT, factor loadings describe the relationship(correlation) between the items and latent traits.
+# High factor loadings indicate a storong association betwen an item and a particular trait.
+
+# What Am I looking at?
+# x-axis = item parameters (I1, I2, I3, I4) and (a, b, c) for each 
+# y-axis = factor loadings (correlation) between the items and latent traits (F1, F2, F3, F4)
 
 # Plot residual analysis ----------------------------------------------------------
 
-plot(mirt.out, type = "residuals", auto.key =  list(columns = 4, legend = TRUE), main = "Residual Analysis")
+residuals <- residuals(mirt.out)
+residuals <- data.frame(model_residuals)
+colnames(residuals) <- c("Item", "Residual")  
 
+ggplot(residuals, aes(x = Item, y = Residual, color = abs(Residual))) +
+    geom_point(alpha = 0.5) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(title = "Residual Analysis", x = "Item", y = "Residual") +
+    theme_minimal() +
+    scale_color_gradient(low = "blue", high = "red")
 
+# Residual Analysis
+# Examining the differences between the observed item responses and the responses predicted by the model.
+# It helps identifying items that do not fit well in the model, indicating potential issues with the item/assumptions.
