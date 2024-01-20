@@ -220,10 +220,11 @@ ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
 # Plot residual analysis ----------------------------------------------------------
 
 residuals <- residuals(mirt.out)
-residuals <- data.frame(model_residuals)
-colnames(residuals) <- c("Item", "Residual")  
+residuals <- data.frame(residuals)
+residuals_long <- reshape2::melt(residuals)
+colnames(residuals_long) <- c("Var1", "Residual")  
 
-ggplot(residuals, aes(x = Item, y = Residual, color = abs(Residual))) +
+ggplot(residuals_long, aes(x = Var1, y = Residual, color = abs(Residual))) +
     geom_point(alpha = 0.5) +
     geom_hline(yintercept = 0, linetype = "dashed") +
     labs(title = "Residual Analysis", x = "Item", y = "Residual") +

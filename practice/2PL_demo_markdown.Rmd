@@ -53,12 +53,12 @@ colnames(response.data) <- c("I1", "I2", "I3", "I4")
 - if \( u > p \) then `response.data = 0`: individual gets answer wrong.
 
 ```{r}
+# Calibrate item parameters using the mirt package, default settings ------
 # record time to convergence and estimation accuracy ---------------------
-start_time = Sys.time() #start time
+start.time = Sys.time() #start time
 mirt.out <- mirt::mirt(data = response.data, model = 1, itemtype = "2PL", storeEMhistory=TRUE) # 2PL model with history tracking
-end_time = Sys.time() # end time
-time_to_conv = end_time - start_time
-time_to_conv
+end.time = Sys.time() # end time
+time.to.conv = end.time - start.time
 ```
 
 - mirt.out <- mirt::mirt() function fits a maximum likelihood (posterier) factor analysis model to the data (dichotomus/polytomous)
@@ -123,7 +123,7 @@ other parameters:
 -- Note: higher the upper asymptote, the easier the item is.
 
 ```{r}
-# Calculate estimation accuracy and time to convergence -------------------------------------------
+# Calculate estimation accuracy and time to convergence 
 a.est <- mirt::coef(mirt.out, simplify = T, IRTparts = T)$items[, 1]
 RMSE.a <- sqrt(mean((a - a.est)^2))
 
@@ -138,43 +138,110 @@ df <- data.frame("a.discrim" = a, "b.difficulty" = b, "c.guessing" = c,
                 "a.est" = a.est, "b.est" = b.est, "c.est" = c.est,
                 "RMSE.a" = RMSE.a, "RMSE.b" = RMSE.b, "RMSE.c" = RMSE.c)
 
-df$time_to_conv <- time_to_conv
+df$time.to.conv <- time.to.conv
+```
+
+- Plots:
+  -- Log-likelihood
+  -- Item characteristic curves (ICC) 
+  -- Test information function (TIF)
+  -- Person-item map
+  -- Factor loadings
+  -- Residual analysis
+
+## Log-Likelihood 
+
+```{r}
+ll.history <- extract.mirt(mirt.out, 'LLhistory')
+
+plot(ll.history, type="b", col='blue', ylim = range(ll.history), 
+    xlab = "Iteration", ylab = "Log-Likelihood", main = "Log-Likelihood Convergence")
 ```
 
 ## Test Information Function (TIF)
 
-```{r}
-plot(mirt.out, type = "info", auto.key = list(columns = 4, legend = TRUE), 
-     main = "Test Information Function (TIF)")
-```
-
 - *Test Information Function (TIF)* provides information about the reliability of a test at different levels of a trait being measured. It is a function of the item parameters and indicates where on the trait scale the test is most informative.
 
-## Person-Item map
-
 ```{r}
-plot(mirt.out, type = "map", auto.key = list(columns = 4, legend = TRUE),
-     main = "Person-Item Map")
+# Plot item characteristic curves (ICC)
+plot(mirt.out, type = "trace", auto.key =  list(columns = 4, legend = TRUE), 
+     main = "Item Characteristic Curves (ICC)")
+
+itemplot(mirt.out, item = 1, type = "trace", auto.key =  list(columns = 4, legend = TRUE), 
+         main = "Item Characteristic Curves (ICC) for Item 1")
+itemplot(mirt.out, item = 2, type = "trace", auto.key =  list(columns = 4, legend = TRUE), 
+         main = "Item Characteristic Curves (ICC) for Item 2")
+itemplot(mirt.out, item = 3, type = "trace", auto.key =  list(columns = 4, legend = TRUE),
+         main = "Item Characteristic Curves (ICC) for Item 3")
+itemplot(mirt.out, item = 4, type = "trace", auto.key =  list(columns = 4, legend = TRUE), 
+         main = "Item Characteristic Curves (ICC) for Item 4")
 ```
+
+## Person-Item Map
 
 - *Person-Item Map* usually represents the distribution of person abilities in relation to item difficulties. It helps in understanding how well the items on a test are targeted to the ability of the test takers.
 
-## Factor Loadings
-
 ```{r}
-plot(mirt.out, type = "loadings", auto.key = list(columns = 4, legend = TRUE), 
-     main = "Factor Loadings")
+# Plot person-item map
+
+# retrieving coef()$items difficutly estimates
+item.difficulties <- coef(mirt.out, simplify = TRUE)$items[, 2]
+item.difficulties <- data.frame(Item = paste("Item", 1:4), Difficulty = item.difficulties)
+
+# retrieving f-scores (person ability estimates)
+person.abilities <- fscores(mirt.out)
+person.abilities <- data.frame(Ability = person.abilities)
+
+item.difficulties.long <- item.difficulties[rep(seq_len(nrow(item.difficulties)), each = nrow(person.abilities)), ]
+item.difficulties.long <- item.difficulties[rep(1:nrow(item.difficulties), each = length(person.abilities)), ]
+
+# difficulties with person abilities
+plot_data <- data.frame(
+    Item = item.difficulties.long$Item,
+    Difficulty = item.difficulties.long$Difficulty,
+    Ability = person.abilities
+  )
+
+ggplot(plot_data, aes(x = F1, y = Difficulty, color = Item)) +
+    geom_point() +
+    labs(title = "Person-Item Map", x = "Person Ability", y = "Item Difficulty") +
+    theme_minimal() +
+    scale_color_brewer(palette = "Set1")
 ```
+
+## Factor Loadings
 
 - *Factor Loading* in multidimensional IRT, factor loadings describe the relationship (correlation) between the items and latent traits. High factor loadings indicate a strong association between an item and a particular trait.
 
-## Plot residual analysis
-
 ```{r}
-plot(mirt.out, type = "residuals", auto.key = list(columns = 4, legend = TRUE), 
-     main = "Residual Analysis")
+# Factor loadings
+loadings <- coef(mirt.out, simplify = TRUE)$items
+loadings.long <- reshape2::melt(loadings)
+colnames(loadings.long) <- c("Item", "Parameter", "Value")
+
+ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = "Factor Loadings", x = "Item Parameters", y = "Factor Loadings") +
+    theme_minimal() +
+    scale_fill_brewer(palette = "Set1")
 ```
+
+## Plot residual analysis
 
 - *Residual Analysis* involves examining the differences between the observed item responses and the responses predicted by the model. It helps in identifying items that do not fit well in the model, indicating potential issues with the item or assumptions.
 
+```{r}
+# Plot residual analysis
+residuals <- residuals(mirt.out)
+residuals <- data.frame(residuals)
+residuals_long <- reshape2::melt(residuals)
+colnames(residuals_long) <- c("Var1", "Residual")  
 
+ggplot(residuals_long, aes(x = Var1, y = Residual, color = abs(Residual))) +
+    geom_point(alpha = 0.5) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    labs(title = "Residual Analysis", x = "Item", y = "Residual") +
+    theme_minimal() +
+    scale_color_gradient(low = "blue", high = "red")
+
+```
