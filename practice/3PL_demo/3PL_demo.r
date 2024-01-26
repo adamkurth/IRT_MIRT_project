@@ -5,6 +5,7 @@ rm(list=ls())
 library(mirt)
 library(ggplot2)
 library(reshape2)
+library(tibble)
 # -------------------------------------------------------------
 
 # Simulate data with Monte Carlo experiments ------------------------------
@@ -86,40 +87,66 @@ itemplot(mirt.out, item = 4, type = "trace", auto.key =  list(columns = 4, legen
 plot(mirt.out, type = "info", auto.key =  list(columns = 4, legend = TRUE), 
     main = "Test Information Function (TIF)")
 
-# very sharp peak around theta = 0
+# This plot differs from the 2PL model because the 3PL model has a guessing parameter (c) that is not 0.
+# This is the guessing parameter, which is not 0, and thus creates sharp peaks in the TIF.
+# The TIF tells us that the test is most informative at the mean of the latent trait (theta = 0).
+# The TIF tells us that the test is least informative at the extremes of the latent trait (theta = -3 and theta = 3).
+
+# The guessing parameter 'c' in the 3PL model affects the floor of the TIF,
+# This does not introduce variabillity in the sense of making the TIF more varaible at different points...
+# instead, this raises the information floor, meaning that even at lower ability (where discrimination is typically low),
+# the test provides some information due to the chance of guessing correctly. This is because of the guessing parameter 'c',
+# ensures that the probability of a correct response is never 0, even for low-ability examinees.
+
+plot(mirt.out, type = "info", auto.key =  list(columns = 4, legend = TRUE), 
+    main = "Test Information Function (TIF)", xlim = c(-3, 3))
+
+# most informative segment
+plot(mirt.out, type = "info", auto.key =  list(columns = 4, legend = TRUE), 
+    main = "Test Information Function (TIF)", xlim = c(-1, 1))
+    
+# least informative segment xlim=(3,1)
+plot(mirt.out, type = "info", auto.key =  list(columns = 4, legend = TRUE), 
+    main = "Test Information Function (TIF)", xlim = c(3, 1))
+
 
 # Plot person-item map ----------------------------------------------------------
 
 # retrieving coef()$items difficutly estimates
 item.difficulties <- coef(mirt.out, simplify = TRUE)$items[, 2]
-item.difficulties <- data.frame(Item = paste("Item", 1:4), Difficulty = item.difficulties)
+item.difficulties <- data.frame(Item = paste("Item", 1:length(item.difficulties)), Difficulty = item.difficulties)
 
 # retrieving f-scores (person ability estimates)
 person.abilities <- fscores(mirt.out)
-person.abilities <- data.frame(Ability = person.abilities)
+person.abilities <- data.frame(PersonID = 1:length(person.abilities), Ability = person.abilities)
 
 item.difficulties.long <- item.difficulties[rep(seq_len(nrow(item.difficulties)), each = nrow(person.abilities)), ]
 item.difficulties.long <- item.difficulties[rep(1:nrow(item.difficulties), each = length(person.abilities)), ]
 
-# difficulties with person abilities
-plot_data <- data.frame(
-    Item = item.difficulties.long$Item,
-    Difficulty = item.difficulties.long$Difficulty,
-    Ability = person.abilities
-  )
+# cols= personID, Item, Difficulty, F1-score
+plot_data <- expand.grid(Item = item.difficulties$Item, PersonID = person.abilities$PersonID)
+plot_data <- merge(plot_data, item.difficulties, by = "Item")
+plot_data <- merge(plot_data, person.abilities, by = "PersonID")
 
 ggplot(plot_data, aes(x = F1, y = Difficulty, color = Item)) +
-    geom_point() +
-    labs(title = "Person-Item Map", x = "Person Ability", y = "Item Difficulty") +
-    theme_minimal() +
-    scale_color_brewer(palette = "Set1")
+  geom_point() +
+  labs(title = "Person-Item Map", x = "Person Ability", y = "Item Difficulty") +
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
 
 # Plot factor loadings ----------------------------------------------------------
 
 # retrieves items and parameters
+
+# ?? Might need adjustment
+
 loadings <- coef(mirt.out, simplify = TRUE)$items
-loadings.long <- reshape2::melt(loadings)
-colnames(loadings.long) <- c("Item", "Parameter", "Value")
+colnames(loadings) <- c("a1", "d", "c", "u")
+loadings <- data.frame(loadings)
+loadings.long <- loadings %>%
+    tibble::rownames_to_column(var = "Item") %>%
+    tidyr::pivot_longer(cols = -Item, names_to = "Parameter", values_to = "Value")
+
 
 ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
     geom_bar(stat = "identity", position = "dodge") +
@@ -127,17 +154,24 @@ ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
     theme_minimal() +
     scale_fill_brewer(palette = "Set1")
 
+
+# parameters: a1, c 
+
 # Plot residual analysis ----------------------------------------------------------
 
 residuals <- residuals(mirt.out)
 residuals <- data.frame(residuals)
-residuals_long <- reshape2::melt(residuals)
-colnames(residuals_long) <- c("Var1", "Residual")  
+residuals <- tibble::rownames_to_column(residuals, var = "Item")
+# residuals.long <- melt(residuals, variable.name = "Item", value.name = "Residual")
+residuals.long <- melt(residuals, id.vars = "Item", value.name = "Residual")
 
-ggplot(residuals_long, aes(x = Var1, y = Residual, color = abs(Residual))) +
+residuals.long.plot <- residuals.long[!is.na(residuals.long$Residual), ]
+
+ggplot(residuals.long.plot, aes(x = Item, y = Residual, color = abs(Residual))) +
     geom_point(alpha = 0.5) +
-    geom_hline(yintercept = 0, linetype = "dashed") +
+    geom_segment(aes(xend = Item, yend = 0), alpha = 0.5) +  # Vertical lines for each point
+    geom_hline(yintercept = 0, linetype = "dashed") +  # Horizontal dashed line at y=0
+    geom_vline(xintercept = 0, linetype = "dashed", color = "black") +  # Vertical dashed line at x=0
     labs(title = "Residual Analysis", x = "Item", y = "Residual") +
     theme_minimal() +
     scale_color_gradient(low = "blue", high = "red")
-
