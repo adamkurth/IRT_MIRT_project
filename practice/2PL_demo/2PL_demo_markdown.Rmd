@@ -11,6 +11,7 @@ rm(list=ls())
 library(mirt)
 library(ggplot2)
 library(reshape2)
+library(tidyr)
 ```
 
 ## Understanding MIRT
@@ -215,15 +216,20 @@ ggplot(plot_data, aes(x = F1, y = Difficulty, color = Item)) +
 
 ```{r}
 # Factor loadings
-loadings <- coef(mirt.out, simplify = TRUE)$items
-loadings.long <- reshape2::melt(loadings)
-colnames(loadings.long) <- c("Item", "Parameter", "Value")
+loadings <- coef(mirt.out, simplify = TRUE)$items[, "a1"]
+loadings <- as.data.frame(loadings)
+colnames(loadings) <- c("a1")
+
+loadings.long <- loadings %>%
+    tibble::rownames_to_column(var = "Item") %>%
+    tidyr::pivot_longer(cols = -Item, names_to = "Parameter", values_to = "Value")
 
 ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
     geom_bar(stat = "identity", position = "dodge") +
     labs(title = "Factor Loadings", x = "Item Parameters", y = "Factor Loadings") +
     theme_minimal() +
     scale_fill_brewer(palette = "Set1")
+
 ```
 
 ## Plot residual analysis
@@ -234,10 +240,11 @@ ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
 # Plot residual analysis
 residuals <- residuals(mirt.out)
 residuals <- data.frame(residuals)
-residuals_long <- reshape2::melt(residuals)
-colnames(residuals_long) <- c("Var1", "Residual")  
+residuals <- tibble::rownames_to_column(residuals, var = "Item")
+residuals.long <- reshape2::melt(residuals, id.vars = "Item")
+colnames(residuals.long) <- c("Var1", "Var2", "Residual")  
 
-ggplot(residuals_long, aes(x = Var1, y = Residual, color = abs(Residual))) +
+ggplot(residuals.long, aes(x = Var1, y = Residual, color = abs(Residual))) +
     geom_point(alpha = 0.5) +
     geom_hline(yintercept = 0, linetype = "dashed") +
     labs(title = "Residual Analysis", x = "Item", y = "Residual") +

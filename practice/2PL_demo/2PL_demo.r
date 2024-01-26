@@ -199,9 +199,22 @@ ggplot(plot_data, aes(x = F1, y = Difficulty, color = Item)) +
 # Plot factor loadings ----------------------------------------------------------
 
 # retrieves items and parameters
-loadings <- coef(mirt.out, simplify = TRUE)$items
-loadings.long <- reshape2::melt(loadings)
-colnames(loadings.long) <- c("Item", "Parameter", "Value")
+loadings <- coef(mirt.out, simplify = TRUE)$items[, "a1"]
+loadings <- as.data.frame(loadings)
+colnames(loadings) <- c("a1")
+
+# a1 (discrimination parameter) 
+# - seen as multiplier that links the latent trait (ability/theta) to the probability of a specific response pattern
+# - indicates how effectively each item discriminates between two different lavels of the latent trait
+# d (difficulty parameter) 
+
+# 2PL model in IRT (where c=d=0) is a close cousin to confimatory factor analysis (CFA) with binary variables
+# c = d = 0 (no guessing or upper asymptote) 
+
+library(tidyr)
+loadings.long <- loadings %>%
+    tibble::rownames_to_column(var = "Item") %>%
+    tidyr::pivot_longer(cols = -Item, names_to = "Parameter", values_to = "Value")
 
 ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
     geom_bar(stat = "identity", position = "dodge") +
@@ -221,10 +234,11 @@ ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
 
 residuals <- residuals(mirt.out)
 residuals <- data.frame(residuals)
-residuals_long <- reshape2::melt(residuals)
-colnames(residuals_long) <- c("Var1", "Residual")  
+residuals <- tibble::rownames_to_column(residuals, var = "Item")
+residuals.long <- reshape2::melt(residuals, id.vars = "Item")
+colnames(residuals.long) <- c("Var1", "Var2", "Residual")  
 
-ggplot(residuals_long, aes(x = Var1, y = Residual, color = abs(Residual))) +
+ggplot(residuals.long, aes(x = Var1, y = Residual, color = abs(Residual))) +
     geom_point(alpha = 0.5) +
     geom_hline(yintercept = 0, linetype = "dashed") +
     labs(title = "Residual Analysis", x = "Item", y = "Residual") +
