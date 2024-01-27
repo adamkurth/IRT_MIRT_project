@@ -22,7 +22,7 @@ response.data <- matrix(NA, n.persons, n.items)
 
 for (i in 1:n.persons) {
     for (j in 1:n.items) {
-        p <- c[j] + (1 - c[j]) / (1 + exp(-(a[j] * theta[i] - b[j]))) #2PL model
+        p <- c[j] + (1 - c[j]) / (1 + exp(-(a[j] * theta[i] - b[j]))) #3PL model
         u <- runif(n = 1, min = 0, max = 1) 
         if (u < p) {
             response.data[i, j] <- 1
