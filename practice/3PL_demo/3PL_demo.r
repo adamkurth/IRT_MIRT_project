@@ -155,7 +155,7 @@ ggplot(loadings.long, aes(x = Item, y = Value, fill = Parameter)) +
     scale_fill_brewer(palette = "Set1")
 
 
-# parameters: a1, c 
+# parameters: a1, 
 
 # Plot residual analysis ----------------------------------------------------------
 
