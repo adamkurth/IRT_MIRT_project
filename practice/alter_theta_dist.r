@@ -6,8 +6,8 @@ library(mirt)
 library(ggplot2)
 library(reshape2)
 library(tibble)
+library(ggpubr)
 # -------------------------------------------------------------
-
 # Simulate data with Monte Carlo experiments ------------------
 theta.exp <- rexp(n = 500, rate = 1) 
 theta.gamma <- rgamma(n = 500, shape = 1, rate = 1)
@@ -93,46 +93,71 @@ for(name in names(response.dataframes)){
 
 # Plot estimates ----------------------------------------------------------
 plot.est.param <- list()
+a_true <- c(0.5, 1, 1.5, 2)
+b_true <- c(0, -1, 1, 0)
+c_true <- c(0.2, 0.15, 0.25, 0.2)
+
+plots.a <- list()
+plots.b <- list()
+plots.c <- list()
 
 # Loop through each fitted model
 for(name in names(mirt.models)) {
     mirt.out <- mirt.models[[name]]
-
-    # Extract estimated parameters
     estimates <- coef(mirt.out, simplify = TRUE, IRTparts = TRUE)$items
-    df <- data.frame(Item = paste("Item", 1:nrow(estimates)),
-                     Discrimination = estimates[, "a1"],
-                     Difficulty = estimates[, "d"],
-                     Guessing = estimates[, "g"])
-
-    # Plot for each parameter
+    df <- data.frame(Item = paste("Item", seq_len(nrow(estimates))),
+                    Discrimination = estimates[, "a1"],
+                    Difficulty = estimates[, "d"],
+                    Guessing = estimates[, "g"])
+    # Extract estimated parameters
     p_a <- ggplot(df, aes(x = Item, y = Discrimination)) +
         geom_bar(stat = "identity", fill = "blue") +
-        labs(title = paste("Discrimination (a) Parameters for", name),
-             x = "Item", y = "Discrimination (a)")
+        geom_hline(yintercept = a_true, linetype = "dashed", color = "black") +
+        labs(title = paste("Discrimination (a) -", name),
+             x = "Item", y = "Discrimination")
 
     p_b <- ggplot(df, aes(x = Item, y = Difficulty)) +
         geom_bar(stat = "identity", fill = "red") +
-        labs(title = paste("Difficulty (b) Parameters for", name),
-             x = "Item", y = "Difficulty (b)")
+        geom_hline(yintercept = b_true, linetype = "dashed", color = "black") +
+        labs(title = paste("Difficulty (b) -", name),
+             x = "Item", y = "Difficulty")
 
     p_c <- ggplot(df, aes(x = Item, y = Guessing)) +
         geom_bar(stat = "identity", fill = "green") +
-        labs(title = paste("Guessing (c) Parameters for", name),
-             x = "Item", y = "Guessing (c)")
+        geom_hline(yintercept = c_true, linetype = "dashed", color = "black") +
+        labs(title = paste("Guessing (c) -", name),
+             x = "Item", y = "Guessing")
 
-    plot.est.param[[paste(name, "a")]] <- p_a
-    plot.est.param[[paste(name, "b")]] <- p_b
-    plot.est.param[[paste(name, "c")]] <- p_c
+    plots.a[[name]] <- p_a
+    plots.b[[name]] <- p_b
+    plots.c[[name]] <- p_c
 }
+plot_a_combined <- ggarrange(plotlist = plots.a, ncol = 2, nrow = ceiling(length(plots.a) / 2))
+plot_b_combined <- ggarrange(plotlist = plots.b, ncol = 2, nrow = ceiling(length(plots.b) / 2))
+plot_c_combined <- ggarrange(plotlist = plots.c, ncol = 2, nrow = ceiling(length(plots.c) / 2))
 
-ggpubr::ggarrange(plot.est.param$theta.exp.a, plot.est.param$theta.gamma.a, plot.est.param$theta.norm.a, plot.est.param$theta.unif.a,
-          plot.est.param$theta.beta.a, plot.est.param$theta.chisq.a, plot.est.param$theta.t.a, plot.est.param$theta.f.a,
-          ncol = 2, nrow = 4)
+print(plot_a_combined)
+print(plot_b_combined)
+print(plot_c_combined)
+
+# Don't know if this is a helpful visualization
+
+## plot estimates already in the dataframe
 
 
-#  fix above !!!1!!!!!!!
 
+# Plot time to convergence ----------------------------------------------------------
+conv.times <- sapply(results, function(df) df$time.to.conv)
+conv.times <- data.frame(Theta = names(conv.times), TimeToConvergence = conv.times)
+
+p <- ggplot(conv.times, aes(x = Theta, y = TimeToConvergence)) +
+    geom_col(fill = "blue") +
+    labs(title = "Time to Convergence for Each Theta Distribution",
+         x = "Theta Distribution", y = "Time to Convergence (seconds)") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(p)
 
 # Plot log-likelihood ----------------------------------------------------------
 
@@ -245,4 +270,66 @@ print(plots.person.item$theta.chisq)
 print(plots.person.item$theta.t)
 
 
+# Plot factor loadings ----------------------------------------------------------
 
+factor.loadings.df <- data.frame(Theta = character(),
+                                 Item = character(),
+                                 Discrimination = numeric(),
+                                 stringsAsFactors = FALSE)
+                            
+for(theta in names(results)){
+    a.est <- results[[theta]]$a.est
+
+    temp.df <- data.frame(Theta = rep(theta, length(a.est)),
+                        Item = paste("Item", seq_along(a.est)), 
+                        Discrimination = a.est)
+
+    factor.loadings.df <- rbind(factor.loadings.df, temp.df)
+}
+
+factor.loadings.df$Theta <- factor(factor.loadings.df$Theta, levels = names(mirt.models))
+factor.loadings.df$Item <- factor(factor_loadings_df$Item)
+
+p <- ggplot(factor.loadings.df, aes(x = Item, y = Discrimination, fill = Theta)) +
+    geom_bar(stat = "identity", position = position_dodge()) +
+    labs(title = "Discrimination Parameter Estimates Across Theta Distributions",
+         x = "Item", y = "Discrimination Parameter (a)") +
+    scale_fill_brewer(palette = "Set1") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(p)
+
+# Plot residual analysis ----------------------------------------------------------
+all.residuals <- data.frame(Theta = character(),
+                            Item = character(),
+                            Residual = numeric(),
+                            stringsAsFactors = FALSE)
+
+for(theta in names(mirt.models)){
+    mirt.model <- mirt.models[[theta]]
+    # extract residuals
+    residuals.df <- data.frame(residuals(mirt.model))
+    residuals.df <- tibble::rownames_to_column(residuals.df, var = "Item")
+
+    # convert to long format
+    residuals.long <- melt(residuals.df, id.vars = "Item", value.name = "Residual")
+    
+    # add theta dist name
+    residuals.long$Theta <- theta
+
+    # add to all residuals df
+    all.residuals <- rbind(all.residuals, residuals.long)
+}
+all.residuals <- all.residuals[!is.na(all.residuals$Residual), ]
+
+p <- ggplot(all.residuals, aes(x = Item, y = Residual, color = abs(Residual))) +
+    geom_point(alpha = 0.5) +
+    geom_segment(aes(xend = Item, yend = 0), alpha = 0.5) +
+    geom_hline(yintercept = 0, linetype = "dashed") +  
+    labs(title = "Residual Analysis Across Theta Distributions", x = "Item", y = "Residual") +
+    theme_minimal() +
+    scale_color_gradient(low = "blue", high = "red") +
+    facet_wrap(~ Theta) +   
+    theme(legend.position = "bottom", legend.justification = "right")
+
+print(p)
