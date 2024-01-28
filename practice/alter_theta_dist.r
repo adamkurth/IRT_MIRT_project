@@ -333,3 +333,54 @@ p <- ggplot(all.residuals, aes(x = Item, y = Residual, color = abs(Residual))) +
     theme(legend.position = "bottom", legend.justification = "right")
 
 print(p)
+
+
+#  Plot RMSE ----------------------------------------------------------
+rmse.plots <- list()
+library(tidyverse)
+for(theta in names(results)){
+    df <- results[[theta]]
+
+    rmse.df <- df %>%
+        select(contains("RMSE")) %>%
+        pivot_longer(everything(), names_to = "Parameter", values_to = "RMSE") %>%
+        mutate(Item = row_number())
+
+
+    p <- ggplot(rmse.df, aes(x = as.factor(Item), y = RMSE, fill = Parameter)) +
+        geom_bar(stat = "identity", position = position_dodge()) +
+        labs(title = paste("RMSE for", theta),
+             x = "Item", y = "RMSE") +
+        scale_fill_brewer(palette = "Set1") +
+        theme_minimal()
+
+    rmse.plots[[theta]] <- p
+}
+
+combined.plots <- ggarrange(plotlist = lapply(rmse.plots, function(p) p), 
+                                ncol = 2, nrow = ceiling(length(rmse.plots) / 2))
+print(combined.plots)
+
+# Misc. plots ----------------------------------------------------------
+# might be useful later?
+rmse.df$Item <- as.factor(rmse.df$Item)
+rmse.df$Parameter <- gsub("RMSE.", "", rmse.df$Parameter)  # Clean up parameter names
+
+p_bar <- ggplot(rmse.df, aes(x = Item, y = RMSE, fill = Parameter)) +
+    geom_bar(stat = "identity", position = position_dodge()) +
+    labs(title = "RMSE by Parameter and Item", x = "Item", y = "RMSE") +
+    theme_minimal()
+
+p_line <- ggplot(rmse.df, aes(x = Item, y = RMSE, color = Parameter, group = Parameter)) +
+    geom_line() +
+    labs(title = "RMSE Trends by Parameter", x = "Item", y = "RMSE") +
+    theme_minimal()
+
+p_box <- ggplot(rmse.df, aes(x = Parameter, y = RMSE)) +
+    geom_boxplot() +
+    labs(title = "Distribution of RMSEs by Parameter", x = "Parameter", y = "RMSE") +
+    theme_minimal()
+
+print(p_bar)
+print(p_line)
+print(p_box)
