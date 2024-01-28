@@ -9,24 +9,27 @@ library(reshape2)
 library(tibble)
 library(ggpubr)
 library(gridExtra)
+library(sn) # for skew normal distribution
 # -------------------------------------------------------------
-# Simulate data with Monte Carlo experiments ------------------
-theta.exp <- rexp(n = 500, rate = 1) 
-theta.gamma <- rgamma(n = 500, shape = 1, rate = 1)
-theta.unif <- runif(n = 500, min = -1, max = 1)
-theta.norm <- rnorm(n = 500, mean = 0, sd = 1)
-theta.beta <- rbeta(n = 500, shape1 = 1, shape2 = 1)
-theta.chisq <- rchisq(n = 500, df = 1)
-theta.t <- rt(n = 500, df = 1)
-theta.f <- rf(n = 500, df1 = 1, df2 = 1)
+# Generate skewed theta distributions --------------------------\
+n <- 500 
+linspace <- seq(-5, 5, length.out = n)
+
+theta.left <- rsn(n, xi = 0, omega = 1, alpha = -10) # left skewed
+theta.right <- rsn(n, xi = 0, omega = 1, alpha = 10) # right skewed
+theta.far.left <- rsn(n, xi = 0, omega = 1, alpha = -20) # far left skewed
+theta.far.right <- rsn(n, xi = 0, omega = 1, alpha = 20) # far right skewed
+theta.normal <- rnorm(n, mean = 0, sd = 1) # normal
+
 # -------------------------------------------------------------
 # True Item Parameters -----------------------------------------
 a <- c(0.5, 1, 1.5, 2)
 b <- c(0, -1, 1, 0)
 c <- c(0.2, 0.15, 0.25, 0.2)
 
-n.persons <- length(theta.exp) # holds for all theta
-n.items <- length(a)
+# n.persons <- length(a)
+n.items <- length(b)
+n.persons <- length(theta.normal)
 
 # function to simulate response data using 3PL model
 simulate_response <- function(theta, seed = 123){
@@ -43,14 +46,11 @@ simulate_response <- function(theta, seed = 123){
 
 # store all response dataframes in a list
 response.dataframes <- list(
-    theta.exp = simulate_response(theta.exp, seed = 123),
-    theta.gamma = simulate_response(theta.gamma, seed = 123),
-    theta.norm = simulate_response(theta.norm, seed = 123),
-    theta.unif = simulate_response(theta.unif, seed = 123),
-    theta.beta = simulate_response(theta.beta, seed = 123),
-    theta.chisq = simulate_response(theta.chisq, seed = 123),
-    theta.t = simulate_response(theta.t, seed = 123),
-    theta.f = simulate_response(theta.f, seed = 123)
+    left = simulate_response(theta.left, seed = 123),
+    right = simulate_response(theta.right, seed = 123),
+    far.left = simulate_response(theta.far.left, seed = 123),
+    far.right = simulate_response(theta.far.right, seed = 123),
+    normal = simulate_response(theta.normal, seed = 123)
 )
 
 # renaming the items to I1, I2, I3, I4 
@@ -63,19 +63,19 @@ response.dataframes <- lapply(response.dataframes, function(df) {
 
 # > head(response.dataframes$theta.norm)
 #   I1 I2 I3 I4
-# 1  1  0  1  0
+# 1  1  0  0  0
 # 2  0  1  0  0
 # 3  0  0  0  0
-# 4  1  1  1  0
-# 5  1  1  0  0
-# 6  0  1  1  0
+# 4  0  1  1  0
+# 5  1  1  1  0
+# 6  0  0  0  0
 
 # -------------------------------------------------------------
 # Goal of this script: 
-# see if distribution of theta (ability) makes a difference 
+# see if skewness of the distribution of theta (ability) makes a difference 
 # -------------------------------------------------------------
 
-# Test Distribution ------------------------------------------
+# Fit the models ------------------------------------------------
 results <- list()
 mirt.models <- list()
 
@@ -105,60 +105,64 @@ for(name in names(response.dataframes)){
     mirt.models[[name]] <- mirt.out
 }
 
-# Plot estimates ----------------------------------------------------------
-plot.est.param <- list()
-a_true <- c(0.5, 1, 1.5, 2)
-b_true <- c(0, -1, 1, 0)
-c_true <- c(0.2, 0.15, 0.25, 0.2)
+# -------------------------------------------------------------
+true_a <- c(0.5, 1, 1.5, 2)
+true_b <- c(0, -1, 1, 0)
+true_c <- c(0.2, 0.15, 0.25, 0.2)
 
 plots.a <- list()
 plots.b <- list()
 plots.c <- list()
 
-# Loop through each fitted model
-for(name in names(mirt.models)) {
-    mirt.out <- mirt.models[[name]] # extract model
-    estimates <- coef(mirt.out, simplify = TRUE, IRTparts = TRUE)$items # extract estimated parameters
-    num.iter <- length(extract.mirt(mirt.out, 'EMhistory')$deviance) # retrieve number of iterations
-
+for(name in names(results)){
+    estimates <- results[[name]][, c("a.est", "b.est", "c.est")]
     df <- data.frame(Item = paste("Item", seq_len(nrow(estimates))),
-                    Discrimination = estimates[, "a1"],
-                    Difficulty = estimates[, "d"],
-                    Guessing = estimates[, "g"])
+                     TrueDiscrimination = true_a,
+                     TrueDifficulty = true_b,
+                     TrueGuessing = true_c,
+                     Discrimination = estimates[, "a.est"],
+                     Difficulty = estimates[, "b.est"],
+                     Guessing = estimates[, "c.est"])
+    # for plotting 
+    df_long <- reshape2::melt(df, id.vars = "Item", 
+                            measure.vars = c("TrueDiscrimination", "Discrimination", 
+                                            "TrueDifficulty", "Difficulty", 
+                                            "TrueGuessing", "Guessing"))
+                                                
+    # Plot for Discrimination
+    p_a <- ggplot(df_long[df_long$variable %in% c("TrueDiscrimination", "Discrimination"), ], 
+                  aes(x = Item, y = value, fill = variable)) +
+           geom_bar(stat = "identity", position = position_dodge()) +
+           scale_fill_manual(values = c("TrueDiscrimination" = "darkblue", "Discrimination" = "skyblue")) +
+           labs(title = paste("Discrimination (a) -", name), x = "Item", y = "Value")
 
-    p_a <- ggplot(df, aes(x = Item, y = Discrimination)) +
-        geom_bar(stat = "identity", fill = "blue") +
-        geom_hline(yintercept = a_true, linetype = "dashed", color = "black") +
-        labs(title = paste("Discrimination (a) -", name),
-             x = "Item", y = "Discrimination")
+    # Plot for Difficulty
+    p_b <- ggplot(df_long[df_long$variable %in% c("TrueDifficulty", "Difficulty"), ], 
+                  aes(x = Item, y = value, fill = variable)) +
+           geom_bar(stat = "identity", position = position_dodge()) +
+           scale_fill_manual(values = c("TrueDifficulty" = "darkred", "Difficulty" = "lightcoral")) +
+           labs(title = paste("Difficulty (b) -", name), x = "Item", y = "Value")
 
-    p_b <- ggplot(df, aes(x = Item, y = Difficulty)) +
-        geom_bar(stat = "identity", fill = "red") +
-        geom_hline(yintercept = b_true, linetype = "dashed", color = "black") +
-        labs(title = paste("Difficulty (b) -", name),
-             x = "Item", y = "Difficulty")
-
-    p_c <- ggplot(df, aes(x = Item, y = Guessing)) +
-        geom_bar(stat = "identity", fill = "green") +
-        geom_hline(yintercept = c_true, linetype = "dashed", color = "black") +
-        labs(title = paste("Guessing (c) -", name),
-             x = "Item", y = "Guessing")
+    # Plot for Guessing
+    p_c <- ggplot(df_long[df_long$variable %in% c("TrueGuessing", "Guessing"), ], 
+                  aes(x = Item, y = value, fill = variable)) +
+           geom_bar(stat = "identity", position = position_dodge()) +
+           scale_fill_manual(values = c("TrueGuessing" = "darkgreen", "Guessing" = "lightgreen")) +
+           labs(title = paste("Guessing (c) -", name), x = "Item", y = "Value")
 
     plots.a[[name]] <- p_a
     plots.b[[name]] <- p_b
     plots.c[[name]] <- p_c
 }
-plot_a_combined <- ggarrange(plotlist = plots.a, ncol = 2, nrow = ceiling(length(plots.a) / 2))
-plot_b_combined <- ggarrange(plotlist = plots.b, ncol = 2, nrow = ceiling(length(plots.b) / 2))
-plot_c_combined <- ggarrange(plotlist = plots.c, ncol = 2, nrow = ceiling(length(plots.c) / 2))
 
-print(plot_a_combined)
-print(plot_b_combined)
-print(plot_c_combined)
+all_plots_a <- ggarrange(plotlist = plots.a, common.legend = TRUE, legend = "bottom")
+all_plots_b <- ggarrange(plotlist = plots.b, common.legend = TRUE, legend = "bottom")
+all_plots_c <- ggarrange(plotlist = plots.c, common.legend = TRUE, legend = "bottom")
 
-# Don't know if this is a helpful visualization?
-
-## plot estimates already in the dataframe
+print(all_plots_a)
+print(all_plots_b)
+print(all_plots_c)
+# -------------------------------------------------------------
 
 # Plot time to convergence ----------------------------------------------------------
 conv.times <- data.frame(
@@ -167,11 +171,12 @@ conv.times <- data.frame(
     # NumIterations = sapply(mirt.models, function(model) length(extract.mirt(model, 'EMhistory')$deviance))
 )
 
+# Plot time to convergence ----------------------------------------------------------
+
 p <- ggplot(conv.times, aes(x = Theta, y = TimeToConvergence)) +
     geom_col(fill = "blue") +
-    geom_text(aes(label = NumIterations), vjust = -0.5) +  # Annotate with number of iterations
     labs(title = "Time to Convergence for Each Theta Distribution",
-         x = "Theta Distribution", y = "Time to Convergence (seconds)") +
+        x = "Theta Distribution", y = "Time to Convergence (seconds)") +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
@@ -198,13 +203,11 @@ combined.plots <- ggarrange(plotlist = lapply(plots.ll, function(p) p),
                             ncol = 2, nrow = ceiling(length(plots.ll) / 2))
 print(combined.plots)
 
-print(plots.ll$theta.exp)
-print(plots.ll$theta.gamma)
-print(plots.ll$theta.norm)
-print(plots.ll$theta.unif)
-print(plots.ll$theta.beta)
-print(plots.ll$theta.chisq)
-print(plots.ll$theta.t)
+print(plots.ll$left)
+print(plots.ll$right)
+print(plots.ll$far.left)
+print(plots.ll$far.right)
+print(plots.ll$normal)
 
 # Plot item characteristic curves (ICC) ----------------------------------------------------------
 
@@ -225,13 +228,12 @@ for(name in names(mirt.models)){
 
 grid.arrange(grobs = plots.icc, ncol = 2)
 
-print(plots.icc$theta.exp)
-print(plots.icc$theta.gamma)
-print(plots.icc$theta.norm)
-print(plots.icc$theta.unif)
-print(plots.icc$theta.beta)
-print(plots.icc$theta.chisq)
-print(plots.icc$theta.t)
+print(plots.icc$left)
+print(plots.icc$right)
+print(plots.icc$far.left)
+print(plots.icc$far.right)
+print(plots.icc$normal)
+
 
 # Plot test information fucntion (TIF) ----------------------------------------------------------
 
@@ -246,33 +248,30 @@ for(name in names(mirt.models)){
     plots.tif[[name]] <- p
 }
 
-print(plots.tif$theta.exp)
-print(plots.tif$theta.gamma)
-print(plots.tif$theta.norm)
-print(plots.tif$theta.unif)
-print(plots.tif$theta.beta)
-print(plots.tif$theta.chisq)
-print(plots.tif$theta.t)
+print(plots.tif$left)
+print(plots.tif$right)
+print(plots.tif$far.left)
+print(plots.tif$far.right)
+print(plots.tif$normal)
 
 # Plot person-item map ----------------------------------------------------------
 
 plots.person.item <- list()
 
-for(name in names(mirt.models)){
+for (name in names(mirt.models)) {
     mirt.out <- mirt.models[[name]]
 
-    # retrieving coef()$items difficutly estimates
+    # retrieving coef()$items difficulty estimates
     item.difficulties <- coef(mirt.out, simplify = TRUE)$items[, 2]
-    item.difficulties <- data.frame(Item = paste("Item", 1:length(item.difficulties)), Difficulty = item.difficulties)
+    item.difficulties <- data.frame(Item = paste("Item", seq_along(item.difficulties)), Difficulty = item.difficulties)
 
     # retrieving f-scores (person ability estimates)
     person.abilities <- fscores(mirt.out)
-    person.abilities <- data.frame(PersonID = 1:length(person.abilities), Ability = person.abilities)
+    person.abilities <- data.frame(PersonID = seq_along(person.abilities), Ability = person.abilities)
 
     item.difficulties.long <- item.difficulties[rep(seq_len(nrow(item.difficulties)), each = nrow(person.abilities)), ]
-    item.difficulties.long <- item.difficulties[rep(1:nrow(item.difficulties), each = length(person.abilities)), ]
 
-    # cols= personID, Item, Difficulty, F1-score
+    # cols = personID, Item, Difficulty, F1-score
     plot_data <- expand.grid(Item = item.difficulties$Item, PersonID = person.abilities$PersonID)
     plot_data <- merge(plot_data, item.difficulties, by = "Item")
 
@@ -280,20 +279,17 @@ for(name in names(mirt.models)){
         geom_point() +
         geom_line(aes(group = Item)) +
         labs(title = paste("Person-Item Map for", name),
-             x = "Person ID", y = "Item Difficulty") +
+                 x = "Person ID", y = "Item Difficulty") +
         theme_minimal()
 
     plots.person.item[[name]] <- p
 }
 
-print(plots.person.item$theta.exp)
-print(plots.person.item$theta.gamma)
-print(plots.person.item$theta.norm)
-print(plots.person.item$theta.unif)
-print(plots.person.item$theta.beta)
-print(plots.person.item$theta.chisq)
-print(plots.person.item$theta.t)
-
+print(plots.person.item$left)
+print(plots.person.item$right)
+print(plots.person.item$far.left)
+print(plots.person.item$far.right)
+print(plots.person.item$normal)
 
 # Plot factor loadings ----------------------------------------------------------
 
@@ -323,6 +319,7 @@ p <- ggplot(factor.loadings.df, aes(x = Item, y = Discrimination, fill = Theta))
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(p)
+
 
 # Plot residual analysis ----------------------------------------------------------
 
@@ -360,8 +357,8 @@ p <- ggplot(all.residuals, aes(x = Item, y = Residual, color = abs(Residual))) +
 
 print(p)
 
-
 #  Plot RMSE ----------------------------------------------------------
+
 rmse.plots <- list()
 library(tidyverse)
 for(theta in names(results)){
@@ -386,6 +383,8 @@ for(theta in names(results)){
 combined.plots <- ggarrange(plotlist = lapply(rmse.plots, function(p) p), 
                                 ncol = 2, nrow = ceiling(length(rmse.plots) / 2))
 print(combined.plots)
+
+
 
 # Misc. plots ----------------------------------------------------------
 # might be useful later?
