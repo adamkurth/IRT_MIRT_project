@@ -10,10 +10,12 @@ library(tibble)
 library(ggpubr)
 library(gridExtra)
 library(sn) # for skew normal distribution
+library(dplyr)
+library(moments)
 # -------------------------------------------------------------
 # Generate skewed theta distributions --------------------------\
 n <- 500 
-linspace <- seq(-5, 5, length.out = n)
+# linspace <- seq(-5, 5, length.out = n)
 
 # skew normal distribution
 theta.left <- rsn(n, xi = 0, omega = 1, alpha = -10) # left skewed
@@ -33,7 +35,6 @@ ggplot(all_distributions, aes(x = theta, fill = distribution)) +
     labs(x = "Theta", y = "Density") +
     scale_fill_manual(values = c("red", "blue", "green", "purple", "black")) +
     theme_minimal()
-
 
 # -------------------------------------------------------------
 # True Item Parameters -----------------------------------------
@@ -84,6 +85,43 @@ response.dataframes <- lapply(response.dataframes, function(df) {
 # 5  1  1  1  0
 # 6  0  0  0  0
 
+# -------------------------------------------------------------
+# Generate discriptive statistics for reponse.data ------------
+
+calculate_stats <- function(df) {
+    df %>%
+        summarise(across(starts_with("I"),
+            list(mean = mean, sd = sd, skewness = moments::skewness, kurtosis = moments::kurtosis, min = min, max = max)))
+}
+
+stats.tables <- lapply(response.dataframes, calculate_stats)
+
+names(stats.tables) <- names(response.dataframes)
+
+for (type in names(stats.tables)) {
+    cat("Descriptive statistics for", type, "skew:\n")
+    print(stats.tables[[type]])
+    cat('\n')
+}
+
+comb.stats <- do.call("cbind", lapply(stats.tables, function(df) {
+  t(df)  # Transpose each dataframe 
+}))
+
+skewness_conditions <- c("left", "right", "far.left", "far.right", "normal")
+new.colnames <- c()
+for (condition in skewness_conditions) {
+    for (measure in c("mean", "sd", "skewness", "kurtosis", "min", "max")) {
+        for (item in 1:4) {
+            new.colnames <- c(new.colnames, paste0("I", item, "_", measure, "_", condition))
+        }
+    }
+}
+colnames(comb.stats) <- new.colnames
+print(comb.stats)
+
+# each row represents a statistical measure (mean, sd, etc.)
+# each col represents a skewness condition (left, right, far left, far right, normal)
 # -------------------------------------------------------------
 # Goal of this script: 
 # see if skewness of the distribution of theta (ability) makes a difference 
