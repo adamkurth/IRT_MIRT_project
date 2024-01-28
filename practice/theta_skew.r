@@ -15,11 +15,25 @@ library(sn) # for skew normal distribution
 n <- 500 
 linspace <- seq(-5, 5, length.out = n)
 
+# skew normal distribution
 theta.left <- rsn(n, xi = 0, omega = 1, alpha = -10) # left skewed
 theta.right <- rsn(n, xi = 0, omega = 1, alpha = 10) # right skewed
 theta.far.left <- rsn(n, xi = 0, omega = 1, alpha = -20) # far left skewed
 theta.far.right <- rsn(n, xi = 0, omega = 1, alpha = 20) # far right skewed
 theta.normal <- rnorm(n, mean = 0, sd = 1) # normal
+
+# Visualize each distribution ----------------------------------
+all_distributions <- data.frame(
+    theta = c(theta.left, theta.right, theta.far.left, theta.far.right, theta.normal),
+    distribution = rep(c("Left Skewed", "Right Skewed", "Far Left Skewed", "Far Right Skewed", "Normal"), each = n)
+)
+
+ggplot(all_distributions, aes(x = theta, fill = distribution)) +
+    geom_density(alpha = 0.5) +
+    labs(x = "Theta", y = "Density") +
+    scale_fill_manual(values = c("red", "blue", "green", "purple", "black")) +
+    theme_minimal()
+
 
 # -------------------------------------------------------------
 # True Item Parameters -----------------------------------------
