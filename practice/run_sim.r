@@ -127,9 +127,10 @@ fit_mirt_models <- function(response.dataframes, all.distributions, true_params)
         # calculate RMSE
         rmse.a <- sqrt(mean((param.estimates[, "a1"] - true_params$a)^2))
         rmse.b <- sqrt(mean((param.estimates[, "b1"] - true_params$b)^2))
-
+        
         # store results
         df <- data.frame(
+            distribution = name,
             a.discrim = true_params$a,
             b.diff = true_params$b,
             a.est = param.estimates[, "a1"], 
@@ -141,7 +142,7 @@ fit_mirt_models <- function(response.dataframes, all.distributions, true_params)
         )
 
         results[[name]] <- df
-        mirt.models[[name]] <- mirt.out
+        mirt.models[[name]] <- mirt.model 
     }   
 
     return(list(Results = results, MirtModels = mirt.models))
@@ -286,6 +287,7 @@ main <- function(n){
     print("Print MirtModels:")
     print(model.results$MirtModels)
 
+#should we incorperate the all.distributions? in these models results? That is the primary interest here. 
 
 
 
