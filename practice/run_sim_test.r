@@ -149,8 +149,75 @@ fit_mirt_models <- function(response.dataframes, true_params, estimation, dentyp
     return(list(Results = results, MirtModels = mirt.models))
 } # end mirt.models
 
+compare.methods <- function(response.dataframes, true_params, methods, dist.types){
+    N <- length(true_params$a)
+    true_params_matrix <- matrix(unlist(true_params), nrow=N, byrow=TRUE)
 
-# Main script
+    results <- list()
+    
+    for(method in methods){
+        for(distribution in dist.types){
+            response.data <- response.dataframes[[distribution]]
+
+            if (is.null(response.data)) {
+                print(paste("No response data for distribution", distribution, "in method", method))
+                next
+            }
+
+            tryCatch({
+                # fit the 2PL model
+                start.time <- Sys.time()
+                mirt.model <- mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method=method) # change dentype too
+                end.time <- Sys.time()
+           
+                param.estimates <- coef(mirt.model, simplify = TRUE)$items
+                relevant.params <- param.estimates[, c("a1", "d")] # drop the "g/c" and "u/d" parameters
+                colnames(relevant.params) <- c("a1", "b1")
+
+                conv.time <- end.time - start.time
+                # rmse
+                rmse.a <- sqrt(mean((relevant.params[, "a1"] - true_params$a)^2))
+                rmse.b <- sqrt(mean((relevant.params[, "b1"] - true_params$b)^2))
+                # bias 
+                bias.a <- mean(relevant.params[, "a1"] - true_params_matrix[, 1])
+                bias.b <- mean(relevant.params[, "b1"] - true_params_matrix[, 2])
+
+                results[[paste(distribution, method, sep=".")]] <- list(
+                    ConvergenceTime = conv.time,
+                    RMSE.a = rmse.a,
+                    RMSE.b = rmse.b,
+                    Bias.a = bias.a,
+                    Bias.b = bias.b,
+                    Method = method,
+                    Distribution = distribution
+                )
+
+            }, error = function(e){
+                message(paste("Error with method", method, "in distribution", distribution, ":", e$message))
+            })
+        }
+    }
+
+    reorganize <- function(results) {
+        organized.results <- do.call(rbind, lapply(names(results), function(key) {
+            result <- results[[key]]
+            cbind(Method = result$Method,
+                  Distribution = result$Distribution
+                  ConvergenceTime = as.numeric(result$ConvergenceTime),
+                  RMSE_a = result$RMSE.a,
+                  RMSE_b = result$RMSE.b,
+                  Bias_a = result$Bias.a,
+                  Bias_b = result$Bias.b)
+        }))
+        
+        return(organized.results)
+    }
+    
+    organized.results <- reorganize(results)
+    return(organized.results)
+} # end compare.methods
+
+# MAIN SCRIPT
 
 # developing the script with theta_skew.r
 load()
@@ -175,15 +242,17 @@ true_params <- list(a = true_params$a, b = true_params$b) # to list
 # 5. Stochastic EM
 # 6. Quasi-Monte Carlo EM
 
-method.options <- c("BL", "EM", "MHRM", "MCEM", "SEM", "QMC")
-
+dist.options <- c("left.skew", "right.skew", "stnd.norm")
+method.options <- c("BL", "EM", "MHRM", "MCEM", "SEM", "QMCEM")
 dentype.options <- c("Gaussian", "EH", "EHW","Davidian-2", "Davidian-4")
-dentype_string <- paste(dentype_options, collapse = ", ")
 
 
-model.results <- fit_mirt_models(response.dataframes, true_params, esimation=est.methods, dentype=default)
+# model.results <- fit_mirt_models(response.dataframes, true_params, esimation=est.methods, dentype=default)
+# results <- model.results$Results
 
-results <- model.results$Results
+results <- compare.methods(response.dataframes, true_params, methods=method.options, dist.types=dist.options)
+View(results)
+
 # models <- model.results$MirtModels
 
 # checks
