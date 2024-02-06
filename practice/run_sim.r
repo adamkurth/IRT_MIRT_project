@@ -1,4 +1,5 @@
 load <- function(){
+    rm(list=ls())
     library(mirt)
     library(ggplot2)
     library(reshape2)
@@ -278,35 +279,41 @@ main <- function(n){
     true_params <- list(a = true_params$a, b = true_params$b) # to list
     model.results <- fit_mirt_models(response.dataframes, all_distributions, true_params)
 
+    results <- model.results$Results
+    models <- model.results$MirtModels
+
     # checks
     print("Checking model.results-------------------")
     print("Print Names:")
     print(names(model.results))
     print("Print Results:")
-    print(model.results$Results)
+    print(results)
     print("Print MirtModels:")
-    print(model.results$MirtModels)
+    print(models)
 
 #should we incorperate the all.distributions? in these models results? That is the primary interest here. 
 
+# Q: Should we incorperate the all.distributions when running the fit_mirt_models function?
+# A: No, the all.distributions dataframe is not used in the fit_mirt_models function. The function only uses the response dataframes and the true parameters. The all.distributions dataframe is only used to generate the response dataframes.
 
+# DIRECTIONS: 
+    # EXAMINE THE SKEWED DISTRIBUTIONS:
+    # 1. Skew right
+    # 2. Skew left
+    # 3. Standard normal
 
-    # type is what type of dataframe we are analyzing
+    # EXAMINE ESTIMATION MEHTODS:
+    # 1. Block & Lieberman approach
+    # 2. Expectation- Maximization (EM) algorithm
+    # 3. Metropolis-Hastings Robbins-Monro (MHRM)
+    # 4. Monte Carlo EM (MCEM)
+    # 5. Stochastic EM
+    # 6. Quasi-Monte Carlo EM
 
-    # might need to fix
-
-    # descriptive.stats <- calculate_descriptive_stats_as_tibble(response.dataframes, all_distributions) 
-    # descriptive.stats <- t(descriptive.stats)
-    # descriptive.stats <- calculate_descriptive_stats_base(response.dataframes, all_distributions) 
-
-    # print("Checking descriptive.stats-------------------")
-    # print("Head:")
-    # print(head(descriptive.stats))
-    # print("Print:")
-    # print(descriptive.stats)
-    # View(descriptive.stats)
-    # print(paste("colnames:", paste(colnames(descriptive.stats), collapse = ", ")))
-    # print(paste("Dimensions:", paste(dim(descriptive.stats), collapse = ", ")))
+    # OUTCOME METRICS:
+    # 1. RMSE (for each item, averaged over 100 replications)
+    # 2. Bias (for each item, averaged over 100 replications)
+    # 3. Coveragece time
 
 
 }

@@ -1,12 +1,21 @@
-a <- c(1, 2, 3, 4)
-b <- c(5, 6, 7, 8)
-
-params <- data.frame(a, b)
+load <- function(){
+    rm(list=ls())
+    library(mirt)
+    library(ggplot2)
+    library(reshape2)
+    library(tibble)
+    library(ggpubr)
+    library(gridExtra)
+    library(sn)
+    library(tidyr)
+    library(dplyr)
+    library(moments)
+} # end load
 
 generate_skewed_distribitions <- function(n, seed, visualize = FALSE) {
     require(sn, quietly = TRUE)
     set.seed(seed) # Set the seed for reproducibility
-
+    
     theta_left <- rsn(n, xi = 0, omega = 1, alpha = -10) # left skewed
     theta_right <- rsn(n, xi = 0, omega = 1, alpha = 10) # right skewed
     theta_normal <- rnorm(n, mean = 0, sd = 1) # standard normal
@@ -22,15 +31,32 @@ generate_skewed_distribitions <- function(n, seed, visualize = FALSE) {
     # check formatting
     print(paste("Dimensions for all_distributions dataframe:", nrow(all_distributions), ncol(all_distributions)))
     print(head(all_distributions))
-    print(tail(all_distributions))
+    print(tail(all_distributions))  
 
     if (visualize) {
-        # p <- plot_skewed_distributions(all_distributions)
-        # print(p) # Explicitly print the plot
+        p <- plot_skewed_distributions(all_distributions)
+        print(p) # Explicitly print the plot
     }
     return(all_distributions)
 } # end generate_skewed_distribitions
 
+plot_skewed_distributions <- function(all_distributions) {
+    theta <- all_distributions$theta
+    distribution <- all_distributions$distribution
+
+    # number of unique distributions
+    num_distributions <- length(unique(distribution))
+
+    # color palette
+    colors <- RColorBrewer::brewer.pal(min(num_distributions, 9), "Set1")
+
+    p <- ggplot(all_distributions, aes(x = theta, fill = distribution)) +
+            geom_density(alpha = 0.5) +
+            labs(x = "Theta", y = "Density") +
+            scale_fill_manual(values = colors) +
+            theme_minimal()
+    return(p)
+} # end plot_skewed_distributions
 
 simulate_response_data <- function(all_distributions, params, seed = 123) {
     require(mirt, quietly = TRUE)
@@ -48,10 +74,10 @@ simulate_response_data <- function(all_distributions, params, seed = 123) {
     if (!("theta" %in% names(all_distributions)) || !("distribution" %in% names(all_distributions))) {
         stop("The dataframe must contain 'theta' and 'distribution' columns")
     }
-
+    
     all_distributions$theta <- as.numeric(all_distributions$theta)
     all_distributions$distribution <- as.factor(all_distributions$distribution)
-
+    
     simulate_response <- function(theta, params) {
         n.persons <- length(theta)
         n.items <- nrow(params)
@@ -76,22 +102,21 @@ simulate_response_data <- function(all_distributions, params, seed = 123) {
 
     # apply simulate_response to each group of theta values
     response.dataframes <- lapply(split(all_distributions$theta, all_distributions$distribution), simulate_response, params = param.matrix)
-
+    
     return(response.dataframes)
 }
 
-
-fit_mirt_models <- function(response.dataframes, true_params) {
+fit_mirt_models <- function(response.dataframes, true_params, estimation, dentype){
     results <- list()
     mirt.models <- list()
 
-    for (name in names(response.dataframes)) {
-        # extract response data
+    for(name in names(response.dataframes)){
+        #extract response data
         response.data <- response.dataframes[[name]]
 
         # fit the 2PL model
         start.time <- Sys.time()
-        mirt.model <- mirt(data = response.data, model = 1, itemtype = "2PL", storeEMhistory = TRUE)
+        mirt.model <- mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method=estimation, dentype=dentype)
         end.time <- Sys.time()
         time.to.conv <- end.time - start.time
 
@@ -103,13 +128,13 @@ fit_mirt_models <- function(response.dataframes, true_params) {
         # calculate RMSE
         rmse.a <- sqrt(mean((param.estimates[, "a1"] - true_params$a)^2))
         rmse.b <- sqrt(mean((param.estimates[, "b1"] - true_params$b)^2))
-
+        
         # store results
         df <- data.frame(
             distribution = name,
             a.discrim = true_params$a,
             b.diff = true_params$b,
-            a.est = param.estimates[, "a1"],
+            a.est = param.estimates[, "a1"], 
             b.est = param.estimates[, "b1"],
             rmse.a = rmse.a,
             rmse.b = rmse.b,
@@ -118,18 +143,81 @@ fit_mirt_models <- function(response.dataframes, true_params) {
         )
 
         results[[name]] <- df
-        mirt.models[[name]] <- mirt.model
-    }
+        mirt.models[[name]] <- mirt.model 
+    }   
 
     return(list(Results = results, MirtModels = mirt.models))
 } # end mirt.models
 
 
-all.distributions <- generate_skewed_distribitions(500, 123, FALSE)
-response.dataframes <- simulate_response_data(all.distributions, params, 123)
-names(response.dataframes)
+# Main script
 
-fit <- fit_mirt_models(response.dataframes, params)
+# developing the script with theta_skew.r
+load()
+n <- 500
+all_distributions <- generate_skewed_distribitions(n, seed=123, visualize = FALSE)
 
-results <- fit$Results
-models <- fit$MirtModels
+# true parameters: 2PL model
+true_params <- data.frame(
+    a = c(0.5, 1, 1.5, 2), 
+    b = c(0, -1, 1, 0)
+) 
+
+response.dataframes <- simulate_response_data(all_distributions, true_params, seed = 123)
+
+true_params <- list(a = true_params$a, b = true_params$b) # to list
+
+# ESTIMATION METHODS
+# 1. Block & Lieberman approach (BL)
+# 2. Expectation- Maximization (EM) algorithm
+# 3. Metropolis-Hastings Robbins-Monro (MHRM)
+# 4. Monte Carlo EM (MCEM)
+# 5. Stochastic EM
+# 6. Quasi-Monte Carlo EM
+
+method.options <- c("BL", "EM", "MHRM", "MCEM", "SEM", "QMC")
+
+dentype.options <- c("Gaussian", "EH", "EHW","Davidian-2", "Davidian-4")
+dentype_string <- paste(dentype_options, collapse = ", ")
+
+
+model.results <- fit_mirt_models(response.dataframes, true_params, esimation=est.methods, dentype=default)
+
+results <- model.results$Results
+# models <- model.results$MirtModels
+
+# checks
+print("Checking model.results-------------------")
+print("Print Names:")
+print(names(model.results))
+print("Print Results:")
+print(results)
+print("Print MirtModels:")
+print(models)
+
+#should we incorperate the all.distributions? in these models results? That is the primary interest here. 
+
+# Q: Should we incorperate the all.distributions when running the fit_mirt_models function?
+# A: No, the all.distributions dataframe is not used in the fit_mirt_models function. The function only uses the response dataframes and the true parameters. The all.distributions dataframe is only used to generate the response dataframes.
+
+# DIRECTIONS: 
+# EXAMINE THE SKEWED DISTRIBUTIONS:
+# 1. Skew right
+# 2. Skew left
+# 3. Standard normal
+
+# EXAMINE ESTIMATION MEHTODS:
+# 1. Block & Lieberman approach
+# 2. Expectation- Maximization (EM) algorithm
+# 3. Metropolis-Hastings Robbins-Monro (MHRM)
+# 4. Monte Carlo EM (MCEM)
+# 5. Stochastic EM
+# 6. Quasi-Monte Carlo EM
+
+# OUTCOME METRICS:
+# 1. RMSE (for each item, averaged over 100 replications)
+# 2. Bias (for each item, averaged over 100 replications)
+# 3. Coveragece time
+
+
+
