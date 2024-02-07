@@ -66,10 +66,10 @@ simulate_response_data <- function(all_distributions, params, seed = 123) {
     # helper function to simulate response data
     a <- params$a
     b <- params$b
-    # Structure: rows = items, columns = parameters (a, b)
-    param.matrix <- cbind(a, b)
 
-    print(param.matrix)
+    # Structure: rows = items, columns = parameters (a, b)
+    param.matrix <- as.matrix(params)
+
     # ensure all dist. have necessary columns: checks for skewed distribution implementation
     if (!("theta" %in% names(all_distributions)) || !("distribution" %in% names(all_distributions))) {
         stop("The dataframe must contain 'theta' and 'distribution' columns")
@@ -87,8 +87,9 @@ simulate_response_data <- function(all_distributions, params, seed = 123) {
         for (i in 1:n.persons) {
             for (j in 1:n.items) {
                 # Extract item params for the jth item
-                a_j <- params[j, 1]
-                b_j <- params[j, 2]
+                a_j <- params[j, "a"]
+                b_j <- params[j, "b"]
+
                 # Calculate probability p for each person-item combination using the 2PL model
                 p <- 1 / (1 + exp(-(a_j * (theta[i] - b_j))))
                 response.data[i, j] <- ifelse(runif(1) < p, 1, 0)
@@ -149,6 +150,9 @@ fit_mirt_models <- function(response.dataframes, true_params, estimation, dentyp
 } # end mirt.models
 
 compare.mirt <- function(response.dataframes, true.params, methods, dentypes, dist.types){
+    # N <- length(true.params$a)
+    # true.params.matrix <- matrix(unlist(true.params), nrow=N, byrow=TRUE)
+
     results <- list()
     
     for(method in methods){
@@ -169,17 +173,6 @@ compare.mirt <- function(response.dataframes, true.params, methods, dentypes, di
                                         storeEMhistory = TRUE, method=method, dentype=dentype)
                     end.time <- Sys.time()
 
-                    # check for convergence
-                    out <- capture.output(print(mirt.model))
-                    converged <- "Unknown"
-                   if(grepl("FAIL", out)) {
-                        convergenceStatus <- "Failed"
-                    } else if(grepl("Converged", out)) {
-                        convergenceStatus <- "Converged"
-                    } else if(grepl("terminated", out)) {
-                        convergenceStatus <- "Terminated"
-                    }  # end if
-                    
                     # extract estimated parameters & rename
                     param.estimates <- coef(mirt.model, simplify = TRUE)$items
                     relevant.params <- param.estimates[, c("a1", "d")] # drop the "g/c" and "u/d" parameters
@@ -197,7 +190,6 @@ compare.mirt <- function(response.dataframes, true.params, methods, dentypes, di
                     # store results
                     results[[paste(method, dentype, distribution, sep=".")]] <- list(
                         convergence.time = conv.time,
-                        conv.status = converged,
                         rmse.a = rmse.a,
                         rmse.b = rmse.b,
                         bias.a = bias.a,
@@ -208,18 +200,6 @@ compare.mirt <- function(response.dataframes, true.params, methods, dentypes, di
                     )
 
                 }, error = function(e) {
-                    results[[paste(method, dentype, distribution, sep=".")]] <- list(
-                        convergence.time = NA,
-                        conv.status = "ERROR",
-                        rmse.a = NA,
-                        rmse.b = NA,
-                        bias.a = NA,
-                        bias.b = NA,
-                        method = method,
-                        distribution = distribution,
-                        dentype = dentype, 
-                        error.message = e$message
-                    )
                     message(paste("Error with method", method, "and dentype", dentype, 
                                   "in distribution", distribution, ":", e$message))
                 }) # end tryCatch
@@ -234,7 +214,6 @@ compare.mirt <- function(response.dataframes, true.params, methods, dentypes, di
                   dentype = result$dentype,
                   distribution = result$distribution,
                   convergence.time = as.numeric(result$convergence.time),
-                  convergence.status = result$conv.status,
                   rmse.a = result$rmse.a,
                   rmse.b = result$rmse.b,
                   bias.a = result$bias.a,
@@ -246,6 +225,7 @@ compare.mirt <- function(response.dataframes, true.params, methods, dentypes, di
 
     return(reorganize(results))
 } # end compare.mirt
+
 
 
 # MAIN SCRIPT
@@ -260,6 +240,9 @@ true.params <- data.frame(
 ) 
 
 response.dataframes <- simulate_response_data(all.distributions, true.params, seed = 123)
+
+true.params <- list(a = true.params$a, b = true.params$b) # to list
+true.params.matrix <- matrix(unlist(true.params), nrow=4, byrow=TRUE)
 
 # ESTIMATION METHODS
 # 1. Block & Lieberman approach (BL)
