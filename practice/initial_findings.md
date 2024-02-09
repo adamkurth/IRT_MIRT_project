@@ -4,6 +4,51 @@ Assuming \(n = 500\).
 
 ### Directions: 
 
+In R's `mirt` package: 
+-  **2PL Model Use**: simulate data from a 2-parameter logistic (2PL) model from Item Response Theory (IRT).
+-  **True Parameter Specificiations**: true parameters for item characteristic curves (\(a = \text{ discrimination }, b = \text{ item difficulty }\)) are given. For the 2PL model, these parameters directly influence the shape and position of these curves. 
+- **Skewed and Normal Distributions**: simulate response data based on the left-skewed, right-skewed, and standard normal distributions.
+- **Crossing Parameters for 16 Items**: Creating combinations of `a` and `b` parameters for 16 items, so that each unique pair is treated as a seperate "item" in the analysis. Since there are 4 values for each parameter, this results in 16 unique combinations.
+- **Reporting Requirements**: 
+  - **RMSE**: Root Mean Squared Error (RMSE) for each item, averaged over 100 replications.
+  - **Bias**: Bias for each item, averaged over 100 replications. 
+  - **Coverage Time**: Time to converge for each item.
+
+### Step 1:
+
+1. *Generate Skewed and Normal Distributions*: For each distribution type (left, right and standard normal), simulate response data based on the 2PL model with given `a` and `b` parameters.
+2. *Crossing `a`, `b` Parameters*: Create a dataset for each of the 16 items by crossing `a` and `b` parameters. Each will have a unique combination of `a` and `b` parameters and then simulate responses for these items under each distribution type.
+3. *Replications:* For accurate estimation, conduct 100 replications of data simulation and parameter estimation for each item under each distribution type. This involves simulating new datasets and estimating parameters 100 times to compute the average RMSE, bias, and coverage time for each item.
+4. *Parameter Estimation*: Utilize the `mirt` package to estimate the `a` and `b` parameters from the simulated response data. 
+5. *Compute RMSE and Bias*: After parameter estimation, for each replicaiton, compute the RMSE and bias for each item. Average these values over the 100 replications. 
+6. *Computation Time Tracking*: Record the computation time for each replication to report the average time taken for parameter estimation across replications. 
+
+### Step 2:
+
+- Aggregate the results across all items, distribution types, and replications. Compute the average RMSE, bias, computation time into a structured format. 
+- Use multidimensional arrays or lists to organize results before summarizing them into readable format.
+- Present the results in a table or report that clearly distinguishes the different estimation methods and density types, and distribution types used.
+
+#### Psuedo Code:
+
+``` r
+# simulate_data is function that outputs response_data
+# estimate_parameters is function that outputs estimatedd parameters and computation time.
+results <- list()
+for(distribution in c("left.skew", "right.skew", "stnd.norm")){
+  for(a_val in c(0.5, 1, 1.5, 2)){
+    for(b_val in c(0, -1, 1, 0)){
+      simulate_data <- simulate_data(distribution, a_val, b_val)
+      est.param, comp.time <- estimate_parameters(simulate_data)
+      # Compute RMSE and Bias and store (with comp.time) in results
+      results[[paste(distribution, a_val, b_val)]] <- list(est.param, comp.time)
+    }
+  }
+}
+
+```
+
+
 ### 1. Examine the following distributions:
   - Skew Right
   - Skew Left
