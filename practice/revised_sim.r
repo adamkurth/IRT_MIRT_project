@@ -251,31 +251,59 @@ calc.averages <- function(all.distributions, cross.param, methods, dentypes, dis
 
 calc.averages.parallel <- function(all.distributions, cross.param, methods, dentypes, dist.types){
     require(parallel, quietly = TRUE)
-    c1 <- makeCluster(detectCores() -1 ) # leave one core free
+    c1 <- makeCluster(detectCores() - 1) # leave one core free
     # Export required variables and functions to the cluster
-    clusterExport(c1, varlist=c("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
+    clusterExport(c1, varlist = c("simulate.response.data", "fit.mirt.model", "calc.metrics", 
+                                  "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
     # Load required library in each worker
     clusterEvalQ(c1, {library(mirt)})
 
-    results <- parLapply(c1, X=1:100, function(x){
-        set.seed(x)
-        sim.data <- simulate.response.data(all.distributions, cross.param, seed = x)
+    combinations <- expand.grid(method = methods, dentype = dentypes, dist = dist.types, stringsAsFactors = FALSE)
+    results <- parLapply(c1, seq_len(nrow(combinations)), function(index){
+        combination <- combinations[index, ]
+        method <- combination$method
+        dentype <- combination$dentype
+        dist <- combination$dist
+        
+        aggregated.metrics <- list(rmse.a = numeric(0),
+                                   rmse.b = numeric(0),
+                                   bias.a = numeric(0),
+                                   bias.b = numeric(0),
+                                   conv.time = numeric(0))
+        for(rep in 1:100){
+            set.seed(rep + index)
+            sim.data <- simulate.response.data(all.distributions, cross.param, seed = rep)
+            response.data <- sim.data[[dist]]
 
-        lapply(dist.types, function(dist){
-            lapply(methods, function(method){ # Corrected typo here
-                lapply(dentypes, function(dentype){
-                    response.data <- sim.data[[dist]]
-                    fit.results <- fit.mirt.model(response.data, cross.param, method, dentype)
-                    metrics <- calc.metrics(fit.results$estimated.params, cross.param)
-                    return(cbind(method, dentype, dist, metrics)) # Ensure return is used for clarity
-                })
+            tryCatch({
+                fit.results <- fit.mirt.model(response.data, cross.param, method, dentype)
+                metrics <- calc.metrics(fit.results$estimated.params, cross.param)
+
+                aggregated.metrics$rmse.a <- c(aggregated.metrics$rmse.a, metrics$rmse.a)
+                aggregated.metrics$rmse.b <- c(aggregated.metrics$rmse.b, metrics$rmse.b)
+                aggregated.metrics$bias.a <- c(aggregated.metrics$bias.a, metrics$bias.a)
+                aggregated.metrics$bias.b <- c(aggregated.metrics$bias.b, metrics$bias.b)
+                aggregated.metrics$conv.time <- c(aggregated.metrics$conv.time, fit.results$conv.time)
+            }, error = function(e){
+                message(paste("Error with method", method, "and dentype", dentype, "in distribution", dist, ":", e$message))
+                # Implement error handling as needed, log error message
             })
-        })
-    })
+        }
+        return(list(
+            method = method,
+            dentype = dentype,
+            distribution = dist,
+            rmse.a = mean(aggregated.metrics$rmse.a, na.rm = TRUE),
+            rmse.b = mean(aggregated.metrics$rmse.b, na.rm = TRUE),
+            bias.a = mean(aggregated.metrics$bias.a, na.rm = TRUE),
+            bias.b = mean(aggregated.metrics$bias.b, na.rm = TRUE),
+            conv.time = mean(aggregated.metrics$conv.time, na.rm = TRUE)
+        ))
+    })  
     stopCluster(c1)
+    # Process results as needed before returning
     return(results)
 }
-
 
 # MAIN SCRIPT
 load()
