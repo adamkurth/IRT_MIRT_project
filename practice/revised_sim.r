@@ -242,72 +242,60 @@ calc.averages <- function(all.distributions, cross.param, methods, dentypes, dis
 
 calc.averages.parallel <- function(all.distributions, cross.param, methods, dentypes, dist.types) {
     require(parallel, quietly = TRUE)
+    require(mirt, quietly = TRUE)
 
-    # Initialize log file for recording progress and errors
+    # Initialize logging
     logFile <- "calc_avg_parallel.log"
-    logConnection <- file(logFile, open = "wt")
-    on.exit(close(logConnection), add = TRUE)
-    writeLines(paste("Starting computation at:", Sys.time()), con = logConnection)
+    write(paste("Computation complete.", Sys.time()), file = logFile, append = TRUE)
 
     # Setup parallel cluster
     numCores <- detectCores() - 1
     cl <- makeCluster(numCores)
-    on.exit(stopCluster(cl), add = TRUE)
+    on.exit({
+        stopCluster(cl)
+        writeLines(paste("Computation complete.", Sys.time()), logFile)
+    }, add = TRUE)
 
     # Prepare environment in each cluster node
-    clusterExport(cl, c("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
+    clusterExport(cl, list("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
     clusterEvalQ(cl, library(mirt))
 
     # Generate combinations of parameters to process
     combinations <- expand.grid(method = methods, dentype = dentypes, dist = dist.types, stringsAsFactors = FALSE)
-    batchSize <- ceiling(nrow(combinations) / numCores)
-
-    # Initialize progress counter for monitoring
-    totalTasks <- nrow(combinations)
-    progressBar <- txtProgressBar(min = 0, max = totalTasks, style = 3)
-    progressCounter <- 0
-
-    # Function to update progress bar and log file
-    updateProgress <- function() {
-        progressCounter <<- progressCounter + batchSize
-        setTxtProgressBar(progressBar, progressCounter)
-        writeLines(paste("Processed batch ending with index", progressCounter, "of", totalTasks), con = logConnection)
-    }
+    totalCombinations <- nrow(combinations)
 
     # Process combinations in batches
-    results <- list()
-    for (i in seq(1, totalTasks, by = batchSize)) {
-        batchIndices <- i:min(i+batchSize-1, totalTasks)
-        batch <- combinations[batchIndices, ]
-        
-        # Parallel processing of each batch
-        batchResults <- parLapply(cl, seq_along(batchIndices), function(index) {
-            comb <- batch[index, ]
-            tryCatch({
-                simData <- simulate.response.data(all.distributions, cross.param, set.seed(index))
-                responseData <- simData[[comb$dist]]
-                fitResults <- fit.mirt.model(responseData, cross.param, comb$method, comb$dentype)
-                metrics <- calc.metrics(fitResults$estimated.params, cross.param)
-                c(comb, metrics)
-            }, error = function(e) {
-                message <- paste("Error in", comb$method, comb$dentype, comb$dist, ":", e$message)
-                writeLines(message, con = logConnection)
-                NULL # Return NULL on error to filter out later
-            })
+    processCombination <- function(index) {
+        comb <- combinations[index, ]
+        tryCatch({
+            simData <- simulate.response.data(all.distributions, cross.param, seed = index)
+            responseData <- simData[[comb$dist]]
+            fitResults <- fit.mirt.model(responseData, cross.param, comb$method, comb$dentype)
+            metrics <- calc.metrics(fitResults$estimated.params, cross.param)
+            result <- c(comb, metrics)
+            return(data.frame(t(result)))  # Ensure the return is a data frame
+        }, error = function(e) {
+            message <- sprintf("Error in %s %s %s: %s", comb$method, comb$dentype, comb$dist, e$message)
+            return(data.frame(error = message))  # Return a data frame with error message
         })
-        results <- c(results, batchResults)
-        updateProgress()
     }
 
-    # Finalize and return aggregated results
-    stopCluster(cl)
-    cat("\nComputation complete.\n", file = logConnection)
-    close(logConnection)
-    close(progressBar)
-    # Filter out NULL results and combine into a single data frame
-    validResults <- do.call("rbind", lapply(results, function(x) if (!is.null(x)) rbind(x) else NULL))
+    # Execute the processing in parallel
+    results <- parLapply(cl, seq_len(totalCombinations), processCombination)
+
+    # Filter out results with errors for logging
+    errors <- Filter(function(x) "error" %in% names(x), results)
+    if (length(errors) > 0) {
+        errorMessages <- sapply(errors, function(e) e$error)
+        writeLines(paste(errorMessages, logFile, append = TRUE))
+    }
+
+    # Combine valid results into a single data frame
+    validResults <- do.call(rbind, Filter(NROW, results))
+    if (nrow(validResults) == 0) return(NULL)  # Return NULL if no valid results
     return(validResults)
-}
+} # end 
+
 
 
 # MAIN SCRIPT
