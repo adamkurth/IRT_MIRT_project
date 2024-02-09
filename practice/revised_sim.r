@@ -33,13 +33,7 @@ generate.skewed.distribitions <- function(n, seed, visualize = FALSE) {
 
 simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     require(mirt, quietly = TRUE)
-    # set seed for reproducibility
     set.seed(seed)
-
-    # a <- cross.param$a
-    # b <- cross.param$b
-    # # Structure: rows = items, columns = parameters (a, b)
-    # param.matrix <- as.matrix(params)
 
     # ensure all dist. have necessary columns: checks for skewed distribution implementation
     if (!("theta" %in% names(all_distributions)) || !("distribution" %in% names(all_distributions))) {
@@ -52,33 +46,30 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     simulate_response <- function(theta, cross.param) {
         n.persons <- length(theta)
         n.items <- nrow(cross.param)
-        response.data <- matrix(NA, n.persons, n.items)
+        a <- cross.param$a
+        b <- cross.param$b
 
-        for (i in 1:n.persons) {
-            for (j in 1:n.items) {
-                # Extract item params for the jth item
-                a_j <- cross.param[j, "a"]
-                b_j <- cross.param[j, "b"]
-                # Calculate probability p for each person-item combination using the 2PL model
-                p <- 1 / (1 + exp(-(a_j * (theta[i] - b_j))))
-                response.data[i, j] <- ifelse(runif(1) < p, 1, 0)
-            }
-        }
+        theta.matrix <- matrix(rep(theta, each = n.items), nrow = n.persons, byrow = TRUE)
+        a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = FALSE)
+        b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = FALSE)
 
-        response.df <- as.data.frame(response.data)
+        p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
+
+        response.matrix <- ifelse(runif(n.persons * n.items) < p.matrix, 1, 0)
+
+        response.df <- as.data.frame(response.matrix)
         colnames(response.df) <- paste0("I", seq_len(n.items))
         return(response.df)
     }
-
     # apply simulate_response to each group of theta values
     response.dataframes <- list()
-    for (distribution in unique(all_distributions$distribution)) {
+    distributions <- unique(all.distributions$distribution)
+    for (distribution in distributions) {
         theta.values <- all_distributions$theta[all_distributions$distribution == distribution]
         response.dataframes[[distribution]] <- simulate_response(theta.values, cross.param)
     }
-
     return(response.dataframes)
-}
+} # end simulate.response.data
 
 # revise 
 compare.mirt <- function(response.dataframes, true.params, methods, dentypes, dist.types){
@@ -252,76 +243,72 @@ calc.averages <- function(all.distributions, cross.param, methods, dentypes, dis
 calc.averages.parallel <- function(all.distributions, cross.param, methods, dentypes, dist.types) {
     require(parallel, quietly = TRUE)
 
+    # Initialize log file for recording progress and errors
     logFile <- "calc_avg_parallel.log"
     logConnection <- file(logFile, open = "wt")
+    on.exit(close(logConnection), add = TRUE)
     writeLines(paste("Starting computation at:", Sys.time()), con = logConnection)
-    
-    c1 <- makeCluster(detectCores() - 1) # leave one core free
-    # Export required variables and functions to the cluster
-    clusterExport(c1, varlist = c("simulate.response.data", "fit.mirt.model", "calc.metrics", 
-                                  "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
-    # Load required library in each worker
-    clusterEvalQ(c1, {library(mirt)})
 
+    # Setup parallel cluster
+    numCores <- detectCores() - 1
+    cl <- makeCluster(numCores)
+    on.exit(stopCluster(cl), add = TRUE)
+
+    # Prepare environment in each cluster node
+    clusterExport(cl, c("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
+    clusterEvalQ(cl, library(mirt))
+
+    # Generate combinations of parameters to process
     combinations <- expand.grid(method = methods, dentype = dentypes, dist = dist.types, stringsAsFactors = FALSE)
-    total.combinations <- nrow(combinations)
+    batchSize <- ceiling(nrow(combinations) / numCores)
 
-    # Corrected the split line for batchIndices
-    batchSize <- ceiling(total.combinations / (detectCores() - 1))
-    batchIndices <- split(seq_len(total.combinations), ceiling(seq_along(seq_len(total.combinations))/batchSize))
-
+    # Initialize progress counter for monitoring
+    totalTasks <- nrow(combinations)
+    progressBar <- txtProgressBar(min = 0, max = totalTasks, style = 3)
     progressCounter <- 0
+
+    # Function to update progress bar and log file
     updateProgress <- function() {
-        progressCounter <<- progressCounter + 1
-        cat(sprintf("\rProgress: [%d/%d]", progressCounter, length(batchIndices)), appendLF = TRUE)
-        flush.console()
+        progressCounter <<- progressCounter + batchSize
+        setTxtProgressBar(progressBar, progressCounter)
+        writeLines(paste("Processed batch ending with index", progressCounter, "of", totalTasks), con = logConnection)
     }
 
-    aggregatedResults <- list()
-
-    for(batch in seq_along(batchIndices)) {
-        currentBatch <- combinations[batchIndices[[batch]], ]
-        batchResults <- parLapply(c1, seq_len(nrow(currentBatch)), function(index) {
-            combination <- currentBatch[index, ]
-            method <- combination$method
-            dentype <- combination$dentype
-            dist <- combination$dist
-            
-            aggregated.metrics <- list(rmse.a = numeric(0),
-                                       rmse.b = numeric(0),
-                                       bias.a = numeric(0),
-                                       bias.b = numeric(0),
-                                       conv.time = numeric(0))
-            for(rep in 1:100) {
-                set.seed(rep + index)
-                sim.data <- simulate.response.data(all.distributions, cross.param, seed = rep)
-                response.data <- sim.data[[dist]]
-
-                tryCatch({
-                    fit.results <- fit.mirt.model(response.data, cross.param, method, dentype)
-                    metrics <- calc.metrics(fit.results$estimated.params, cross.param)
-
-                    aggregated.metrics$rmse.a <- c(aggregated.metrics$rmse.a, metrics$rmse.a)
-                    aggregated.metrics$rmse.b <- c(aggregated.metrics$rmse.b, metrics$rmse.b)
-                    aggregated.metrics$bias.a <- c(aggregated.metrics$bias.a, metrics$bias.a)
-                    aggregated.metrics$bias.b <- c(aggregated.metrics$bias.b, metrics$bias.b)
-                    aggregated.metrics$conv.time <- c(aggregated.metrics$conv.time, fit.results$conv.time)
-                }, error = function(e) {
-                    message(paste("Error with method", method, "and dentype", dentype, "in distribution", dist, ":", e$message))
-                    cat(e$message, file = logFile, sep = "\n", append = TRUE)
-                })
-            }
-            return(list(method = method, dentype = dentype, distribution = dist, aggregated.metrics))
+    # Process combinations in batches
+    results <- list()
+    for (i in seq(1, totalTasks, by = batchSize)) {
+        batchIndices <- i:min(i+batchSize-1, totalTasks)
+        batch <- combinations[batchIndices, ]
+        
+        # Parallel processing of each batch
+        batchResults <- parLapply(cl, seq_along(batchIndices), function(index) {
+            comb <- batch[index, ]
+            tryCatch({
+                simData <- simulate.response.data(all.distributions, cross.param, set.seed(index))
+                responseData <- simData[[comb$dist]]
+                fitResults <- fit.mirt.model(responseData, cross.param, comb$method, comb$dentype)
+                metrics <- calc.metrics(fitResults$estimated.params, cross.param)
+                c(comb, metrics)
+            }, error = function(e) {
+                message <- paste("Error in", comb$method, comb$dentype, comb$dist, ":", e$message)
+                writeLines(message, con = logConnection)
+                NULL # Return NULL on error to filter out later
+            })
         })
-        aggregatedResults <- c(aggregatedResults, batchResults)
+        results <- c(results, batchResults)
         updateProgress()
     }
-    
-    stopCluster(c1)
+
+    # Finalize and return aggregated results
+    stopCluster(cl)
+    cat("\nComputation complete.\n", file = logConnection)
     close(logConnection)
-    cat("\nComputation complete.\n")
-    return(aggregatedResults)
+    close(progressBar)
+    # Filter out NULL results and combine into a single data frame
+    validResults <- do.call("rbind", lapply(results, function(x) if (!is.null(x)) rbind(x) else NULL))
+    return(validResults)
 }
+
 
 # MAIN SCRIPT
 load()
