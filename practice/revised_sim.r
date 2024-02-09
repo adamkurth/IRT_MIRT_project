@@ -1,5 +1,5 @@
 load <- function(){
-    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel")
+    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "progressr")
     sapply(packages, require, character.only = TRUE)
 } # end load
 
@@ -330,14 +330,3 @@ dist.types <- c("left.skew", "right.skew", "stnd.norm")
 
 averages.data <- calc.averages.parallel(all.distributions, cross.param, methods = methods, dentypes = dentypes, dist.types = dist.types)
 View(averages.data)
-
-
-
-# dist.types <- c("left.skew", "right.skew", "stnd.norm")
-# method.types <- c("BL", "EM", "MHRM", "MCEM", "SEM", "QMCEM")
-# dentype.types <- c("Gaussian", "EH", "EHW","Davidian-2", "Davidian-4")
-
-
-# mirt.results <- compare.mirt(response.dataframes, true.params, 
-#                 methods = method.types, dentypes = dentype.types, dist.types = dist.types)
-# View(mirt.results)
