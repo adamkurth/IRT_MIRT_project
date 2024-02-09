@@ -266,11 +266,6 @@ mirt.results <- compare.mirt(response.dataframes, true.params,
                 methods = method.types, dentypes = dentype.types, dist.types = dist.types)
 View(mirt.results)
 
-
-
-
-
-
 #should we incorperate the all.distributions? in these models results? That is the primary interest here. 
 
 # Q: Should we incorperate the all.distributions when running the fit_mirt_models function?
