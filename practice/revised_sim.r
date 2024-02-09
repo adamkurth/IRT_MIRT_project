@@ -3,6 +3,7 @@ load <- function(){
     sapply(packages, require, character.only = TRUE)
 } # end load
 
+# DONE & working
 generate.skewed.distribitions <- function(n, seed, visualize = FALSE) {
     require(sn, quietly = TRUE)
     set.seed(seed) # Set the seed for reproducibility
@@ -31,6 +32,7 @@ generate.skewed.distribitions <- function(n, seed, visualize = FALSE) {
     return(all_distributions)
 } # end generate_skewed_distribitions
 
+# DONE & working
 simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     require(mirt, quietly = TRUE)
     set.seed(seed)
@@ -71,7 +73,7 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     return(response.dataframes)
 } # end simulate.response.data
 
-# revise 
+# revise NOT COMPLETE
 compare.mirt <- function(response.dataframes, true.params, methods, dentypes, dist.types){
     # N <- length(true.params$a)
     # true.params.matrix <- matrix(unlist(true.params), nrow=N, byrow=TRUE)
@@ -150,7 +152,7 @@ compare.mirt <- function(response.dataframes, true.params, methods, dentypes, di
 } # end compare.mirt
 
 
-# called by calc.averages
+# called by calc.averages/ calc.averages.parallel
 fit.mirt.model <- function(response.data, cross.param, method, dentype) {
     message(paste("Starting: " , method, dentype, sep=" "))
     start.time <- Sys.time()
@@ -177,9 +179,9 @@ fit.mirt.model <- function(response.data, cross.param, method, dentype) {
     message(paste("Completed:", method, dentype, sep=" "))
     out <- list(estimated.params = estimated.params, conv.time = time.to.conv)
     return(out)
-}
 
-# called by calc.averages
+
+# called by calc.averages/ calc.averages.parallel
 calc.metrics <- function(estimated.params, cross.param){
     # estimated.params$a <- as.numeric(estimated.params$a)
     # estimated.params$b <- as.numeric(estimated.params$b)
@@ -192,7 +194,7 @@ calc.metrics <- function(estimated.params, cross.param){
     return(out)
 }
 
-# master function
+# master function SLOW!!!
 calc.averages <- function(all.distributions, cross.param, methods, dentypes, dist.types){
     aggregated.results <- list()
 
