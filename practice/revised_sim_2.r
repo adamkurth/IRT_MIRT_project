@@ -246,84 +246,81 @@ calc.averages <- function(all.distributions, cross.param, methods, dentypes, dis
 
 
 calc.averages.parallel <- function(all.distributions, cross.param, methods, dentypes, dist.types) {
-    require(parallel, quietly = TRUE)
-    require(mirt, quietly = TRUE)
-
-    # Initialize log file
-    logFile <- "calc_avg_parallel.log"
-    writeLines(paste("Computation started at: ", Sys.time()), logFile)
-
-    # Setup parallel cluster
-    numCores <- detectCores() - 1
-    cl <- makeCluster(numCores)
-    on.exit({
-        stopCluster(cl) # Ensure cluster is stopped on function exit
-        writeLines(paste("Computation complete at: ", Sys.time()), logFile)
-    }, add = TRUE)
-
-    # Define processCombination within the clusterEvalQ to ensure it's available in worker environments
-    clusterEvalQ(cl, {
-        library(mirt)
-
-        processCombination <- function(comb, allDistributions, crossParam, seed) {
-            require(mirt, quietly = TRUE) # Ensure mirt is loaded in each worker
-            simData <- simulate.response.data(allDistributions, crossParam, seed)
-            responseData <- simData[[comb$dist]]
-            fitResults <- fit.mirt.model(responseData, crossParam, comb$method, comb$dentype)
-            if (!is.null(fitResults$error)) {
-                return(list(error = fitResults$error))
-            }
-            metrics <- calc.metrics(fitResults$estimated.params, crossParam)
-            return(list(metrics = metrics))
-        }
-    })
-
-    clusterExport(cl, c("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
-
-    # Generate combinations of parameters to process
-    combinations <- expand.grid(method = methods, dentype = dentypes, dist = dist.types, stringsAsFactors = FALSE)
-
-    aggregatedResults <- list()
-    errors <- list()
-
-    # Iterate over each combination of parameters
-    for (i in seq_len(nrow(combinations))) {
-        comb <- combinations[i, ]
-        results <- parLapply(cl, 1:100, function(seed) {
-            processCombination(comb, all.distributions, cross.param, seed)
-        })
-
-        # Process errors and valid results
-        errs <- Filter(function(x) !is.null(x$error), results)
-        if (length(errs) > 0) {
-            errors <- c(errors, errs)
-        }
-        validResults <- Filter(function(x) is.null(x$error), results)
+  require(parallel, quietly = TRUE)
+  require(mirt, quietly = TRUE)
+  
+  # Initialize log file
+  logFile <- "calc_avg_parallel.log"
+  writeLines(paste("Computation started at:", Sys.time()), logFile)
+  
+  # Setup parallel cluster
+  numCores <- detectCores() - 1
+  cl <- makeCluster(numCores)
+  on.exit({
+    stopCluster(cl)
+    writeLines(paste("Computation ended at:", Sys.time()), logFile)
+  })
+  
+  # Export necessary functions and data to cluster nodes
+  clusterExport(cl, c("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param"))
+  
+  # Load necessary libraries in each cluster node
+  clusterEvalQ(cl, {
+    library(mirt)
+  })
+  
+  # Generate combinations of parameters to process
+  combinations <- expand.grid(method = methods, dentype = dentypes, dist = dist.types, stringsAsFactors = FALSE)
+  
+    processCombination <- function(index) {
+        comb <- combinations[index, ]
         
-        # Aggregate metrics for each item across valid results
-        itemMetrics <- lapply(seq_len(length(cross.param$a)), function(itemIdx) {
-            itemResults <- lapply(validResults, function(res) res$metrics[[itemIdx]])
-            list(
+        # Simulate and process data for each replication
+        seeds <- 1:100
+        results <- lapply(seeds, function(seed) {
+        simData <- simulate.response.data(all.distributions, cross.param, seed)
+        responseData <- simData[[comb$dist]]
+        fitResults <- fit.mirt.model(responseData, cross.param, comb$method, comb$dentype)
+        if (!is.null(fitResults$error)) {
+            return(list(error = fitResults$error))
+        }
+        
+        calc.metrics(fitResults$estimated.params, cross.param)
+        })
+        
+        # Aggregate metrics for each item, handling errors
+        aggregatedMetrics <- list()
+        if (all(sapply(results, function(x) !is.null(x$error)))) {
+            return(list(error = "All replications resulted in an error for combination", comb))
+        }
+        
+        for (itemIdx in seq_along(cross.param$a)) {
+            itemMetrics <- lapply(results, function(res) res[[itemIdx]] %||% list(rmse.a = NA, rmse.b = NA, bias.a = NA, bias.b = NA))
+            aggregatedMetrics[[itemIdx]] <- list(
                 True.a = cross.param$a[itemIdx],
                 True.b = cross.param$b[itemIdx],
-                Avg.RMSE.a = mean(sapply(itemResults, `[[`, "rmse.a")),
-                Avg.RMSE.b = mean(sapply(itemResults, `[[`, "rmse.b")),
-                Avg.Bias.a = mean(sapply(itemResults, `[[`, "bias.a")),
-                Avg.Bias.b = mean(sapply(itemResults, `[[`, "bias.b"))
+                Avg.RMSE.a = mean(sapply(itemMetrics, \(m) m$rmse.a), na.rm = TRUE),
+                Avg.RMSE.b = mean(sapply(itemMetrics, \(m) m$rmse.b), na.rm = TRUE),
+                Avg.Bias.a = mean(sapply(itemMetrics, \(m) m$bias.a), na.rm = TRUE),
+                Avg.Bias.b = mean(sapply(itemMetrics, \(m) m$bias.b), na.rm = TRUE)
             )
-        })
-        aggregatedResults[[i]] <- list(combination = comb, metrics = itemMetrics)
+        }
+        
+        list(combination = comb, metrics = aggregatedMetrics)
     }
-    # Log errors if any
+  
+    # Execute processCombination for each combination in parallel
+    aggregatedResults <- parLapply(cl, seq_along(combinations), processCombination)
+  
+    # Extract and log errors if any
+    errors <- Filter(\(x) !is.null(x$error), aggregatedResults)
     if (length(errors) > 0) {
-        errorMessages <- unlist(lapply(errors, function(err) err$error))
+        errorMessages <- sapply(errors, \(e) e$error)
         writeLines(errorMessages, "calc_avg_parallel.errors.log", append = TRUE)
     }
-
-    stopCluster(cl)
-
-    return(aggregatedResults)
-} # end calc.averages.parallel
+    
+  return(aggregatedResults)
+}
 
 
 # MAIN SCRIPT
@@ -343,7 +340,7 @@ response.dataframes <- simulate.response.data(all.distributions, cross.param, se
 
 methods <- c("BL")
 dentypes <- c("Gaussian")
-dist.types <- c("left.skew", "right.skew", "stnd.norm")
+dist.types <- c("stnd.norm")
 
 
 # methods <- c("BL")
