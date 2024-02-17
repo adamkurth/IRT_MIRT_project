@@ -276,51 +276,84 @@ View(test.df)
 
 
 
-fit.mirt <- function(response.dataframes, cross.param) {
+fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replications = 100) {
     require(mirt, quietly = TRUE)
-    response.data <- response.dataframes$stnd.norm  # Only for standard normal distribution
 
-    n.replications <- 100
-    n.items <- ncol(response.data)  # Number of items
-    total.time <- numeric(n.replications)  # Store time for each replication
-    
-    # Initialize matrices to store parameter estimates across replications
-    est.params.a <- matrix(NA, nrow = n.replications, ncol = n.items)
-    est.params.b <- matrix(NA, nrow = n.replications, ncol = n.items)
-
-    for (i in 1:n.replications) {
-        cat("\n")
-        message(paste("Replication", i, ": Starting"))
-        start <- Sys.time()
-        
-        fit <- mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE)
-        
-        end <- Sys.time()
-        total.time[i] <- as.numeric(end - start)  # Store time for this replication
-        message(paste("Replication", i, ": Completed", "- Time to convergence:", total.time[i]))
-        
-        coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE)$items
-        est.params.a[i,] <- coefs[, "a"]
-        est.params.b[i,] <- coefs[, "b"]
+    if(!is.data.frame(response.data)) {
+        stop("response.data must be a dataframe.")
     }
-    
-    # Average parameter estimates and total time across replications
-    avg.a <- rowMeans(est.params.a, na.rm = TRUE)
-    avg.b <- rowMeans(est.params.b, na.rm = TRUE)
-    avg.time <- mean(total.time, na.rm = TRUE)
-    
-    # Calculate metrics based on averaged parameter estimates
-    metrics <- data.frame(item = 1:n.items, 
-                          true.a = cross.param$a, true.b = cross.param$b, 
-                          avg.a = avg.a, avg.b = avg.b, avg.time = avg.time)
-    
-    metrics$bias.a <- metrics$avg.a - metrics$true.a
-    metrics$bias.b <- metrics$avg.b - metrics$true.b
-    metrics$rmse.a <- sqrt(mean((metrics$avg.a - metrics$true.a)^2))
-    metrics$rmse.b <- sqrt(mean((metrics$avg.b - metrics$true.b)^2))
 
-    return(metrics)
+    # Assuming response.data is correctly formatted and passed to the function
+    n.items <- ncol(response.data)  # Number of items
+    # n.persons <- nrow(response.data)  # Number of persons
+
+    # Initialize an empty list to store results from all methods and dentypes
+    results <- list()
+    
+
+    for (method in methods) {
+        for (dentype in dentypes) {
+            message(paste("Running method:", method, "with dentype:", dentype))
+            
+            est.params.a <- matrix(NA, nrow = n.replications, ncol = n.items)
+            est.params.b <- matrix(NA, nrow = n.replications, ncol = n.items)
+            total.time <- numeric(n.replications)
+            
+            successful_run <- TRUE
+        
+            for (i in 1:n.replications) {
+                cat("\n")
+                message(paste("Replication", i, ": Starting"))
+                start <- Sys.time()
+                
+                # Try to fit the model with the current method and dentype
+                fit <- tryCatch({
+                mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method = method, dentype = dentype)
+                }, error = function(e) {
+                message(paste("Error in replication", i, ":", e$message))
+                    successful_run <- FALSE
+                    return(NULL)
+                })
+                
+                if (is.null(fit)) break  # Exit the replication loop if the model fit was unsuccessful
+                
+                end <- Sys.time()
+                total.time[i] <- as.numeric(end - start)
+                message(paste("Replication", i, ": Completed", "- Time to convergence:", total.time[i]))
+                
+                coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE)$items
+                est.params.a[i,] <- coefs[, "a"]
+                est.params.b[i,] <- coefs[, "b"]
+            }
+        
+            if (successful_run) {
+                    avg.time <- mean(total.time, na.rm = TRUE)
+                    avg.a <- rowMeans(est.params.a, na.rm = TRUE)
+                    avg.b <- rowMeans(est.params.b, na.rm = TRUE)
+                    
+                    metrics <- data.frame(item = 1:n.items, 
+                                        true.a = cross.param$a, true.b = cross.param$b, 
+                                        avg.a = avg.a, avg.b = avg.b, avg.time = avg.time)
+                    
+                    metrics$bias.a <- metrics$avg.a - metrics$true.a
+                    metrics$bias.b <- metrics$avg.b - metrics$true.b
+                    metrics$rmse.a <- sqrt(mean((metrics$avg.a - metrics$true.a)^2))
+                    metrics$rmse.b <- sqrt(mean((metrics$avg.b - metrics$true.b)^2))
+                    
+                    # Store metrics in the results list with a unique name
+                    results[[paste("method", method, "dentype", dentype)]] <- metrics
+            } else {
+                message(paste("Method:", method, "with dentype:", dentype, "failed. Skipping."))
+            }
+        }
+    }
+  
+  return(results)
 }
 
-metrics <- fit.mirt(response.dataframes, cross.param)
+methods <- c("BL")
+dentypes <- c("Gaussian")
 
+# Corrected function call to specifically use 'stnd.norm' dataframe
+metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100)
+# fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replications = 100) {
