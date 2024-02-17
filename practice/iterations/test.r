@@ -73,209 +73,6 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     return(response.dataframes)
 } # end simulate.response.data
 
-
-calc.metrics <- function(estimated.params, cross.param){
-  # Assuming `estimated.params` contains averaged estimates across replications for each item
-  
-  # True parameters
-  true.a <- cross.param$a
-  true.b <- cross.param$b
-  
-  # Averaged estimated parameters
-  avg.est.a <- mean(estimated.params$a)
-  avg.est.b <- mean(estimated.params$b)
-  
-  # Calculating bias for averaged estimates
-  bias.a <- avg.est.a - true.a
-  bias.b <- avg.est.b - true.b
-  
-  # Calculating RMSE for averaged estimates
-  rmse.a <- sqrt(mean((estimated.params$a - true.a)^2))
-  rmse.b <- sqrt(mean((estimated.params$b - true.b)^2))
-  
-  # Assuming `time` is an average over replications if relevant
-  # time <- mean(estimated.params$conv.time)
-  
-  # Compile into a single-row dataframe
-  metrics.df <- data.frame(
-    true.a = true.a, 
-    true.b = true.b, 
-    avg.est.a = avg.est.a, 
-    avg.est.b = avg.est.b, 
-    bias.a = bias.a, 
-    bias.b = bias.b, 
-    rmse.a = rmse.a, 
-    rmse.b = rmse.b
-    # ,time = time  # Uncomment if time is relevant and available
-  )
-  
-  return(metrics.df)
-}
-
-
-fit.mirt.models.all <- function(response.data, cross.param, method, dentype, dist.types) {
-    require(mirt, quietly = TRUE)
-    n.replications <- 100
-    all.est.params <- vector("list", n.replications)
-    all.times <- numeric(n.replications)
-    
-    
-
-    for (i in 1:n.replications){
-        cat("\n")
-        
-        message(paste("Replication", i, "-", method, dentype, ": Starting"))
-        
-        current.data <- response.data[[i]]
-        
-        # Diagnostic check for current.data
-        if(is.null(current.data) || length(current.data) == 0) {
-            message(paste("Replication", i, "-", method, dentype, ": current.data is empty or NULL. Skipping."))
-            next  # Skip this iteration
-        }
-
-        current.data <- response.data[[i]]
-        start.time <- Sys.time()
-        # Fit model
-        mirt.model <- tryCatch({
-            mirt(data = current.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method = method, dentype = dentype)
-        }, error = function(e) {
-            message(paste("Replication", i, "-", method, dentype, ": Error -", e$message))
-            return(NULL)  # Return NULL if error
-        })
-        end.time <- Sys.time()
-        time.to.conv <- as.numeric(end.time - start.time)
-        all.times[i] <- time.to.conv
-
-        if (!is.null(mirt.model)) {
-            para.estimates <- coef(mirt.model, simplify = TRUE, IRTpars = TRUE)$items
-            relevant.param.estimates <- para.estimates[, c("a", "b")]
-            all.est.params[[i]] <- list(a = relevant.param.estimates[, "a"], b = relevant.param.estimates[, "b"])
-        } else {
-            all.est.params[[i]] <- list(a = NA, b = NA)
-        }
-        message(paste("Replication", i, "-", method, dentype, ": Completed"))
-    }
-
-    avg.times <- mean(all.times, na.rm = TRUE)
-    avg.a <- mean(unlist(lapply(all.est.params, function(x) x$a), na.rm = TRUE))
-    avg.b <- mean(unlist(lapply(all.est.params, function(x) x$b), na.rm = TRUE))
-    
-    aggregated.results <- list(estimated.params = list(a = avg.a, b = avg.b), avg.conv.time = avg.times)
-    return(aggregated.results)
-}
-
-calc.averages.parallel <- function(all.distributions, cross.param, methods, dentypes, dist.types){
-    require(parallel, quietly = TRUE)
-    require(mirt, quietly = TRUE)
-
-    log <- "calc_averages_parallel.log"
-    write(paste("Starting parallel processing at", Sys.time()), log)
-
-    numCores <- detectCores() - 1
-    cl <- makeCluster(numCores)
-    on.exit({
-        stopCluster(cl)
-        writeLines(paste("Computation complete.", Sys.time()), log)
-    }, add = TRUE)
-
-    # environment prep for cluster
-    clusterExport(cl, list("simulate.response.data", "fit.mirt.model", "calc.metrics", "all.distributions", "cross.param", "methods", "dentypes", "dist.types"))
-    clusterEvalQ(cl, library(mirt))
-
-    # generate combinations of parameters to process
-    combinations <- expand.grid(method=methods, dentype=dentypes, dist.type=dist.types)
-    n.combinations <- nrow(combinations)
-
-    # function to process each combination
-    processCombination <- function(i){
-        comb <- combinations[i, ]
-
-        tryCatch({
-            simData <- simulate.response.data(all.distributions, cross.param)
-            responseData <- simData[[comb$dist.type]]
-            fit <- fit.mirt.model(responseData, cross.param, comb$method, comb$dentype)
-            metrics.df <- calc.metrics(fit$estimated.params, cross.param)
-            metrics.df$method <- comb$method
-            metrics.df$dist.type <- comb$dist.type
-            metrics.df$dentype <- comb$dentype
-            return(metrics.df)
-        }, error = function(e) {
-            message(paste("Error with combination", i, ":", e$message))
-            return(NULL)
-        })
-    }
-    
-    # process each combination in parallel and store results 
-    metrics.list <- parLapply(cl, seq_len(n.combinations), processCombination) # outputs a list of dataframes 
-    
-    # combine list of dataframes into one dataframe
-    metrics.df <- do.call(rbind, Filter(NROW, metrics.list)) # remove NULL elements and combine into 1 dataframe
-    
-    return(metrics.df)
-} # end calc.averages.parallel 
-
-
-load()
-n <- 300
-all.distributions <- generate.skewed.distribitions(n, seed=123)
-
-# cros.param has 20 rows and 3 columns (of true param values for a, b, and d)
-cross.param <- expand.grid(d = c(-2.5, -1.25, 0, 1.25, 2.5), a = c(0.5, 1, 1.5, 2.5))
-cross.param$b <- with(cross.param, -d/a)
-
-# simulate response data
-# for each dist, has 300 rows of 20 item responses
-response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
-
-methods <- c("BL")
-dentypes <- c("Gaussian")
-dist.types <- c("stnd.norm")
-
-# averages.data <- calc.averages.parallel(all.distributions, cross.param, methods = methods, dentypes = dentypes, dist.types = dist.types)
-# View(averages.data)
-
-
-combinations <- expand.grid(method=methods, dentype=dentypes, dist.type=dist.types)
-fit <- fit.mirt.models.all(response.dataframes$stnd.norm, cross.param, "BL", "Gaussian")
-
-# fit.mirt.model <- function(response.data, cross.param, method, dentype, n.replications) {
-
-test_combination <- function() {
-    
-    i <- 1 # Assuming 1 is a valid index for a test
-    comb <- combinations[i, ]
-    dist <- as.character(comb$dist.type)
-    method <- as.character(comb$method)
-    dentype <- as.character(comb$dentype)
-
-    simData <- simulate.response.data(all.distributions, cross.param)
-    responseData <- simData[[dist]]
-    fit <- fit.mirt.models.all(responseData, cross.param, method, dentype)
-    metrics.df <- calc.metrics(fit$estimated.params, cross.param)
-    print(metrics.df)
-    metrics.df$method <- method 
-    metrics.df$dist.type <- dist
-    metrics.df$dentype <- dentype
-    return(metrics.df)
-}
-
-test.df <- test_combination()
-View(test.df)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replications = 100) {
     require(mirt, quietly = TRUE)
 
@@ -351,9 +148,69 @@ fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replicatio
   return(results)
 }
 
+fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes) {
+    require(parallel, quietly = TRUE)
+    require(mirt, quietly = TRUE)
+    
+    # Generate or load response dataframes for each distribution type
+    response.dataframes <- simulate.response.data(all.distributions, cross.param)  # Placeholder; adjust as needed
+
+    log <- "calc_averages_parallel.log"
+    write(paste("Starting parallel processing at", Sys.time()), file = log)
+
+    numCores <- detectCores() - 1
+    cl <- makeCluster(numCores)
+    on.exit(stopCluster(cl), add = TRUE)
+    
+    dist.types <- unique(all.distributions[,2])  # Assuming this correctly identifies unique distribution types
+
+    # Prepare the environment for the cluster
+    clusterExport(cl, c("response.dataframes", "fit.mirt", "cross.param", "methods", "dentypes", "dist.types"))
+    clusterEvalQ(cl, {
+        library(mirt)
+        # Ensure simulate.response.data and any other necessary functions are defined or loaded here
+    })
+
+    # Function to process each distribution type by its index
+    processCombination <- function(i) {
+        distType <- dist.types[i]  # Directly use 'i' to access the current distType
+        response.data <- response.dataframes[[i]]  # Access response data by index directly
+        tryCatch({
+            metrics.df <- fit.mirt(response.data, cross.param, methods, dentypes, 100)
+            return(metrics.df)
+        }, error = function(e) {
+            message(paste("Error with distribution type", distType, ":", e$message))
+            return(NULL)
+        })
+    }    
+    # Process each distribution type in parallel and store results
+    metrics.list <- parLapply(cl, seq_along(dist.types), processCombination)
+    
+    # Combine results into a single dataframe, handling potential NULLs
+    metrics.df <- do.call(rbind, lapply(metrics.list, function(x) if (is.null(x)) data.frame() else x))
+
+    return(metrics.df)
+}
+
+
+load()
+n <- 300
+all.distributions <- generate.skewed.distribitions(n, seed=123)
+
+# cros.param has 20 rows and 3 columns (of true param values for a, b, and d)
+cross.param <- expand.grid(d = c(-2.5, -1.25, 0, 1.25, 2.5), a = c(0.5, 1, 1.5, 2.5))
+cross.param$b <- with(cross.param, -d/a)
+
+# simulate response data
+# for each dist, has 300 rows of 20 item responses
+response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+
 methods <- c("BL")
 dentypes <- c("Gaussian")
+dist.types <- c("stnd.norm")
+
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100)
-# fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replications = 100) {
+# metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) ## WORKING! 
+
+metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
