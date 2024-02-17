@@ -211,6 +211,6 @@ dist.types <- c("stnd.norm")
 
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-# metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) ## WORKING! 
+metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) ## WORKING! 
 
 metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
