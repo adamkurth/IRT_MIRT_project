@@ -176,6 +176,9 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     processCombination <- function(i) {
         distType <- dist.types[i]  # Directly use 'i' to access the current distType
         response.data <- response.dataframes[[i]]  # Access response data by index directly
+        
+        metrics <- list()
+
         for (method in methods) {
             for (dentype in dentypes) {
                 tryCatch({
@@ -194,12 +197,7 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
             organized.metrics[[result$distType]] <- result$metrics
         }
     }
-    # # Process each distribution type in parallel and store results
-    # metrics.list <- parLapply(cl, seq_along(dist.types), processCombination)
-    
-    # # Combine results into a single dataframe, handling potential NULLs
-    # metrics.df <- do.call(rbind, lapply(metrics.list, function(x) if (is.null(x)) data.frame() else x))
-    # metrics.df <- 
+    stopCluster(cl)
     return(organized.metrics)
 }
 
