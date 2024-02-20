@@ -157,48 +157,41 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     # Generate or load response dataframes for each distribution type
     response.dataframes <- simulate.response.data(all.distributions, cross.param)  # Placeholder; adjust as needed
 
-    log <- "parallel_mirt.log"
+    log <- "parallel_fit_mirt.log"
     write(paste("Starting parallel processing at", Sys.time()), file = log)
 
     numCores <- detectCores() - 1
     cl <- makeCluster(numCores)
     on.exit(stopCluster(cl), add = TRUE)
     
-    dist.types <- unique(all.distributions[,2])
+    dist.types <- unique(all.distributions[,2])  # Assuming this correctly identifies unique distribution types
 
     # Prepare the environment for the cluster
     clusterExport(cl, c("response.dataframes", "fit.mirt", "cross.param", "methods", "dentypes", "dist.types"))
-    clusterEvalQ(cl, library(mirt))
-
-    organized.metrics <- list()
+    clusterEvalQ(cl, {
+        library(mirt)
+        # Ensure simulate.response.data and any other necessary functions are defined or loaded here
+    })
 
     # Function to process each distribution type by its index
     processCombination <- function(i) {
         distType <- dist.types[i]  # Directly use 'i' to access the current distType
         response.data <- response.dataframes[[i]]  # Access response data by index directly
-        
-        metrics <- list()
+        tryCatch({
+            metrics.df <- fit.mirt(response.data, cross.param, methods, dentypes, 100)
+            return(metrics.df)
+        }, error = function(e) {
+            message(paste("Error with distribution type", distType, ":", e$message))
+            return(NULL)
+        })
+    }    
+    # Process each distribution type in parallel and store results
+    metrics.list <- parLapply(cl, seq_along(dist.types), processCombination)
+    
+    # Combine results into a single dataframe, handling potential NULLs
+    metrics.df <- do.call(rbind, lapply(metrics.list, function(x) if (is.null(x)) data.frame() else x))
 
-        for (method in methods) {
-            for (dentype in dentypes) {
-                tryCatch({
-                    metrics[[paste(method, dentype, sep = "_")]] <- fit.mirt(response.data, cross.param, method, dentype, 10)
-                }, error = function(e) {
-                    message(paste("Error with", distType, method, dentype, ":", e$message))
-                })
-            }
-        }
-        return(list(distType = distType, metrics = metrics))
-    }
-
-    results <- parLapply(cl, seq_along(dist.types), processCombination)
-    for (result in results){
-        if(!is.null(result)){
-            organized.metrics[[result$distType]] <- result$metrics
-        }
-    }
-    stopCluster(cl)
-    return(organized.metrics)
+    return(metrics.df)
 }
 
 export.data <- function(response.dataframes){
@@ -253,10 +246,9 @@ dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm")
 
 
-# Corrected function call to specifically use 'stnd.norm' dataframe
+# # Corrected function call to specifically use 'stnd.norm' dataframe
 metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 10) # for quick testing
 metrics # view 
 
 # metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) # for full run
 metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
-metrics[1,] # view 
