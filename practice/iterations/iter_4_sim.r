@@ -178,7 +178,7 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
         distType <- dist.types[i]  # Directly use 'i' to access the current distType
         response.data <- response.dataframes[[i]]  # Access response data by index directly
         tryCatch({
-            metrics.df <- fit.mirt(response.data, cross.param, methods, dentypes, 100)
+            metrics.df <- fit.mirt(response.data, cross.param, methods, dentypes, 10)
             return(metrics.df)
         }, error = function(e) {
             message(paste("Error with distribution type", distType, ":", e$message))
@@ -206,7 +206,26 @@ export.data <- function(response.dataframes){
         message("Wrote response.data to a .txt file: ", filename, '\n')
         }
 }
-        
+    
+
+read.data <- function(){
+    # read in response data from .txt files in the "response_data" directory
+    response.dataframes <- list()
+    filenames <- list.files(path = "response_data", pattern = "response_.*\\.txt", full.names = TRUE)
+    
+    for (filename in filenames){
+        response.data <- read.table(filename, header = TRUE, sep = "\t")
+
+        name <- basename(filename) # remove path, leaving only the filename
+        name <- gsub("^response_", "", name)  # Remove 'response_' prefix
+        name <- gsub(".txt", "", name)  # Remove '.txt' suffix
+        name <- gsub("_", ".", name)  # Replace '_' with '.'
+        # modified name as the key name
+        response.dataframes[[name]] <- response.data
+    }
+    return(response.dataframes)
+}
+
 
 load()
 n <- 300
@@ -218,9 +237,9 @@ cross.param$b <- with(cross.param, -d/a)
 
 # simulate response data
 # for each dist, has 300 rows of 20 item responses
-response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
-
-export.data(response.dataframes)
+# response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+response.dataframes <- read.data()
+# export.data(response.dataframes)
 
 methods <- c("BL")
 dentypes <- c("Gaussian")
@@ -228,6 +247,6 @@ dist.types <- c("stnd.norm")
 
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-# metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) ## WORKING! 
-
-# metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
+metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 10) # for quick testing
+# metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) # for full run
+metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
