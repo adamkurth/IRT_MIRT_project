@@ -96,7 +96,7 @@ fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replicatio
             est.params.b <- matrix(NA, nrow = n.replications, ncol = n.items)
             total.time <- numeric(n.replications)
             
-            successful_run <- TRUE
+            successful.run <- TRUE
         
             for (i in 1:n.replications) {
                 cat("\n")
@@ -108,7 +108,7 @@ fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replicatio
                 mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method = method, dentype = dentype)
                 }, error = function(e) {
                 message(paste("Error in replication", i, ":", e$message))
-                    successful_run <- FALSE
+                    successful.run <- FALSE
                     return(NULL)
                 })
                 
@@ -123,22 +123,24 @@ fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replicatio
                 est.params.b[i,] <- coefs[, "b"]
             }
         
-            if (successful_run) {
-                    avg.time <- mean(total.time, na.rm = TRUE)
-                    avg.a <- rowMeans(est.params.a, na.rm = TRUE)
-                    avg.b <- rowMeans(est.params.b, na.rm = TRUE)
-                    
-                    metrics <- data.frame(item = 1:n.items, 
-                                        true.a = cross.param$a, true.b = cross.param$b, 
-                                        avg.a = avg.a, avg.b = avg.b, avg.time = avg.time)
-                    
-                    metrics$bias.a <- metrics$avg.a - metrics$true.a
-                    metrics$bias.b <- metrics$avg.b - metrics$true.b
-                    metrics$rmse.a <- sqrt(mean((metrics$avg.a - metrics$true.a)^2))
-                    metrics$rmse.b <- sqrt(mean((metrics$avg.b - metrics$true.b)^2))
-                    
-                    # Store metrics in the results list with a unique name
-                    results[[paste("method", method, "dentype", dentype)]] <- metrics
+            if (successful.run) {
+                metrics <- data.frame(item = 1:n.items, true.a = cross.param$a, true.b = cross.param$b)
+                metrics$avg.time <- mean(total.time, na.rm = TRUE)
+
+                # bias calculation for each item
+                metrics$bias.a <- colMeans(est.params.a, na.rm = TRUE) - metrics$true.a
+                metrics$bias.b <- colMeans(est.params.b, na.rm = TRUE) - metrics$true.b
+
+                # RMSE calculation for each item
+                metrics$rmse.a <- sqrt(colMeans((est.params.a - rep(metrics$true.a, each = n.replications))^2, na.rm = TRUE))
+                metrics$rmse.b <- sqrt(colMeans((est.params.b - rep(metrics$true.b, each = n.replications))^2, na.rm = TRUE))
+
+                # Store metrics in the results list with a unique name
+                results[[paste("method", method, "dentype", dentype)]] <- metrics
+                
+                # calculating the average bias and RMSE for each item
+                # summarizing over replications for each item not accross all items!
+
             } else {
                 message(paste("Method:", method, "with dentype:", dentype, "failed. Skipping."))
             }
@@ -192,6 +194,19 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     return(metrics.df)
 }
 
+export.data <- function(response.dataframes){
+    # write response data to .txt for each distribution 
+    for(i in names(response.dataframes)){
+        response.data <- response.dataframes[[i]]
+        # replace '.' with '_' in the name
+        filename <- paste0("response_", gsub("\\.", "_", i), ".txt")
+        # write to .txt file
+        write.table(response.data, filename, sep = "\t", row.names = FALSE, col.names = TRUE)
+        # message to console
+        message("Wrote response.data to a .txt file: ", filename, '\n')
+        }
+}
+        
 
 load()
 n <- 300
@@ -205,12 +220,14 @@ cross.param$b <- with(cross.param, -d/a)
 # for each dist, has 300 rows of 20 item responses
 response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
 
+export.data(response.dataframes)
+
 methods <- c("BL")
 dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm")
 
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) ## WORKING! 
+# metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) ## WORKING! 
 
-metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
+# metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
