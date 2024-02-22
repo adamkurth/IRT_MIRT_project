@@ -73,6 +73,83 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     return(response.dataframes)
 } # end simulate.response.data
 
+
+
+### revised functions 
+
+quick.gen.dist <- function(n, dist.type = 'stnd.norm', seed=123){
+    require(sn, quietly = TRUE)
+    set.seed(seed) # Set the seed for reproducibility   
+    data <- data.frame(theta = numeric(n), distribution = character(n))
+    
+    if (dist.type == 'stnd.norm') {
+        data$theta <- rnorm(n, mean = 0, sd = 1)  # Standard normal
+        data$distribution <- 'stnd.norm'
+    } else if (dist.type == 'left.skew') {
+        data$theta <- rsn(n, xi = 0, omega = 1, alpha = -10)  # Left skewed
+        data$distribution <- 'left.skew'
+    } else if (dist.type == 'right.skew') {
+        data$theta <- rsn(n, xi = 0, omega = 1, alpha = 10)  # Right skewed
+        data$distribution <- 'right.skew'
+    } else {
+        stop("dist.type must be 'stnd.norm', 'left.skew', or 'right.skew'")
+    }
+    
+    return(data)
+}
+
+quick.sim.response <- function(theta.values, cross.param, seed=123) {
+    set.seed(seed)
+    n.persons <- length(theta.values) # 300 persons
+    n.items <- nrow(cross.param) 
+    a <- cross.param$a
+    b <- cross.param$b
+
+    # create matrices for theta, a, and b
+    theta.matrix <- matrix(rep(theta.values, each = n.items), nrow = n.persons, byrow = TRUE)
+    a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = FALSE)
+    b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = FALSE)
+    
+    # calculate the probability matrix
+    p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
+    response.matrix <- ifelse(runif(n.persons * n.items) < p.matrix, 1, 0)
+
+    response.df <- as.data.frame(response.matrix)
+    colnames(response.df) <- paste0("I", seq_len(n.items))
+    return(response.df)
+}
+
+export.data <- function(cross.param, output.dir='response_data', n=300, replications=10, seed=123){
+    dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)
+    dist.types <- c('stnd.norm', 'left.skew', 'right.skew')
+
+    # for each distribution, simulate response data and write to .txt file
+    for (dist.type in dist.types){
+        for (rep in 1:replications){
+            # generate theta values
+            theta.data <- quick.gen.dist(n, dist.type = dist.type, seed = seed + rep) # seed is incremented by rep
+            # simulate response data
+            response.data <- quick.sim.response(theta.data$theta, cross.param, seed=123+rep) # seed is incremented by rep
+            # generate filename with replication number 
+            filename <- sprintf("%s/response_%s_rep_%02d.txt", output.dir, gsub("\\.", "_", dist.type), rep)
+            write.table(response.data, filename, sep = "\t", row.names = FALSE, col.names = TRUE)
+            message("Wrote response data to file: ", filename)
+        }
+    }
+
+}
+    
+
+# testing 
+data <- quick.gen.dist(300, dist.type = 'stnd.norm', seed=123)
+sim.data <- quick.sim.response(data$theta, cross.param, seed=123)
+export.data(cross.param, output.dir = 'response_data', n=300, replications=10, seed=123)
+
+####
+
+
+
+
 fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replications = 100) {
     require(mirt, quietly = TRUE)
 
@@ -194,17 +271,26 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     return(metrics.df)
 }
 
-export.data <- function(response.dataframes){
-    # write response data to .txt for each distribution 
-    for(i in names(response.dataframes)){
-        response.data <- response.dataframes[[i]]
-        # replace '.' with '_' in the name
-        filename <- paste0("response_", gsub("\\.", "_", i), ".txt")
-        # write to .txt file
-        write.table(response.data, filename, sep = "\t", row.names = FALSE, col.names = TRUE)
-        # message to console
-        message("Wrote response.data to a .txt file: ", filename, '\n')
+
+export.data <- function(, output.dir = 'response_data', replications=10){
+
+    dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)
+    dist.names <- levels(all.distributions$distribution) # unique distribution names
+
+    # for each distribution, simulate response data and write to .txt file
+    for (dist in dist.names){
+        current.dist <- all.distributions[all.distributions$distribution == dist,]
+
+        for (rep in 1:replications){
+            response.data <- simulate.response.data(current.dist, cross.param, seed = 123)
+            # response.data <- response.dataframes[[dist]]
+            # generate filename with replication number 
+            filename <- paste0("response_", gsub("\\.", "_", dist), "_rep_", rep, ".txt")
+            write.table(response.data, filename, sep = "\t", row.names = FALSE, col.names = TRUE)
+            message("Wrote response data to file: ", filename, '\n')
         }
+    }
+
 }
     
 
@@ -237,9 +323,12 @@ cross.param$b <- with(cross.param, -d/a)
 
 # simulate response data
 # for each dist, has 300 rows of 20 item responses
-# response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
 response.dataframes <- read.data()
-# export.data(response.dataframes)
+
+# export data runs replications=10 response data to .txt files in the "response_data" directory
+export.data(all.distributions, output.dir = 'response_data', replications=10)
+# export.data <- function(all.distributions, output.dir = 'response_data', replications=10){
 
 methods <- c("BL")
 dentypes <- c("Gaussian")
@@ -247,8 +336,9 @@ dist.types <- c("stnd.norm")
 
 
 # # Corrected function call to specifically use 'stnd.norm' dataframe
+
 metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 10) # for quick testing
 metrics # view 
 
 # metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) # for full run
-metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
+# metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
