@@ -6,7 +6,7 @@ load <- function(){
     sapply(packages, require, character.only = TRUE)
 } # end load
 
-# DONE & working
+# Method 1
 generate.skewed.distribitions <- function(n, seed=123) {
     require(sn, quietly = TRUE)
     set.seed(seed) # Set the seed for reproducibility
@@ -31,8 +31,6 @@ generate.skewed.distribitions <- function(n, seed=123) {
     return(all_distributions)
 } # end generate_skewed_distribitions
 
-
-# DONE & working
 simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     require(mirt, quietly = TRUE)
     set.seed(seed)
@@ -73,10 +71,8 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     return(response.dataframes)
 } # end simulate.response.data
 
-
-
+# Method 2
 ### revised functions 
-
 quick.gen.dist <- function(n, dist.type = 'stnd.norm', seed=123){
     require(sn, quietly = TRUE)
     set.seed(seed) # Set the seed for reproducibility   
@@ -119,6 +115,19 @@ quick.sim.response <- function(theta.values, cross.param, seed=123) {
     return(response.df)
 }
 
+# for reading a specific response data file 
+read.data <- function(dist.type='stnd.norm', rep=1, read.dir='response_data'){
+    dist.type.pattern <- gsub("\\.", "_", dist.type)
+    file.pattern <- sprintf("response_%s_rep_%02d.txt", dist.type.pattern, rep)
+    
+    file.path <- file.path(read.dir, file.pattern)
+    if (!file.exists(file.path)) {
+        stop(paste("File not found:", file.path))
+    }
+    response.data <- read.table(file.path, header = TRUE, sep = "\t")
+    return(response.data)
+}
+
 export.data <- function(cross.param, output.dir='response_data', n=300, replications=10, seed=123){
     dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)
     dist.types <- c('stnd.norm', 'left.skew', 'right.skew')
@@ -139,74 +148,49 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 
 }
 
-read.data <- function(dist.type='stnd.norm', read.dir='response_data'){
-    # read in response data from .txt files in the "response_data" directory
-    response.dataframes <- list()
-    filenames <- list.files(path = "response_data", pattern = "response_.*\\.txt", full.names = TRUE)
-    
-    for (filename in filenames){
-        response.data <- read.table(filename, header = TRUE, sep = "\t")
-
-        name <- basename(filename) # remove path, leaving only the filename
-        name <- gsub("^response_", "", name)  # Remove 'response_' prefix
-        name <- gsub(".txt", "", name)  # Remove '.txt' suffix
-        name <- gsub("_", ".", name)  # Replace '_' with '.'
-        # modified name as the key name
-        response.dataframes[[name]] <- response.data
-    }
-    return(response.dataframes)
-}
-
-####
-
-
-fit.mirt <- function(response.data, cross.param, methods, dentypes, n.replications = 100) {
+#### Method 2
+fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications = 10) {
     require(mirt, quietly = TRUE)
+    read.dir <- 'response_data'
 
-    if(!is.data.frame(response.data)) {
-        stop("response.data must be a dataframe.")
-    }
-
-    # Assuming response.data is correctly formatted and passed to the function
-    n.items <- ncol(response.data)  # Number of items
-    # n.persons <- nrow(response.data)  # Number of persons
-
-    # Initialize an empty list to store results from all methods and dentypes
+    # initialize results list
     results <- list()
-    
-    all.files <- list.files(path = "response_data", pattern = "response_.*\\.txt", full.names = TRUE)
-    stnd.norm.files <- all.files[grep("stnd.norm", all.files)] # ??
 
     for (method in methods) {
         for (dentype in dentypes) {
             message(paste("Running method:", method, "with dentype:", dentype))
             
-            est.params.a <- matrix(NA, nrow = n.replications, ncol = n.items)
-            est.params.b <- matrix(NA, nrow = n.replications, ncol = n.items)
+            est.params.a <- matrix(NA, nrow = n.replications)
+            est.params.b <- matrix(NA, nrow = n.replications)
             total.time <- numeric(n.replications)
             
             successful.run <- TRUE
         
-            for (i in 1:n.replications) {
+            for (rep in 1:n.replications) {
                 cat("\n")
+                # read response data for current replication
+                response.data <- read.data(dist.type=dist.type, rep=rep, read.dir=read.dir) 
+
                 message(paste("Replication", i, ": Starting"))
-                response.data <- load.data()
-                start <- Sys.time()
                 
                 # Try to fit the model with the current method and dentype
                 fit <- tryCatch({
-                mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method = method, dentype = dentype)
+                    start <- Sys.time()    
+                    mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method = method, dentype = dentype)
+                    end <- Sys.time()
                 }, error = function(e) {
-                message(paste("Error in replication", i, ":", e$message))
+                    message(paste("Error in replication", rep, ":", e$message))
                     successful.run <- FALSE
                     return(NULL)
                 })
                 
-                if (is.null(fit)) break  # Exit the replication loop if the model fit was unsuccessful
-                
-                end <- Sys.time()
-                total.time[i] <- as.numeric(end - start)
-                message(paste("Replication", i, ": Completed", "- Time to convergence:", total.time[i]))
+                if (is.null(fit)) {
+                    message(paste("Replication", i, ": Failed. Skipping."))
+                    next
+                }
+
+                total.time[rep] <- as.numeric(end - start)
+                message(paste("Replication", rep, ": Completed", "- Time to convergence:", total.time[rep]))
                 
                 coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE)$items
                 est.params.a[i,] <- coefs[, "a"]
@@ -284,37 +268,15 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     return(metrics.df)
 }
 
-
-export.data <- function(, output.dir = 'response_data', replications=10){
-
-    dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)
-    dist.names <- levels(all.distributions$distribution) # unique distribution names
-
-    # for each distribution, simulate response data and write to .txt file
-    for (dist in dist.names){
-        current.dist <- all.distributions[all.distributions$distribution == dist,]
-
-        for (rep in 1:replications){
-            response.data <- simulate.response.data(current.dist, cross.param, seed = 123)
-            # response.data <- response.dataframes[[dist]]
-            # generate filename with replication number 
-            filename <- paste0("response_", gsub("\\.", "_", dist), "_rep_", rep, ".txt")
-            write.table(response.data, filename, sep = "\t", row.names = FALSE, col.names = TRUE)
-            message("Wrote response data to file: ", filename, '\n')
-        }
-    }
-
-}
-    
 read.data.all <- function(){
     # read in response data from .txt files in the "response_data" directory
     response.dataframes <- list()
     filenames <- list.files(path = "response_data", pattern = "response_.*\\.txt", full.names = TRUE)
     
-    for (filename in filenames){
-        response.data <- read.table(filename, header = TRUE, sep = "\t")
+    for (f in filenames){
+        response.data <- read.table(f, header = TRUE, sep = "\t")
 
-        name <- basename(filename) # remove path, leaving only the filename
+        name <- basename(f) # remove path, leaving only the filename
         name <- gsub("^response_", "", name)  # Remove 'response_' prefix
         name <- gsub(".txt", "", name)  # Remove '.txt' suffix
         name <- gsub("_", ".", name)  # Replace '_' with '.'
@@ -323,6 +285,7 @@ read.data.all <- function(){
     }
     return(response.dataframes)
 }
+
 
 
 load()
@@ -340,21 +303,25 @@ response.dataframes <- simulate.response.data(all.distributions, cross.param, se
 
 ######
 # Method 2: revised implementation 
-data <- quick.gen.dist(300, dist.type = 'stnd.norm', seed=123)
-sim.data <- quick.sim.response(data$theta, cross.param, seed=123)
+dist.data <- quick.gen.dist(300, dist.type = 'stnd.norm', seed=123)
+response.data <- quick.sim.response(dist.data$theta, cross.param, seed=123)
 export.data(cross.param, output.dir = 'response_data', n=300, replications=10, seed=123)
 
 methods <- c("BL")
 dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm")
 
-# FIX FIT.MIRT() 
+
 
 # # Corrected function call to specifically use 'stnd.norm' dataframe
 #### Method 1:
-metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 10) # for quick testing
-metrics # view 
+metrics <- fit.mirt(dist.type='stnd.norm', rep=1, cross.param, methods, dentypes, 10) # for quick testing
 
-metrics.revised <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) 
-# metrics <- fit.mirt(response.dataframes$stnd.norm, cross.param, methods, dentypes, 100) # for full run
-# metrics <- fit.mirt.parallel(all.distributions, cross.param, methods, dentypes) 
+for (rep in 1:10) {
+    metrics.revised <- fit.mirt(dist.type='stnd.norm', rep, cross.param, methods, dentypes, 10) # for quick testing
+    metrics.revised # view 
+}
+# metrics.revised <- fit.mirt(den.type='stnd.norm', rep, cross.param, methods, dentypes, 100) 
+# metrics.revised # view
+
+fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications = 10) {
