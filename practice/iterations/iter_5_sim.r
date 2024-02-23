@@ -92,7 +92,7 @@ quick.gen.dist <- function(n, dist.type = 'stnd.norm', seed=123){
     }
     
     return(data)
-}
+}  # end quick.gen.dist
 
 quick.sim.response <- function(theta.values, cross.param, seed=123) {
     set.seed(seed)
@@ -113,7 +113,7 @@ quick.sim.response <- function(theta.values, cross.param, seed=123) {
     response.df <- as.data.frame(response.matrix)
     colnames(response.df) <- paste0("I", seq_len(n.items))
     return(response.df)
-}
+} # end quick.sim.response
 
 # for reading a specific response data file 
 read.data <- function(dist.type='stnd.norm', rep=1, read.dir='response_data'){
@@ -125,8 +125,9 @@ read.data <- function(dist.type='stnd.norm', rep=1, read.dir='response_data'){
         stop(paste("File not found:", file.path))
     }
     response.data <- read.table(file.path, header = TRUE, sep = "\t")
+    print(paste("Read response data from file:", file.path))
     return(response.data)
-}
+} # end read.data
 
 export.data <- function(cross.param, output.dir='response_data', n=300, replications=10, seed=123){
     dir.create(output.dir, recursive = TRUE, showWarnings = FALSE)
@@ -146,56 +147,66 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
         }
     }
 
-}
+} # end export.data
 
 #### Method 2
-fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications = 10) {
+fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications=10) {
     require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
 
     # initialize results list
     results <- list()
+    n.items <- length(cross.param$a)
 
     for (method in methods) {
         for (dentype in dentypes) {
             message(paste("Running method:", method, "with dentype:", dentype))
             
-            est.params.a <- matrix(NA, nrow = n.replications)
-            est.params.b <- matrix(NA, nrow = n.replications)
+            est.params.a <- matrix(NA, nrow = n.replications, ncol = n.items)
+            est.params.b <- matrix(NA, nrow = n.replications, ncol = n.items)
             total.time <- numeric(n.replications)
-            
             successful.run <- TRUE
         
             for (rep in 1:n.replications) {
                 cat("\n")
+                message(sprintf("Processing: Method = %s, Replication = %d", method, rep))
+                
                 # read response data for current replication
-                response.data <- read.data(dist.type=dist.type, rep=rep, read.dir=read.dir) 
+                response.data <- read.data(dist.type = dist.type, rep = rep, read.dir = read.dir)
 
-                message(paste("Replication", i, ": Starting"))
+                message(paste("Replication", rep, ": Starting"))
+                start.time <- Sys.time()
                 
-                # Try to fit the model with the current method and dentype
-                fit <- tryCatch({
-                    start <- Sys.time()    
-                    mirt(data = response.data, model = 1, itemtype = '2PL', storeEMhistory = TRUE, method = method, dentype = dentype)
-                    end <- Sys.time()
+                tryCatch({
+                    # model fit
+                    fit <- mirt(model = 1, data = response.data, itemtype = "2PL", method = method)
+                    end.time <- Sys.time()
+        
+                    total.time[rep] <- as.numeric(end.time - start.time)
+                    message(paste("Replication", rep, ": Completed", "- Time to convergence:", total.time[rep]))
+
+                    # coefficient 
+                    coefs <- coef(fit, simplify = TRUE)$items
+                    est.params.a[rep, ] <- coefs[, "a"]
+                    est.params.b[rep, ] <- coefs[, "b"]
+                    
                 }, error = function(e) {
-                    message(paste("Error in replication", rep, ":", e$message))
+                    message(sprintf("Error during replication %d: %s", rep, e$message))
                     successful.run <- FALSE
-                    return(NULL)
-                })
-                
+                })                
                 if (is.null(fit)) {
-                    message(paste("Replication", i, ": Failed. Skipping."))
-                    next
+                    message(paste("Replication", rep, ": Failed. Skipping."))
+                    next # skip if failed to fit
                 }
 
-                total.time[rep] <- as.numeric(end - start)
-                message(paste("Replication", rep, ": Completed", "- Time to convergence:", total.time[rep]))
-                
-                coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE)$items
-                est.params.a[i,] <- coefs[, "a"]
-                est.params.b[i,] <- coefs[, "b"]
-            }
+                coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE)
+                if(is.list(coef) && "items" %in% names(coefs)) {
+                    est.params.a[rep,] <- coefs$items[, "a"]
+                    est.params.b[rep,] <- coefs$items[, "b"]
+                } else {
+                    message("Unexpected format of coefficients, skipping this replication.")
+                }
+            } # end for rep loop
         
             if (successful.run) {
                 metrics <- data.frame(item = 1:n.items, true.a = cross.param$a, true.b = cross.param$b)
@@ -214,7 +225,6 @@ fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replicati
                 
                 # calculating the average bias and RMSE for each item
                 # summarizing over replications for each item not accross all items!
-
             } else {
                 message(paste("Method:", method, "with dentype:", dentype, "failed. Skipping."))
             }
@@ -222,7 +232,7 @@ fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replicati
     }
   
   return(results)
-}
+} # end fit.mirt
 
 fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes) {
     require(parallel, quietly = TRUE)
@@ -266,7 +276,7 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     metrics.df <- do.call(rbind, lapply(metrics.list, function(x) if (is.null(x)) data.frame() else x))
 
     return(metrics.df)
-}
+} # end fit.mirt.parallel
 
 read.data.all <- function(){
     # read in response data from .txt files in the "response_data" directory
@@ -284,7 +294,7 @@ read.data.all <- function(){
         response.dataframes[[name]] <- response.data
     }
     return(response.dataframes)
-}
+} # end read.data.all
 
 
 
@@ -300,6 +310,7 @@ cross.param$b <- with(cross.param, -d/a)
 
 # simulate response data: for each dist, has 300 rows of 20 item responses
 response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+# output here: response.dataframes$left.skew, response.dataframes$right.skew, response.dataframes$stnd.norm
 
 ######
 # Method 2: revised implementation 
@@ -312,16 +323,11 @@ dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm")
 
 
-
-# # Corrected function call to specifically use 'stnd.norm' dataframe
-#### Method 1:
+# Corrected function call to specifically use 'stnd.norm' dataframe
 metrics <- fit.mirt(dist.type='stnd.norm', rep=1, cross.param, methods, dentypes, 10) # for quick testing
 
-for (rep in 1:10) {
-    metrics.revised <- fit.mirt(dist.type='stnd.norm', rep, cross.param, methods, dentypes, 10) # for quick testing
-    metrics.revised # view 
-}
+
 # metrics.revised <- fit.mirt(den.type='stnd.norm', rep, cross.param, methods, dentypes, 100) 
 # metrics.revised # view
 
-fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications = 10) {
+# fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications = 10) {
