@@ -1,0 +1,17 @@
+<Project>
+Title = "3PL EAP scoring example";
+Description = "12 items, 1 Factor, 1 Group Scoring";
+
+<Options>
+ Mode = Scoring;
+ ReadPRMFile = "3PLM_example-prm.txt";
+ Score= EAP;
+ SaveSCO = YES;
+
+<Groups>
+%Group1%
+ File = "g341-19.dat";
+ Varnames = v1-v12;
+ N = 2844;
+
+<Constraints>

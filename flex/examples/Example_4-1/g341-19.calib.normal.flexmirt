@@ -1,0 +1,46 @@
+<Project>
+Title = "G341-19";
+Description = "12 Items 3PL 2 Groups
+Calibration with Normal Prior, Saving Parameter Estimates,
+Followed by Combined Scoring Run for EAP Scores";
+
+<Options>
+ Mode = Calibration;
+ Progress = Yes;
+ SaveSCO = Yes;
+ Score = EAP;
+ SavePRM = Yes;
+ SaveINF = Yes;
+ FisherInf = 81,4.0;
+ SE = Xpd;
+ GOF = Extended;
+ M2 = Full;
+ FitNullModel = Yes;
+
+<Groups>
+%Grade4%
+ File = "g341-19.grp1.dat";
+ Varnames = v1-v12;
+ N = 1314;
+ Ncats(v1-v12) = 2;
+ Model(v1-v12) = ThreePL;
+ BetaPriors(v1-v12) = 1.5;
+
+%Grade3%
+ File = "g341-19.grp2.dat";
+ Varnames = v1-v12;
+ N = 1530;
+ Ncats(v1-v12) = 2;
+ Model(v1-v12) = ThreePL;
+ BetaPriors(v1-v12) = 1.5;
+
+<Constraints>
+  Free Grade3, Mean(1);
+  Free Grade3, Cov(1,1);
+  Equal Grade3, (v1-v12), Guessing:
+        Grade4, (v1-v12), Guessing;
+  Equal Grade3, (v1-v12), Intercept:
+        Grade4, (v1-v12), Intercept;
+  Equal Grade3, (v1-v12), Slope:
+        Grade4, (v1-v12), Slope;
+  Prior Grade3, (v1-v12), Guessing :Beta(1.0,4.0);

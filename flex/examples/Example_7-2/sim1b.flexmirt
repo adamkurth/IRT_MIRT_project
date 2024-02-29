@@ -1,0 +1,16 @@
+<Project>
+Title = "Simulate Data";
+Description = "4 Items Graded Use PRM File";
+
+<Options>
+  Mode = Simulation;
+  Rndseed = 7474;
+  ReadPrmFile = "sim1b-prm.txt";
+
+<Groups>
+%G%
+  File = "sim1b.dat";
+  Varnames = v1-v4;
+  N = 1000;
+
+<Constraints>

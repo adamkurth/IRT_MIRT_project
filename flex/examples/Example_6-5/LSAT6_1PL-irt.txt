@@ -1,0 +1,122 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+LSAT 6 -  Fixed Effects Calibration
+5 Items 1PL N=1000
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         5
+     Number of Cases      1000
+ # Latent Dimensions         1
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+
+Metropolis-Hastings Robbins-Monro Algorithm Control Values
+Random number seed:  1842
+Convergence criterion:    1.00e-04
+Convergence monitor window size:     3
+Number of imputations per cycle:     1
+Thinning:    10
+Burn-in:    10
+Number of initialization cycles (Stage 1):     0
+Number of SEM-like cycles (Stage 2):     0
+Maximum number of cycles (Stage 3):  2000
+Gain constant for stage-1 and stage-2 cycles:  0.10
+Control parameter alpha for stage-3 gain sequence:  1.00
+Control parameter epsilon for stage-3 gain sequence:  1.00
+Metropolis proposal SD for level-1:   1.00
+Metropolis proposal SD for level-2:   1.00
+Standard error computation algorithm: Accumulation (Stochastic approximation)
+Number of imputations for goodness-of-fit statistics (Stage 5):    20
+Monte Carlo sample size for log-likeihood simulation:      0
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:     6
+Number of processor cores used:    1
+
+Processing times (in seconds)
+Optimization and standard errors:      0.10
+Log-likelihood simulations:      0.00
+Total:       0.10
+
+Output Files
+Text results and control parameters: LSAT6_1PL-irt.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:    60
+Maximum parameter change (P#):  -0.00006920 (    6)
+MH-RM latent trait sampler acceptance rate (L1,L2): (1.000,0.000)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 3.0380
+Second-order test: Solution is a possible local maximum
+
+*** Fixed effects calibration in Group 1: Group1
+
+LSAT 6 -  Fixed Effects Calibration
+5 Items 1PL N=1000
+
+2PL Items for Group 1: Group1
+    Item               Label   P#       a    s.e.   P#       c    s.e.       b    s.e.
+       1                  v1    6    2.96    0.08    1    3.59    0.14   -1.21    0.06
+       2                  v2    6    2.96    0.08    2    1.35    0.08   -0.45    0.03
+       3                  v3    6    2.96    0.08    3    0.33    0.08   -0.11    0.03
+       4                  v4    6    2.96    0.08    4    1.76    0.09   -0.59    0.03
+       5                  v5    6    2.96    0.08    5    2.79    0.11   -0.94    0.05
+
+LSAT 6 -  Fixed Effects Calibration
+5 Items 1PL N=1000
+
+Group Parameter Estimates:
+   Group               Label   P#      mu    s.e.   P#      s2    s.e.      sd    s.e.
+       1              Group1         0.00    ----         1.00    ----    1.00    ----
+
+LSAT 6 -  Fixed Effects Calibration
+5 Items 1PL N=1000
+
+Marginal fit (Chi-square) and Standardized LD X2 Statistics for Group 1: Group1
+
+      Marginal
+  Item    Chi2      1       2       3       4 
+     1     0.0
+     2     0.0   16.8n
+     3     0.0   11.9n   33.7n
+     4     0.0   21.1n   42.7n   31.9n
+     5     0.0   17.3n   23.3n   38.0n   18.2n
+
+
+LSAT 6 -  Fixed Effects Calibration
+5 Items 1PL N=1000
+
+Item Information Function Values at 15 Values of theta from -2.8 to 2.8 for Group 1: Group1
+                      Theta:
+  Item               Label  -2.8  -2.4  -2.0  -1.6  -1.2  -0.8  -0.4  -0.0   0.4   0.8   1.2   1.6   2.0   2.4   2.8
+     1                  v1  0.08  0.25  0.71  1.60  2.19  1.53  0.66  0.23  0.07  0.02  0.01  0.00  0.00  0.00  0.00
+     2                  v2  0.01  0.03  0.09  0.28  0.78  1.70  2.17  1.43  0.60  0.20  0.06  0.02  0.01  0.00  0.00
+     3                  v3  0.00  0.01  0.03  0.10  0.32  0.89  1.83  2.13  1.29  0.52  0.17  0.05  0.02  0.01  0.00
+     4                  v4  0.01  0.04  0.13  0.40  1.07  1.99  2.02  1.10  0.42  0.14  0.04  0.01  0.00  0.00  0.00
+     5                  v5  0.04  0.12  0.35  0.96  1.90  2.09  1.21  0.48  0.16  0.05  0.02  0.00  0.00  0.00  0.00
+
+         Test Information:  1.14  1.44  2.32  4.35  7.26  9.21  8.90  6.36  3.54  1.93  1.30  1.09  1.03  1.01  1.00
+            Expected s.e.:  0.94  0.83  0.66  0.48  0.37  0.33  0.34  0.40  0.53  0.72  0.88  0.96  0.99  1.00  1.00
+Marginal reliability for response pattern scores: 0.67
+
+Statistics based on simulated loglikelihood of the fitted model (and 95% CL):
+                     -2loglikelihood (95% CL):     3581.40,3581.40
+  Akaike Information Criterion (AIC) (95% CL):     3593.40,3593.40
+Bayesian Information Criterion (BIC) (95% CL):     3622.85,3622.85
+
+Wed Nov 18 15:01:28 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

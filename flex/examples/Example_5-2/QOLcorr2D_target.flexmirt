@@ -1,0 +1,38 @@
+<Project>
+Title = "QOL Data";
+Description = "Items 2-9 2D EFA with target rotation";
+
+<Options>
+  Mode = Calibration;
+  Quadrature = 21,5.0;
+  Processors = 2;
+  Etol = 1e-3;
+  NewThreadModel = Yes;
+  FactorLoadings = Yes;
+  SavePCC = Yes;
+
+<Groups>
+%Group1%
+  File = "QOL.DAT";
+  Varnames = v1-v35;
+  Select = v2-v9;
+  Ncats(v2-v9) = 7;
+  Model(v2-v9) = Graded(7);
+  BetaPriors(v2-v9) = 1.5;
+
+//  Rotation = None/CFquartimax/CFquartimax/Target;
+  Dimensions = 2;
+  Rotation = Target;
+  Oblique = Yes;
+  UnSpecifiedTargetElement = 9;
+  Target = (
+   9 0,
+   9 0,
+   9 0,
+   9 0,
+   0 9,
+   0 9,
+   0 9,
+   0 9);
+
+<Constraints>

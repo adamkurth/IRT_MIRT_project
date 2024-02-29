@@ -1,0 +1,245 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         5
+     Number of Cases        30
+ # Latent Dimensions         1
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+
+Bock-Aitkin EM Algorithm Control Values
+Maximum number of cycles:   500
+Convergence criterion:    1.00e-04
+Maximum number of M-step iterations:   100
+Convergence criterion for iterative M-steps:    1.00e-07
+Number of rectangular quadrature points:    49
+Minimum, Maximum quadrature points:   -6.00,    6.00
+Standard error computation algorithm: Cross-product approximation
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:     6
+Number of processor cores used:    1
+
+Processing times (in seconds)
+E-step computations:      0.00
+M-step computations:      0.00
+Standard error computations:      0.00
+Goodness-of-fit statistics:      0.00
+Total:       0.01
+
+Output Files
+Text results and control parameters: lsat6_1PLgrp-irt.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:    21
+Maximum parameter change (P#):  -0.00008879 (    6)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 5.7711
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: Group1
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+2PL Items for Group 1: Group1
+    Item               Label   P#       a    s.e.   P#       c    s.e.       b    s.e.
+       1                  v1    6    0.76    0.07    1    2.73    0.13   -3.61    0.32
+       2                  v2    6    0.76    0.07    2    1.00    0.08   -1.32    0.14
+       3                  v3    6    0.76    0.07    3    0.24    0.07   -0.32    0.10
+       4                  v4    6    0.76    0.07    4    1.31    0.08   -1.73    0.17
+       5                  v5    6    0.76    0.07    5    2.10    0.11   -2.78    0.25
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Factor Loadings for Group 1: Group1
+ Item               Label lambda 1  s.e.
+    1                  v1     0.41  0.05
+    2                  v2     0.41  0.05
+    3                  v3     0.41  0.05
+    4                  v4     0.41  0.05
+    5                  v5     0.41  0.05
+
+Orlando-Thissen-Bjorner Summed-Score Based Item Diagnostic Tables and X2s:
+ Group   1: Group1
+  Item 1 S-X2(3) = 0.2, p = 0.9809
+             Category  0             Category  1      
+ Score    Observed    Expected    Observed    Expected
+     0           3         2.4          10        10.6
+     1          10         9.9          62        62.1
+     2          23        23.3         212       211.7
+     3          25        25.5         342       341.5
+     4          15        14.9         298       298.1
+
+  Item 2 S-X2(3) = 2.0, p = 0.5671
+             Category  0             Category  1      
+ Score    Observed    Expected    Observed    Expected
+     0           3         2.3           1         1.7
+     1          19        20.4          24        22.6
+     2          61        65.1         109       104.9
+     3         128       120.2         277       284.8
+     4          80        83.1         298       294.9
+
+  Item 3 S-X2(3) = 1.1, p = 0.7721
+             Category  0             Category  1      
+ Score    Observed    Expected    Observed    Expected
+     0           3         2.9           1         1.1
+     1          19        17.1           7         8.9
+     2          78        80.4          63        60.6
+     3         174       169.7         184       188.3
+     4         173       176.9         298       294.1
+
+  Item 4 S-X2(3) = 1.0, p = 0.7911
+             Category  0             Category  1      
+ Score    Observed    Expected    Observed    Expected
+     0           3         2.4           2         2.6
+     1          18        18.3          28        27.7
+     2          57        61.4         139       134.6
+     3          98        93.3         296       300.7
+     4          61        61.6         298       297.4
+
+  Item 5 S-X2(3) = 0.4, p = 0.9420
+             Category  0             Category  1      
+ Score    Observed    Expected    Observed    Expected
+     0           3         2.7           6         6.3
+     1          14        14.5          49        48.5
+     2          36        38.3         188       185.7
+     3          49        46.5         329       331.5
+     4          28        27.9         298       298.1
+
+
+Summed Score to Scale Score Conversion Table:
+  Summed
+   Score     EAP      SD         P         O
+    0.00  -1.910   0.797 0.0023654 0.0030000
+    1.00  -1.429   0.800 0.0208898 0.0200000
+    2.00  -0.941   0.809 0.0885974 0.0850000
+    3.00  -0.439   0.823 0.2274460 0.2370000
+    4.00   0.084   0.841 0.3648997 0.3570000
+    5.00   0.632   0.864 0.2958018 0.2980000
+Summed score based latent distribution fit S-D2 = 0.9, p = 0.8166
+Marginal reliability of the scaled scores for summed scores = 0.29427
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Group Parameter Estimates:
+   Group               Label   P#      mu    s.e.   P#      s2    s.e.      sd    s.e.
+       1              Group1         0.00    ----         1.00    ----    1.00    ----
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Marginal fit (Chi-square) and Standardized LD X2 Statistics for Group 1: Group1
+
+      Marginal
+  Item    Chi2      1       2       3       4 
+     1     0.0
+     2     0.0   -0.6p
+     3     0.0    0.1p   -0.6p
+     4     0.0   -0.5n   -0.0n   -0.6p
+     5     0.0   -0.3n   -0.7p   -0.2n   -0.4p
+
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Edwards-Houts-Cai LD Jackknife Slope Index for Group 1: Group1
+  Item      1       2       3       4       5 
+     1    ---   -0.08    0.37   -0.17   -0.15 
+     2   0.07     ---    0.37   -0.17   -0.15 
+     3   0.07   -0.08     ---   -0.17   -0.15 
+     4   0.07   -0.08    0.37     ---   -0.15 
+     5   0.07   -0.08    0.37   -0.17     --- 
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Item Information Function Values at 15 Values of theta from -2.80 to 2.80 for Group 1: Group1
+                      Theta:
+  Item               Label  -2.8  -2.4  -2.0  -1.6  -1.2  -0.8  -0.4  -0.0   0.4   0.8   1.2   1.6   2.0   2.4   2.8
+     1                  v1  0.13  0.12  0.10  0.08  0.07  0.05  0.04  0.03  0.03  0.02  0.01  0.01  0.01  0.01  0.00
+     2                  v2  0.11  0.12  0.13  0.14  0.14  0.14  0.13  0.11  0.10  0.08  0.06  0.05  0.04  0.03  0.02
+     3                  v3  0.07  0.08  0.10  0.11  0.13  0.14  0.14  0.14  0.13  0.12  0.10  0.09  0.07  0.06  0.05
+     4                  v4  0.12  0.13  0.14  0.14  0.14  0.13  0.11  0.10  0.08  0.06  0.05  0.04  0.03  0.02  0.02
+     5                  v5  0.14  0.14  0.13  0.12  0.10  0.09  0.07  0.06  0.04  0.03  0.03  0.02  0.01  0.01  0.01
+
+         Test Information:  1.57  1.59  1.60  1.60  1.58  1.54  1.49  1.44  1.38  1.32  1.26  1.21  1.16  1.13  1.10
+            Expected s.e.:  0.80  0.79  0.79  0.79  0.80  0.81  0.82  0.83  0.85  0.87  0.89  0.91  0.93  0.94  0.95
+Marginal reliability for response pattern scores: 0.29
+
+LSAT 6
+5 Items 1PL N=1000 Grouped Data
+
+Response Pattern Observed and Expected Frequencies, Standardized Residuals, EAPs and SDs
+
+Group 1: Group1
+Item:              Frequencies    Standard
+  1  2  3  4  5 Observed Expected Residual EAP[q |u]  SD[q |u]
+  0  0  0  0  0     3.00     2.37     0.41     -1.91      0.80
+  0  0  0  0  1     6.00     5.47     0.23     -1.43      0.80
+  0  0  0  1  0     2.00     2.47    -0.30     -1.43      0.80
+  0  0  0  1  1    11.00     8.25     0.96     -0.94      0.81
+  0  0  1  0  0     1.00     0.85     0.16     -1.43      0.80
+  0  0  1  0  1     1.00     2.84    -1.09     -0.94      0.81
+  0  0  1  1  0     3.00     1.28     1.51     -0.94      0.81
+  0  0  1  1  1     4.00     6.22    -0.89     -0.44      0.82
+  0  1  0  0  0     1.00     1.82    -0.61     -1.43      0.80
+  0  1  0  0  1     8.00     6.06     0.79     -0.94      0.81
+  0  1  0  1  1    16.00    13.29     0.75     -0.44      0.82
+  0  1  1  0  1     3.00     4.57    -0.74     -0.44      0.82
+  0  1  1  1  0     2.00     2.07    -0.05     -0.44      0.82
+  0  1  1  1  1    15.00    14.75     0.07      0.08      0.84
+  1  0  0  0  0    10.00    10.28    -0.09     -1.43      0.80
+  1  0  0  0  1    29.00    34.25    -0.91     -0.94      0.81
+  1  0  0  1  0    14.00    15.50    -0.38     -0.94      0.81
+  1  0  0  1  1    81.00    75.06     0.71     -0.44      0.82
+  1  0  1  0  0     3.00     5.33    -1.01     -0.94      0.81
+  1  0  1  0  1    28.00    25.83     0.43     -0.44      0.82
+  1  0  1  1  0    15.00    11.69     0.97     -0.44      0.82
+  1  0  1  1  1    80.00    83.30    -0.38      0.08      0.84
+  1  1  0  0  0    16.00    11.39     1.37     -0.94      0.81
+  1  1  0  0  1    56.00    55.17     0.12     -0.44      0.82
+  1  1  0  1  0    21.00    24.96    -0.80     -0.44      0.82
+  1  1  0  1  1   173.00   177.91    -0.41      0.08      0.84
+  1  1  1  0  0    11.00     8.59     0.83     -0.44      0.82
+  1  1  1  0  1    61.00    61.23    -0.03      0.08      0.84
+  1  1  1  1  0    28.00    27.71     0.06      0.08      0.84
+  1  1  1  1  1   298.00   295.80     0.15      0.63      0.86
+
+Statistics based on the loglikelihood of the fitted model:
+                         -2loglikelihood:     4933.88
+      Akaike Information Criterion (AIC):     4945.88
+    Bayesian Information Criterion (BIC):     4975.32
+
+Full-information fit statistics of the fitted model:
+                 Degrees
+          G2  of freedom Probability       F0hat       RMSEA
+       21.80          23      0.5337      0.0218        0.00
+                 Degrees
+          X2  of freedom Probability       F0hat       RMSEA
+       18.35          25      0.8278      0.0183        0.00
+
+Limited-information fit statistics of the fitted model:
+  The M2 statistics were not requested.
+
+Wed Nov 18 13:43:02 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

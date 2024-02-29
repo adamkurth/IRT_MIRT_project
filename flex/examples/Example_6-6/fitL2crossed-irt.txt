@@ -1,0 +1,102 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Two-level CFA
+Crossed Random Effect
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         1
+  Number of Clusters      1000
+    Number of Blocks        50
+     Number of Cases     50000
+ # Latent Dimensions         2
+  Cluster Dimensions         1
+    Block Dimensions         1
+
+Item  Categories       Model
+   1           2      Graded
+
+Metropolis-Hastings Robbins-Monro Algorithm Control Values
+Random number seed:    10
+Convergence criterion:    1.00e-04
+Convergence monitor window size:     3
+Number of imputations per cycle:     1
+Thinning:    10
+Burn-in:    10
+Number of initialization cycles (Stage 1):  2000
+Number of SEM-like cycles (Stage 2):   100
+Maximum number of cycles (Stage 3):  2000
+Gain constant for stage-1 and stage-2 cycles:  0.10
+Control parameter alpha for stage-3 gain sequence:  1.00
+Control parameter epsilon for stage-3 gain sequence:  1.00
+Metropolis proposal SD for level-1:   2.00
+Metropolis proposal SD for level-2:   2.00
+Standard error computation algorithm: Accumulation (Stochastic approximation)
+Monte Carlo sample size for log-likeihood simulation:      1
+
+User-Defined Initial Values for Parameters
+      P#       Value
+       1        0.50
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:     3
+Number of processor cores used:    2
+  Parallelization granularity: Coarse (may be more optimal for large sample size)
+
+Processing times (in seconds)
+Optimization and standard errors:     95.39
+Log-likelihood simulations:      0.10
+Total:      95.49
+
+Output Files
+Text results and control parameters: fitL2crossed-irt.txt
+Text parameter estimate file: fitL2crossed-prm.txt
+MH-RM Stage I iteration history in a file: fitL2crossed-mco.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:    78
+Maximum parameter change (P#):   0.00001206 (    2)
+MH-RM latent trait sampler acceptance rate (L1,L2): (0.868,0.723)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 60.3337
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: Gr
+
+Two-level CFA
+Crossed Random Effect
+
+2PL Items for Group 1: Gr
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#       c    s.e.
+       1                  v1    2    0.96    0.04    3    0.52    0.10    1    0.01    0.03
+
+Two-level CFA
+Crossed Random Effect
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.
+       1                  Gr         0.00    ----         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: Gr
+   P# Theta  1    s.e.   P# Theta  2    s.e.
+          1.00    ----
+          0.00    ----          1.00    ----
+
+Two-level CFA
+Crossed Random Effect
+
+Statistics based on simulated loglikelihood of the fitted model (and 95% CL):
+                     -2loglikelihood (95% CL):   131267.64,131267.64
+  Akaike Information Criterion (AIC) (95% CL):   131273.64,131273.64
+Bayesian Information Criterion (BIC) (95% CL):   131300.10,131300.10
+
+Wed Nov 18 15:03:04 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

@@ -1,0 +1,112 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Two-level Model with covariates
+12 Items, 1000 L2 units, 10 respondents within each
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items        12
+ Number of L-2 units       100
+ Number of L-1 units      1000
+ # Latent Dimensions         2
+  Between Dimensions         1
+   Within Dimensions         1
+Number of Covariates         2
+  Level-2 Covariates         1
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+   7           2      Graded
+   8           2      Graded
+   9           2      Graded
+  10           2      Graded
+  11           2      Graded
+  12           2      Graded
+
+Metropolis-within-Gibbs Markov chain Monte Carlo Algorithm Control Values
+Random number seed:  7474
+Burn-in cycles:   500
+Thinning interval:    25
+Maximum number of cycles:   500
+Metropolis proposal SD for level-1:  1.200
+Metropolis proposal SD for level-2:  1.400
+Metropolis proposal SD for item parameters:  0.050
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:    27
+Number of processor cores used:    4
+  Parallelization granularity: Coarse (may be more optimal for large sample size)
+
+Processing times (in seconds)
+Burn-in cycles:      1.37
+Main MCMC cycles:     32.84
+Total:      34.22
+
+Output Files
+Text results and control parameters: CovariateL2.Fit-irt.txt
+Text parameter estimate file: CovariateL2.Fit-prm.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:   500
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 123.5866
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: G
+
+Two-level Model with covariates
+12 Items, 1000 L2 units, 10 respondents within each
+
+2PL Items for Group 1: G
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#       c    s.e.
+       1                  v1   13    1.28    0.15   13    1.28    0.15    1   -1.01    0.19
+       2                  v2   14    1.12    0.13   14    1.12    0.13    2   -0.19    0.16
+       3                  v3   15    0.68    0.08   15    0.68    0.08    3    0.55    0.11
+       4                  v4   16    1.46    0.17   16    1.46    0.17    4    1.37    0.22
+       5                  v5   17    1.08    0.12   17    1.08    0.12    5   -1.15    0.17
+       6                  v6   18    0.66    0.07   18    0.66    0.07    6   -0.30    0.11
+       7                  v7   19    1.02    0.11   19    1.02    0.11    7    0.50    0.15
+       8                  v8   20    1.07    0.12   20    1.07    0.12    8    1.28    0.18
+       9                  v9   21    0.61    0.07   21    0.61    0.07    9   -1.06    0.12
+      10                 v10   22    1.35    0.16   22    1.35    0.16   10   -0.12    0.18
+      11                 v11   23    1.18    0.13   23    1.18    0.13   11    0.52    0.17
+      12                 v12   24    0.63    0.07   24    0.63    0.07   12    1.00    0.12
+
+Two-level Model with covariates
+12 Items, 1000 L2 units, 10 respondents within each
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.
+       1                   G         0.00    ----         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: G
+   P# Theta  1    s.e.   P# Theta  2    s.e.
+          1.00    ----
+          0.00    ----   25     1.58    0.29
+
+Latent Regression Coefficients:
+
+   Group  1: G
+                   Covariate  1           Covariate  2
+             P#    Beta    s.e.     P#    Beta    s.e.
+Theta  1     26    1.47    0.17           0.00    ----
+Theta  2           0.00    ----     27    0.46    0.07
+
+Two-level Model with covariates
+12 Items, 1000 L2 units, 10 respondents within each
+
+Wed Nov 18 15:04:53 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

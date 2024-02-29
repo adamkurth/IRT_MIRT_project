@@ -1,0 +1,16 @@
+<Project>
+Title = "Fit Model";
+Description = "10 Items 3PL N=500 Normal Priors";
+
+<Options>
+  Mode = Simulation;
+  RndSeed = 1;
+  ReadPRMFile = "genparams.txt";
+
+<Groups>
+%Group1%
+  File = "sim2.dat";
+  Varnames = v1-v10;
+  N = 500;
+
+<Constraints>

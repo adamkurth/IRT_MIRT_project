@@ -1,0 +1,29 @@
+<Project>
+Title = "QOL Data";
+Description = "Items 2-21 - 4 Correlated Factors EFA
+
+NOTE: THIS EXAMPLE TAKES ~1 HOUR TO COMPLETE";
+
+<Options>
+  Mode = Calibration;
+  Quadrature = 21,5.0;
+  Processors = 2;
+  Etol = 1e-3;
+  NewThreadModel = Yes;
+  FactorLoadings = Yes;
+  
+<Groups>
+%Group1%
+  File = "QOL.DAT";
+  Varnames = v1-v35;
+  Select = v2-v21;
+  Ncats(v2-v21) = 7;
+  Model(v2-v21) = Graded(7);
+  BetaPriors(v2-v21) = 1.5;
+
+   Dimensions = 4; 
+//  Rotation options are: None/CFquartimax/CFvarimax/Target;
+  Rotation = CFquartimax;
+  Oblique = Yes;
+  
+<Constraints>

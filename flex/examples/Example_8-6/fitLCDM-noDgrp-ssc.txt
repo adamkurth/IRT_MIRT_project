@@ -1,0 +1,94 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         7
+     Number of Cases     10000
+ # Latent Dimensions         7
+    Diagnostic Model   L1[  3]
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+   7           2      Graded
+
+Slope:Main Effect
+    1:1
+    2:2
+    3:3
+
+Slope:Interaction
+    4:1x2
+    5:1x3
+    6:2x3
+    7:1x2x3
+
+Scoring Control Values
+Response pattern EAPs are computed
+
+Miscellaneous Control Values 
+
+Output Files
+Text results and control parameters: fitLCDM-noDgrp-ssc.txt
+Text scale score file: fitLCDM-noDgrp-sco.txt
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+2PL Items for Group 1: G
+    Item    a  1    a  2    a  3    a  4    a  5    a  6    a  7       c
+       1    1.87    0.00    0.00    0.00    0.00    0.00    0.00   -0.91
+       2    0.00    2.04    0.00    0.00    0.00    0.00    0.00   -1.01
+       3    0.00    0.00    2.01    0.00    0.00    0.00    0.00   -0.96
+       4    2.05    1.86    0.00    1.03    0.00    0.00    0.00   -2.44
+       5    1.79    0.00    1.72    0.00    1.38    0.00    0.00   -2.24
+       6    0.00    2.15    2.10    0.00    0.00    1.11    0.00   -2.54
+       7    2.47    2.13    2.06    0.81    0.75    0.98   -1.30   -3.63
+
+Diagnostic IRT Attributes and Cross-classification Probabilities for Group   1: G
+
+ Pattern          Prob
+   0 0 0    0.24810254
+   0 0 1    0.07355305
+   0 1 0    0.09927383
+   0 1 1    0.09119587
+   1 0 0    0.08634202
+   1 0 1    0.09134889
+   1 1 0    0.09358579
+   1 1 1    0.21659800
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Group Latent Variable Means:
+   Group               Label   mu  1   mu  2   mu  3   mu  4   mu  5   mu  6   mu  7
+       1                   G    0.00    0.00    0.00    0.00    0.00    0.00    0.00
+
+Latent Variable Variance-Covariance Matrix for Group  1: G
+ Theta  1 Theta  2 Theta  3 Theta  4 Theta  5 Theta  6 Theta  7
+     1.00
+     0.00     1.00
+     0.00     0.00     1.00
+     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     0.00     0.00     1.00
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Wed Nov 18 15:05:31 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

@@ -1,0 +1,60 @@
+<Project>
+Title = "Tatsuoka Subtraction Data";
+Description = "Restricted Higher-order DINA Model";
+
+<Options>
+  Mode = Calibration;
+  MaxE = 20000;
+  MaxM = 5;
+  Mtol = 0;
+  Etol = 1e-5;
+  GOF = Extended;
+  SE = REM;
+  SavePRM = Yes;
+  SaveCOV = Yes;
+  SaveSCO = Yes;
+  Score = EAP;
+  Processors = 4;
+  NewThreadModel = Yes;
+
+<Groups>
+
+%G%
+  File = "subtraction.csv";
+  Varnames = v1-v20;
+  Ncats(v1-v20) = 2;
+  Model(v1-v20) = Graded(2);
+
+  Attributes = 8;
+  Generate = (4,6,7),(4,7),(2,3,5,7),(2,4,7,8),(1,2,7),(2,5,7,8),(2,5,7),(7,8),(2,4,5,7),
+   (2,7),(1,7),(2,5,6,7),(1,2,3,5,7),(2,3,5,7);
+  Dimensions = 22; //8 MEs + 14 generated higher order interations
+  
+%D%
+  Varnames = a1-a8;
+  DM = G;
+
+<Constraints>
+  Fix G,(v1-v20),MainEffect;
+  Free G,(v1),Interaction(4,6,7); // 3rd-order int of attr 4,6,7
+  Free G,(v2),Interaction(4,7); // 2nd-order int of attr 4,7
+  Free G,(v3),Interaction(4,7); // 2nd-order int of attr 4,7
+  Free G,(v4),Interaction(2,3,5,7); // 4th-order int of attr 2,3,5,7
+  Free G,(v5),Interaction(2,4,7,8); // 4th-order int of attr 2,4,7,8
+  Free G,(v6),MainEffect(7); // main effect of attr 7
+  Free G,(v7),Interaction(1,2,7); // 3rd-order int of attr 1,2,7
+  Free G,(v8),MainEffect(7); // main effect of attr 7
+  Free G,(v9),MainEffect(2); // main effect of attr 2
+  Free G,(v10),Interaction(2,5,7,8); // 4th-order int of attr 2,5,7,8
+  Free G,(v11),Interaction(2,5,7); // 3rd-order int of attr 2,5,7
+  Free G,(v12),Interaction(7,8); // 2nd-order int of attr 7,8
+  Free G,(v13),Interaction(2,4,5,7); // 4th-order int of attr 2,4,5,7
+  Free G,(v14),Interaction(2,7); // 2nd-order int of attr 2,7
+  Free G,(v15),Interaction(1,7); // 2nd-order int of attr 1,7
+  Free G,(v16),Interaction(2,7); // 2nd-order int of attr 2,7
+  Free G,(v17),Interaction(2,5,7); // 3rd-order int of attr 2,5,7
+  Free G,(v18),Interaction(2,5,6,7); // 4th-order int of attr 2,5,6,7
+  Free G,(v19),Interaction(1,2,3,5,7); // 5th-order int of attr 1,2,3,5,7
+  Free G,(v20),Interaction(2,3,5,7); // 4th-order int of attr 2,3,5,7
+
+  Equal D,(a1-a8),Slope; // "restricted" higher order model

@@ -1,0 +1,40 @@
+<Project>
+Title = "QOL Data";
+Description = "Items 2-21, 4 Correlated Factors CFA
+
+NOTE: THIS EXAMPLE TAKES ~1hr TO COMPLETE";
+
+<Options>
+  Mode = Calibration;
+  Quadrature = 21,5.0;
+  Processors = 4;
+  SavePRM = Yes;
+  FactorLoadings = Yes;
+
+<Groups>
+%Group1%
+ File = "QOL.DAT";
+  Varnames = v1-v35;
+  Select = v2-v21;
+  N = 586;
+  Dimensions = 4;
+  Ncats(v2-v21) = 7;
+  Model(v2-v21) = Graded(7);
+
+<Constraints>
+  Fix (v2-v21),Slope;
+
+  Free (v2-v5),Slope(1);
+  Free (v6-v9),Slope(2);
+  Free (v10-v15),Slope(3);
+  Free (v16-v21),Slope(4);
+
+  Free Cov(2,1);
+
+  Free Cov(3,1);
+  Free Cov(3,2);
+
+  Free Cov(4,1);
+  Free Cov(4,2);
+  Free Cov(4,3);
+  

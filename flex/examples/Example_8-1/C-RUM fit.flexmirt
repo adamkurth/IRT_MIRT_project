@@ -1,0 +1,43 @@
+<Project>
+Title = "Calibrate and Score Simulated DM Data";
+Description = "C-RUM Model";
+
+<Options>
+  Mode = Calibration;
+  MaxE = 20000;
+  MaxM = 5;
+  Mtol = 0;
+  Etol = 1e-5;
+  SE = REM;
+  GOF = extended;
+  SavePRM = Yes;
+  SaveCOV = Yes;
+  SaveSCO = Yes;
+  Score = EAP;
+
+<Groups>
+
+%G%
+  File = "DMsim.dat";
+  Varnames = v1-v15;
+  N = 3000;
+  Ncats(v1-v15) = 2;
+  Model(v1-v15) = Graded(2);
+
+  Attributes = 4;
+  Dimensions = 4; 
+
+%D%
+  Varnames = a1-a4;
+  DM = G;
+
+<Constraints>
+  Fix G,(v1-v15),MainEffect;
+
+  Free G,(v1-v3),MainEffect(1);
+  Free G,(v4-v6),MainEffect(2);
+  Free G,(v7-v9, v13-v15),MainEffect(3);
+  Free G,(v10-v15),MainEffect(4);
+
+ 
+ 

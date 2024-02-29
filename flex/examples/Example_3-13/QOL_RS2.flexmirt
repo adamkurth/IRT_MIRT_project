@@ -1,0 +1,32 @@
+<Project>
+Title = "QOL Data";
+Description = "35 Items RS Multilog-style Triangle Contrasts";
+
+<Options>
+  Mode = Calibration;
+  SE = SEM;
+
+<Groups>
+%Group1%
+  File = "QOL.DAT";
+  Varnames = v1-v35;
+  N = 586;
+  Ncats(v1-v35) = 7;
+  Model(v1-v35) = Nominal(7);
+  Tc(v1-v35) = (
+   0  0  0  0  0  0,
+  -1 -1  0  0  0  0,
+  -2 -1 -1  0  0  0,
+  -3 -1 -1 -1  0  0,
+  -4 -1 -1 -1 -1  0,
+  -5 -1 -1 -1 -1 -1,
+  -6  0  0  0  0  0 );
+
+<Constraints>
+  Fix (v1-v35),ScoringFn;
+  Equal (v1-v35),Slope;
+  Equal (v1-v35),Intercept(2);
+  Equal (v1-v35),Intercept(3);
+  Equal (v1-v35),Intercept(4);
+  Equal (v1-v35),Intercept(5);
+  Equal (v1-v35),Intercept(6);

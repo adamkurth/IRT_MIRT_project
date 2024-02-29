@@ -1,0 +1,41 @@
+<Project>
+Title = "G341-19";
+Description = "12 Items 3PL 2 Groups
+Test Candidate Items for DIF";
+
+<Options>
+  Mode = Calibration;
+  GOF = Extended;
+  M2 = Full;
+  DIF = TestCandidates;
+  DIFcontrasts = (1.0 -1.0);
+
+<Groups>
+
+%Grade4%
+  File = "g341-19.grp1.dat";
+  Varnames = v1-v12;
+  N = 1314;
+  Ncats(v1-v12) = 2;
+  Model(v1-v12) = ThreePL;
+  DIFitems = v1,v2;
+%Grade3%
+  File = "g341-19.grp2.dat";
+  Varnames = v1-v12;
+  N = 1530;
+  Ncats(v1-v12) = 2;
+  Model(v1-v12) = ThreePL;
+  DIFitems = v1,v2;
+
+<Constraints>
+  Free Grade3, Mean(1);
+  Free Grade3, Cov(1,1);
+  Equal Grade3, (v3-v12), Guessing:
+        Grade4, (v3-v12), Guessing;
+  Equal Grade3, (v3-v12), Intercept: 
+        Grade4, (v3-v12), Intercept;
+  Equal Grade3, (v3-v12), Slope:
+        Grade4, (v3-v12), Slope;
+
+  Prior Grade3, (v1-v12), Guessing: Normal(-1.1,0.5);
+  Prior Grade4, (v1-v12), Guessing: Normal(-1.1,0.5);

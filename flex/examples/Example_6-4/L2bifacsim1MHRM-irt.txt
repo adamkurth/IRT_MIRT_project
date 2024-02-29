@@ -1,0 +1,109 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Two-level Bifactor
+6 Items, 100 L2 units, 20 respondents within each
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         6
+ Number of L-2 units       100
+ Number of L-1 units      2000
+ # Latent Dimensions         4
+  Between Dimensions         1
+   Within Dimensions         3
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+
+Metropolis-Hastings Robbins-Monro Algorithm Control Values
+Random number seed:   874
+Convergence criterion:    1.00e-04
+Convergence monitor window size:     3
+Number of imputations per cycle:     1
+Thinning:    10
+Burn-in:    10
+Number of initialization cycles (Stage 1):   200
+Number of SEM-like cycles (Stage 2):   100
+Maximum number of cycles (Stage 3):  2000
+Gain constant for stage-1 and stage-2 cycles:  0.10
+Control parameter alpha for stage-3 gain sequence:  1.00
+Control parameter epsilon for stage-3 gain sequence:  1.00
+Metropolis proposal SD for level-1:   1.00
+Metropolis proposal SD for level-2:   2.00
+Standard error computation algorithm: Accumulation (Stochastic approximation)
+Monte Carlo sample size for log-likeihood simulation:    500
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:    24
+Number of processor cores used:    4
+  Parallelization granularity: Coarse (may be more optimal for large sample size)
+
+Processing times (in seconds)
+Optimization and standard errors:     24.46
+Log-likelihood simulations:     19.56
+Total:      44.03
+
+Output Files
+Text results and control parameters: L2bifacsim1MHRM-irt.txt
+Text parameter estimate file: L2bifacsim1MHRM-prm.txt
+MH-RM Stage I iteration history in a file: L2bifacsim1MHRM-mco.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:   510
+Maximum parameter change (P#):   0.00005244 (   24)
+MH-RM latent trait sampler acceptance rate (L1,L2): (0.333,0.456)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 9.5287
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: Gr
+
+Two-level Bifactor
+6 Items, 100 L2 units, 20 respondents within each
+
+2PL Items for Group 1: Gr
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#    a  3    s.e.   P#    a  4    s.e.   P#       c    s.e.
+       1                  v1    7    1.20    0.09   13    1.14    0.10   19    1.12    0.13         0.00    ----    1   -1.45    0.09
+       2                  v2    8    1.35    0.09   14    1.29    0.10   20    1.02    0.11         0.00    ----    2   -0.93    0.07
+       3                  v3    9    1.67    0.10   15    1.34    0.11   21    1.50    0.13         0.00    ----    3   -0.19    0.07
+       4                  v4   10    1.51    0.10   16    1.61    0.12         0.00    ----   22    1.35    0.13    4    0.27    0.07
+       5                  v5   11    1.45    0.10   17    1.05    0.10         0.00    ----   23    1.46    0.14    5    0.81    0.08
+       6                  v6   12    1.48    0.10   18    1.59    0.14         0.00    ----   24    1.45    0.14    6    1.51    0.10
+
+Two-level Bifactor
+6 Items, 100 L2 units, 20 respondents within each
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.   P#   mu  3    s.e.   P#   mu  4    s.e.
+       1                  Gr         0.00    ----         0.00    ----         0.00    ----         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: Gr
+   P# Theta  1    s.e.   P# Theta  2    s.e.   P# Theta  3    s.e.   P# Theta  4    s.e.
+          1.00    ----
+          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+
+Two-level Bifactor
+6 Items, 100 L2 units, 20 respondents within each
+
+Statistics based on simulated loglikelihood of the fitted model (and 95% CL):
+                     -2loglikelihood (95% CL):    16486.19,16496.39
+  Akaike Information Criterion (AIC) (95% CL):    16534.19,16544.39
+Bayesian Information Criterion (BIC) (95% CL):    16668.61,16678.81
+
+Wed Nov 18 15:01:28 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

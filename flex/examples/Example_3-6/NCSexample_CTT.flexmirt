@@ -1,0 +1,17 @@
+<Project>
+Title = "CTT example";
+Description = "NCS: 18 5-cat items, N = 3000";
+
+<Options>
+ Mode = Classical;
+
+<Groups>
+%Group1%
+ File = "NCSsim_MISS.txt";
+ Varnames = v1-v18;
+ N = 3000;
+ Ncats(v1-v18) = 5;
+ Code(v1-v18)  = (1,2,3,4,5),(0,1,2,3,4);
+ Model(v1-v18) = Graded(5);
+
+<Constraints>

@@ -1,0 +1,57 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Two-level CFA
+Crossed Random Effect
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         1
+  Number of Clusters      1000
+    Number of Blocks        50
+     Number of Cases     50000
+ # Latent Dimensions         2
+  Cluster Dimensions         1
+    Block Dimensions         1
+
+Item  Categories       Model
+   1           2      Graded
+
+Scoring Control Values
+Response pattern EAPs are computed
+
+Miscellaneous Control Values 
+
+Output Files
+Text results and control parameters: fitL2crossed-ssc.txt
+Text scale score file: fitL2crossed-sco.txt
+
+Two-level CFA
+Crossed Random Effect
+
+2PL Items for Group 1: Gr
+    Item    a  1    a  2       c
+       1    0.96    0.52    0.01
+
+Two-level CFA
+Crossed Random Effect
+
+Group Latent Variable Means:
+   Group               Label   mu  1   mu  2
+       1                  Gr    0.00    0.00
+
+Latent Variable Variance-Covariance Matrix for Group  1: Gr
+ Theta  1 Theta  2
+     1.00
+     0.00     1.00
+
+Two-level CFA
+Crossed Random Effect
+
+Wed Nov 18 15:03:57 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

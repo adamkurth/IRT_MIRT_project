@@ -1,0 +1,30 @@
+<Project>
+Title = "LSAT 6";
+Description = "5 Items 1PL N=1000 Grouped Data";
+
+<Options>
+ Mode = Calibration;
+ GOF = Complete;
+ JSI = Yes;
+ HabermanResTbl = Yes;
+ SX2Tbl = Yes;
+ FactorLoadings = Yes;
+ SaveSco = No;
+ Score = SSC;
+ 
+<Groups>
+
+%Group1%
+ File = "lsat6grp.dat";
+ Varnames = v1-v5, w;
+ Select = v1-v5; //only the first 5 variables
+ CaseWeight = w;
+ N = 30; 
+ /* <- Starts a Block Comment
+ For grouped data, N = rows in dataset, not total N
+ Ends a Block Comment -> */
+ Ncats(v1-v5) = 2;
+ Model(v1-v5) = Graded(2);
+
+<Constraints>
+  Equal (v1-v5), Slope;
