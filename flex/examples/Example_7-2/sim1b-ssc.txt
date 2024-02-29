@@ -1,0 +1,70 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Simulate Data
+4 Items Graded Use PRM File
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         4
+     Number of Cases      1000
+ # Latent Dimensions         1
+
+Item  Categories       Model
+   1           3      Graded
+   2           3      Graded
+   3           3      Graded
+   4           3      Graded
+
+Miscellaneous Control Values 
+Random number seed:        7474
+
+Output Files
+Text results and control parameters: sim1b-ssc.txt
+
+Simulate Data
+4 Items Graded Use PRM File
+
+Graded Items for Group 1: G
+    Item       a     c 1     c 2
+       1    0.70    2.00    1.00
+       2    1.00    2.00    1.00
+       3    1.20    0.00   -1.00
+       4    1.50    0.00   -1.00
+
+Graded Items for Group 1: G
+    Item       a     b 1     b 2
+       1    0.70   -2.86   -1.43
+       2    1.00   -2.00   -1.00
+       3    1.20   -0.00    0.83
+       4    1.50   -0.00    0.67
+
+Simulate Data
+4 Items Graded Use PRM File
+
+Group Parameter Estimates:
+   Group               Label      mu      s2      sd
+       1                   G    0.00    1.00    1.00
+
+Simulate Data
+4 Items Graded Use PRM File
+
+Item Information Function Values at 15 Values of theta from -2.80 to 2.80 for Group 1: G
+                      Theta:
+  Item               Label  -2.8  -2.4  -2.0  -1.6  -1.2  -0.8  -0.4  -0.0   0.4   0.8   1.2   1.6   2.0   2.4   2.8
+     1                  v1  0.14  0.14  0.14  0.14  0.13  0.12  0.11  0.10  0.08  0.07  0.06  0.05  0.04  0.03  0.02
+     2                  v2  0.22  0.26  0.28  0.29  0.29  0.27  0.24  0.20  0.16  0.12  0.09  0.06  0.05  0.03  0.02
+     3                  v3  0.05  0.07  0.11  0.16  0.23  0.30  0.36  0.40  0.42  0.41  0.36  0.30  0.23  0.17  0.11
+     4                  v4  0.03  0.06  0.10  0.17  0.28  0.41  0.54  0.63  0.66  0.61  0.50  0.36  0.24  0.14  0.08
+
+         Test Information:  1.44  1.53  1.64  1.77  1.92  2.10  2.25  2.34  2.32  2.21  2.01  1.77  1.55  1.37  1.24
+            Expected s.e.:  0.83  0.81  0.78  0.75  0.72  0.69  0.67  0.65  0.66  0.67  0.71  0.75  0.80  0.85  0.90
+Marginal reliability for response pattern scores: 0.52
+
+Wed Nov 18 15:04:54 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

@@ -1,0 +1,107 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Fit Two-level MIRT Model to Simulated Data
+6 Items, 100 L2 units, 20 respondents within each
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         6
+ Number of L-2 units       100
+ Number of L-1 units      2000
+ # Latent Dimensions         4
+  Between Dimensions         2
+   Within Dimensions         2
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+
+Metropolis-Hastings Robbins-Monro Algorithm Control Values
+Random number seed:  1842
+Convergence criterion:    1.00e-04
+Convergence monitor window size:     3
+Number of imputations per cycle:     1
+Thinning:    10
+Burn-in:    10
+Number of initialization cycles (Stage 1):   200
+Number of SEM-like cycles (Stage 2):   100
+Maximum number of cycles (Stage 3):  2000
+Gain constant for stage-1 and stage-2 cycles:  0.10
+Control parameter alpha for stage-3 gain sequence:  1.00
+Control parameter epsilon for stage-3 gain sequence:  1.00
+Metropolis proposal SD for level-1:   1.00
+Metropolis proposal SD for level-2:   1.00
+Standard error computation algorithm: Accumulation (Stochastic approximation)
+Monte Carlo sample size for log-likeihood simulation:  10000
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:    16
+Number of processor cores used:    2
+  Parallelization granularity: Coarse (may be more optimal for large sample size)
+
+Processing times (in seconds)
+Optimization and standard errors:     16.82
+Log-likelihood simulations:    393.45
+Total:     410.27
+
+Output Files
+Text results and control parameters: L2_MHRM-irt.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:   249
+Maximum parameter change (P#):  -0.00008171 (   16)
+MH-RM latent trait sampler acceptance rate (L1,L2): (0.414,0.564)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 45.7933
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: Gr
+
+Fit Two-level MIRT Model to Simulated Data
+6 Items, 100 L2 units, 20 respondents within each
+
+2PL Items for Group 1: Gr
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#    a  3    s.e.   P#    a  4    s.e.   P#       c    s.e.
+       1                  v1    7    1.59    0.09         0.00    ----    7    1.59    0.09         0.00    ----    1   -1.00    0.07
+       2                  v2    8    1.84    0.11         0.00    ----    8    1.84    0.11         0.00    ----    2   -0.48    0.07
+       3                  v3    9    0.98    0.06         0.00    ----    9    0.98    0.06         0.00    ----    3    0.70    0.06
+       4                  v4         0.00    ----   10    1.78    0.11         0.00    ----   10    1.78    0.11    4    1.72    0.10
+       5                  v5         0.00    ----   11    1.65    0.10         0.00    ----   11    1.65    0.10    5   -1.74    0.10
+       6                  v6         0.00    ----   12    0.89    0.06         0.00    ----   12    0.89    0.06    6   -0.30    0.05
+
+Fit Two-level MIRT Model to Simulated Data
+6 Items, 100 L2 units, 20 respondents within each
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.   P#   mu  3    s.e.   P#   mu  4    s.e.
+       1                  Gr         0.00    ----         0.00    ----         0.00    ----         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: Gr
+   P# Theta  1    s.e.   P# Theta  2    s.e.   P# Theta  3    s.e.   P# Theta  4    s.e.
+   13     0.73    0.11
+   15     0.47    0.10   14     0.87    0.14
+          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----   16     0.49    0.02          1.00    ----
+
+Fit Two-level MIRT Model to Simulated Data
+6 Items, 100 L2 units, 20 respondents within each
+
+Statistics based on simulated loglikelihood of the fitted model (and 95% CL):
+                     -2loglikelihood (95% CL):    23507.20,23509.07
+  Akaike Information Criterion (AIC) (95% CL):    23539.20,23541.07
+Bayesian Information Criterion (BIC) (95% CL):    23628.81,23630.68
+
+Wed Nov 18 10:16:29 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

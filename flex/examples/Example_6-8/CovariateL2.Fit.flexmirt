@@ -1,0 +1,39 @@
+<Project>
+Title = "Two-level Model with covariates";
+Description = "12 Items, 1000 L2 units, 10 respondents within each";
+
+<Options>
+  Mode = Calibration;
+  Rndseed = 7474;
+  Algorithm = MCMC;
+  ProposalStd = 1.2;
+  ProposalStd2 = 1.4;
+  ItemProposalStd = 0.05;
+  Processors = 4;
+  SavePRM = Yes;
+  GOF = Extended;
+
+<Groups>
+%G%
+  File = "simL2.g1.dat";
+  Varnames = v1-v12, l2id, l1id, theta1-theta6, l2cov, l1cov;
+  CaseID = l1id;
+  Cluster = l2id;
+
+  Select = v1-v12;
+  NCats(v1-v12) = 2;
+  Model(v1-v12) = Graded(2);
+
+  Dimensions = 2;
+  Between = 1;
+
+  Covariates = l2cov, l1cov;
+  L2covariates = 1;
+
+<Constraints>
+
+  Equal G, (v1-v12), Slope(1): G, (v1-v12), slope(2);
+  Free G, cov(2,2);
+
+  Free Beta(1,1);
+  Free Beta(2,2);

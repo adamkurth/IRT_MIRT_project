@@ -1,0 +1,56 @@
+<Project>
+Title = "Fit HO-DINA Model with Testlets";
+Description = "HO-DINA Model - 4 attributes";
+
+<Options>
+  Mode = Calibration;
+  MaxE = 10000;
+  Etol = 1e-4;
+  Mtol = 1e-7;
+  Quadrature = 25,6.0;
+  Processors = 2;
+  GOF = Extended;
+  SE = REM;
+  SaveDBG = Yes;
+  SaveSCO = Yes;
+  Score = EAP;
+
+<Groups>
+%G%
+  File = "fitDINAt.dat";
+  Varnames = v1-v24;
+  Ncats(v1-v24) = 2;
+  Model(v1-v24) = Graded(2);
+
+  Attributes = 4;
+  InteractionEffects = (2); //6 possible 2nd order ints.
+  Primary = 10; //number of dimensions to CDM
+  Dimensions = 14;  //total dims, including testlet effects
+
+%D%
+  Varnames = a1-a4;
+  DM = G;
+
+<Constraints>
+  Fix G,(v1-v24),MainEffect;
+  
+  Free G,(v1,v7,v13,v19),Interaction(1,2);
+  Free G,(v3,v9,v15,v21),Interaction(1,3);
+  Free G,(v5,v11,v17,v23),Interaction(1,4);
+  Free G,(v6,v12,v18,v24),Interaction(2,3);
+  Free G,(v4,v10,v16,v22),Interaction(2,4);
+  Free G,(v2,v8,v14,v20),Interaction(3,4);
+
+  Free G,(v1-v6),Slope(11);
+  Free G,(v7-v12),Slope(12);
+  Free G,(v13-v18),Slope(13);
+  Free G,(v19-v24),Slope(14);
+
+  Equal G,(v1-v6),Slope(11);
+  Equal G,(v7-v12),Slope(12);
+  Equal G,(v13-v18),Slope(13);
+  Equal G,(v19-v24),Slope(14);
+
+  Equal D,(a1-a4),Slope(1);
+
+ 

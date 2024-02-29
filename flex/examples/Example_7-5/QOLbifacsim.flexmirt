@@ -1,0 +1,18 @@
+<Project>
+Title = "QOL Data";
+Description = "Simulation From PRM File 35 Items Bifactor-2PL";
+
+<Options>
+  Mode = Simulation;
+  ReadPRMFile = "QOLbifac-prm.txt";
+  Rndseed = 7474;
+
+<Groups>
+%Group1%
+  File = "QOLbifacsim.DAT";
+  Varnames = v1-v35;
+  Dimensions = 8;
+  Primary = 1;
+  N = 1000;
+
+<Constraints>

@@ -1,0 +1,22 @@
+<Project>
+Title = "G341-19";
+Description = "12 Items 3PL 2 Groups Summed Score to EAP from
+Parameter Estimates Using Estimated Empirical Histogram Prior
+Make Table Only";
+
+<Options>
+ Mode = Scoring;
+ ReadPRMFile = "g341-19.calib.EH-prm.txt";
+ Score = SSC;
+ Quadrature = (81,4.0);
+
+<Groups>
+%Grade4%
+ Varnames = v1-v12;
+ EmpHist = Yes;
+ 
+%Grade3%
+ Varnames = v1-v12;
+ EmpHist = Yes;
+ 
+<Constraints>

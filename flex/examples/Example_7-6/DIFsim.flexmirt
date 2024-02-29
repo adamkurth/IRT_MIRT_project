@@ -1,0 +1,31 @@
+<Project>
+Title = "Simulate Data";
+Description = "3 Groups 10 Items N=1000 (mostly) 3PLs Group 1 ~ N( 0.0,1.0)
+Group 2 ~ N( 0.2,1.0)
+Group 3 ~ N(-0.2,1.5)
+Item 9 in Group 2 has 0.5 higher threshold than the corresponding 
+item in Groups 1 and 3.
+Item 1 in Group 3 is actually a 2PL item.";
+
+<Options>
+  Mode = Simulation;
+  RndSeed = 7474;
+  ReadPRMFile = "genparams.txt";
+
+<Groups>
+%Group1%
+  File = "group1.dat";
+  Varnames = v1-v10;
+  N = 1000;
+
+%Group2%
+  File = "group2.dat";
+  Varnames = v1-v10;
+  N = 1000;
+
+%Group3%
+  File = "group3.dat";
+  Varnames = v1-v10;
+  N = 1000;
+
+<Constraints>

@@ -1,0 +1,157 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Two-level Bifactor Model (Two Groups)
+12 Items: 1 L2 factor, 
+5 L1 factors with 1 General, 4 Specific, 
+100 L2 units, 10 respondents within each
+
+Summary of the Data and Dimensions
+               Group        G1        G2
+   Missing data code        -9        -9
+     Number of Items        12        12
+ Number of L-2 units       100       100
+ Number of L-1 units      1000      1000
+ # Latent Dimensions         6         6
+  Between Dimensions         1         1
+   Within Dimensions         5         5
+ Dimension Reduction  Yes[  2]  Yes[  2]
+Number of Covariates         2         1
+  Level-2 Covariates         1         0
+
+ Group 1
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+   7           2      Graded
+   8           2      Graded
+   9           2      Graded
+  10           2      Graded
+  11           2      Graded
+  12           2      Graded
+
+ Group 2
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+   7           2      Graded
+   8           2      Graded
+   9           2      Graded
+  10           2      Graded
+  11           2      Graded
+  12           2      Graded
+
+Miscellaneous Control Values 
+Random number seed:        7471
+
+Output Files
+Text results and control parameters: MGsimL2covariates-ssc.txt
+
+Two-level Bifactor Model (Two Groups)
+12 Items: 1 L2 factor, 
+5 L1 factors with 1 General, 4 Specific, 
+100 L2 units, 10 respondents within each
+
+2PL Items for Group 1: G1
+    Item    a  1    a  2    a  3    a  4    a  5    a  6       c
+       1    2.00    2.00    1.50    0.00    0.00    0.00   -1.50
+       2    1.50    1.50    1.50    0.00    0.00    0.00   -0.50
+       3    1.00    1.00    1.20    0.00    0.00    0.00    0.50
+       4    2.00    2.00    0.00    1.20    0.00    0.00    1.50
+       5    1.50    1.50    0.00    1.50    0.00    0.00   -1.50
+       6    1.00    1.00    0.00    1.80    0.00    0.00   -0.50
+       7    1.50    1.50    0.00    0.00    1.20    0.00    0.50
+       8    1.50    1.50    0.00    0.00    1.50    0.00    1.50
+       9    1.00    1.00    0.00    0.00    1.50    0.00   -1.50
+      10    2.00    2.00    0.00    0.00    0.00    1.80   -0.50
+      11    2.00    2.00    0.00    0.00    0.00    2.00    0.50
+      12    1.00    1.00    0.00    0.00    0.00    1.50    1.50
+
+Two-level Bifactor Model (Two Groups)
+12 Items: 1 L2 factor, 
+5 L1 factors with 1 General, 4 Specific, 
+100 L2 units, 10 respondents within each
+
+2PL Items for Group 2: G2
+    Item    a  1    a  2    a  3    a  4    a  5    a  6       c
+       1    2.00    2.00    1.50    0.00    0.00    0.00   -1.50
+       2    1.50    1.50    1.50    0.00    0.00    0.00   -0.50
+       3    1.00    1.00    1.20    0.00    0.00    0.00    0.50
+       4    2.00    2.00    0.00    1.20    0.00    0.00    1.50
+       5    1.50    1.50    0.00    1.50    0.00    0.00   -1.50
+       6    1.00    1.00    0.00    1.80    0.00    0.00   -0.50
+       7    1.50    1.50    0.00    0.00    1.20    0.00    0.50
+       8    1.50    1.50    0.00    0.00    1.50    0.00    1.50
+       9    1.00    1.00    0.00    0.00    1.50    0.00   -1.50
+      10    2.00    2.00    0.00    0.00    0.00    1.80   -0.50
+      11    2.00    2.00    0.00    0.00    0.00    2.00    0.50
+      12    1.00    1.00    0.00    0.00    0.00    1.50    1.50
+
+Two-level Bifactor Model (Two Groups)
+12 Items: 1 L2 factor, 
+5 L1 factors with 1 General, 4 Specific, 
+100 L2 units, 10 respondents within each
+
+Group Latent Variable Means:
+   Group               Label   mu  1   mu  2   mu  3   mu  4   mu  5   mu  6
+       1                  G1    0.00    0.00    0.00    0.00    0.00    0.00
+       2                  G2    0.20    0.00    0.00    0.00    0.00    0.00
+
+Latent Variable Variance-Covariance Matrix for Group  1: G1
+ Theta  1 Theta  2 Theta  3 Theta  4 Theta  5 Theta  6
+     0.50
+     0.00     1.00
+     0.00     0.00     1.00
+     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     0.00     1.00
+
+Latent Variable Variance-Covariance Matrix for Group  2: G2
+ Theta  1 Theta  2 Theta  3 Theta  4 Theta  5 Theta  6
+     0.25
+     0.00     1.00
+     0.00     0.00     1.00
+     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     1.00
+     0.00     0.00     0.00     0.00     0.00     1.00
+
+Latent Regression Coefficients:
+
+   Group  1: G1
+          Covariate  1  Covariate  2
+Theta  1          1.30          0.00
+Theta  2          0.00          0.50
+Theta  3          0.00          0.00
+Theta  4          0.00          0.00
+Theta  5          0.00          0.00
+Theta  6          0.00          0.00
+
+   Group  2: G2
+          Covariate  1
+Theta  1          0.00
+Theta  2          0.40
+Theta  3          0.00
+Theta  4          0.00
+Theta  5          0.00
+Theta  6          0.00
+
+Two-level Bifactor Model (Two Groups)
+12 Items: 1 L2 factor, 
+5 L1 factors with 1 General, 4 Specific, 
+100 L2 units, 10 respondents within each
+
+Wed Nov 18 15:04:55 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

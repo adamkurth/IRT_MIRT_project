@@ -1,0 +1,49 @@
+<Project>
+Title = "QOL Data";
+Description = "35 Items Graded Testlet Response Model";
+
+<Options>
+  Mode = Calibration;
+  Etol = 1e-3;
+  Processors = 2;
+  NewThreadModel = Yes;
+
+<Groups>
+
+%G%
+  File = "QOL.DAT";
+  Varnames = v1-v35;
+  N = 586;
+  Ncats(v1-v35) = 7;
+  Model(v1-v35) = Graded(2);
+  Code(v1-v35) = (0,1,2,3,4,5,6),(0,0,0,1,1,1,1);
+  Dimensions = 8;
+  Primary = 1;
+  BetaPriors(v1-v35) = 1.5;
+
+<Constraints>
+  Fix (v1-v35),Slope;
+  Free (v1-v35),Slope(1);
+  Free (v2-v5),Slope(2);
+  Free (v6-v9),Slope(3);
+  Free (v10-v15),Slope(4);
+  Free (v16-v21),Slope(5);
+  Free (v22-v26),Slope(6);
+  Free (v27-v31),Slope(7);
+  Free (v32-v35),Slope(8); 
+
+  Equal G,(v2-v5),Slope(1) : G,(v2-v5),Slope(2);
+  Equal G,(v6-v9),Slope(1) : G,(v6-v9),Slope(3);
+  Equal G,(v10-v15),Slope(1) : G,(v10-v15),Slope(4);
+  Equal G,(v16-v21),Slope(1) : G,(v16-v21),Slope(5);
+  Equal G,(v22-v26),Slope(1) : G,(v22-v26),Slope(6);
+  Equal G,(v27-v31),Slope(1) : G,(v27-v31),Slope(7);
+  Equal G,(v32-v35),Slope(1) : G,(v32-v35),Slope(8);
+
+  Free Cov(2,2);
+  Free Cov(3,3);
+  Free Cov(4,4);
+  Free Cov(5,5);
+  Free Cov(6,6);
+  Free Cov(7,7);
+  Free Cov(8,8);

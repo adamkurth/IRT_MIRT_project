@@ -1,0 +1,39 @@
+<Project>
+Title = "Two-level Bifactor";
+Description = "6 Items, 100 L2 units, 20 respondents within each";
+
+<Options>
+  Mode = Calibration;
+  Algorithm = MCMC;
+  BurnIn = 500;
+  Thinning = 10;
+  MaxCycle = 1000;
+  
+  ProposalStd = 1.0;
+  ProposalStd2 = 2.0;
+  ItemProposalStd = 0.05;
+  
+  Processors = 4;
+  Rndseed = 874;
+  SavePRM = Yes;
+  SaveMCO = Yes;
+
+<Groups>
+
+%Gr%
+  File = "L2bifacsim.dat";
+  Varnames = v1-v6,l2id;
+  Select = v1-v6;
+  Cluster = l2id;
+  Dimensions = 4;
+  Between = 1;
+  N = 2000;
+  Ncats(v1-v6) = 2;
+  Model(v1-v6) = Graded(2);
+
+<Constraints>
+  Fix (v1-v6),Slope; // fix all slopes to begin with
+  Free (v1-v6),Slope(1); // between
+  Free (v1-v6),Slope(2); // within-general
+  Free (v1-v3),Slope(3); // within-specific 1
+  Free (v4-v6),Slope(4); // within-specific 2

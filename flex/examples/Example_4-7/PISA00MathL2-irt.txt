@@ -1,0 +1,286 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+Summary of the Data and Dimensions
+               Group       USA   Ireland
+   Missing data code         9         9
+     Number of Items        31        31
+ Number of L-2 units       152       139
+ Number of L-1 units      2115      2125
+ # Latent Dimensions         2         2
+  Between Dimensions         1         1
+   Within Dimensions         1         1
+
+ Group 1
+Item  Categories       Model  Beta Prior
+   1           2         3PL         1.5
+   2           2      Graded         1.5
+   3           2      Graded         1.5
+   4           2      Graded         1.5
+   5           2      Graded         1.5
+   6           4      Graded         1.5
+   7           2      Graded         1.5
+   8           2      Graded         1.5
+   9           3      Graded         1.5
+  10           2      Graded         1.5
+  11           2      Graded         1.5
+  12           2         3PL         1.5
+  13           2      Graded         1.5
+  14           2      Graded         1.5
+  15           3      Graded         1.5
+  16           2      Graded         1.5
+  17           3      Graded         1.5
+  18           2      Graded         1.5
+  19           2      Graded         1.5
+  20           3      Graded         1.5
+  21           3      Graded         1.5
+  22           2      Graded         1.5
+  23           2         3PL         1.5
+  24           2         3PL         1.5
+  25           2         3PL         1.5
+  26           2         3PL         1.5
+  27           2         3PL         1.5
+  28           3      Graded         1.5
+  29           2      Graded         1.5
+  30           2      Graded         1.5
+  31           2      Graded         1.5
+
+ Group 2
+Item  Categories       Model  Beta Prior
+   1           2         3PL         1.5
+   2           2      Graded         1.5
+   3           2      Graded         1.5
+   4           2      Graded         1.5
+   5           2      Graded         1.5
+   6           4      Graded         1.5
+   7           2      Graded         1.5
+   8           2      Graded         1.5
+   9           3      Graded         1.5
+  10           2      Graded         1.5
+  11           2      Graded         1.5
+  12           2         3PL         1.5
+  13           2      Graded         1.5
+  14           2      Graded         1.5
+  15           3      Graded         1.5
+  16           2      Graded         1.5
+  17           3      Graded         1.5
+  18           2      Graded         1.5
+  19           2      Graded         1.5
+  20           3      Graded         1.5
+  21           3      Graded         1.5
+  22           2      Graded         1.5
+  23           2         3PL         1.5
+  24           2         3PL         1.5
+  25           2         3PL         1.5
+  26           2         3PL         1.5
+  27           2         3PL         1.5
+  28           3      Graded         1.5
+  29           2      Graded         1.5
+  30           2      Graded         1.5
+  31           2      Graded         1.5
+
+Bock-Aitkin EM Algorithm Control Values
+Maximum number of cycles:   500
+Convergence criterion:    1.00e-03
+Maximum number of M-step iterations:   100
+Convergence criterion for iterative M-steps:    1.00e-07
+Number of rectangular quadrature points:    21
+Minimum, Maximum quadrature points:   -5.00,    5.00
+Standard error computation algorithm: Cross-product approximation
+
+Prior Distributions/Soft Constraints for Parameters
+      P#     Density  Parameter1  Parameter2
+      18        Beta        1.00        3.00
+      19        Beta        1.00        3.00
+      20        Beta        1.00        3.00
+      21        Beta        1.00        3.00
+      22        Beta        1.00        3.00
+      23        Beta        1.00        4.00
+      24        Beta        1.00        4.00
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:    80
+Number of processor cores used:    8
+  Parallelization granularity: Coarse (may be more optimal for large sample size)
+
+Processing times (in seconds)
+E-step computations:      5.06
+M-step computations:      6.80
+Standard error computations:      2.68
+Goodness-of-fit statistics:      0.00
+Total:      14.55
+
+Output Files
+Text results and control parameters: PISA00MathL2-irt.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:   224
+Maximum parameter change (P#):  -0.00099075 (   33)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 5687.8126
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: USA
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+2PL Items for Group 1: USA
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#       c    s.e.
+       2            BricksQ1   47    1.17    0.07   47    1.17    0.07    1   -1.34    0.07
+       3             FarmsQ1   48    1.17    0.08   48    1.17    0.08    2    0.40    0.07
+       4             FarmsQ2   49    1.00    0.08   49    1.00    0.08    3    0.89    0.07
+       5           WalkingQ1   50    1.56    0.12   50    1.56    0.12    4   -1.78    0.11
+       7            ApplesQ1   51    1.13    0.07   51    1.13    0.07    5   -0.38    0.05
+       8            ApplesQ2   52    1.71    0.11   52    1.71    0.11    6   -1.54    0.11
+      10      CubePaintingQ1   53    0.85    0.07   53    0.85    0.07    7   -0.13    0.06
+      11      CubePaintingQ2   54    0.68    0.08   54    0.68    0.08    8   -1.98    0.09
+      13      CubePaintingQ4   55    1.03    0.09   55    1.03    0.09    9   -0.70    0.08
+      14             CubesQ1   56    1.32    0.07   56    1.32    0.07   10   -0.11    0.06
+      16         GrowingUpQ1   57    1.38    0.08   57    1.38    0.08   11   -0.15    0.06
+      18         GrowingUpQ3   58    1.17    0.07   58    1.17    0.07   12    0.23    0.06
+      19       PopPyramidsQ1   59    1.09    0.07   59    1.09    0.07   13    0.67    0.06
+      22       PopPyramidsQ4   60    0.89    0.06   60    0.89    0.06   14    0.01    0.05
+      29        ContainersQ1   61    1.21    0.07   61    1.21    0.07   15   -1.81    0.08
+      30        CarpenterQ01   62    1.02    0.09   62    1.02    0.09   16   -2.74    0.13
+      31         PipelinesQ1   63    0.66    0.06   63    0.66    0.06   17   -0.38    0.06
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+3PL Items for Group 1: USA
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#       c    s.e.   P# logit-g    s.e.       g    s.e.
+       1          ViewRoomQ1   64    0.77    0.11   64    0.77    0.11   25    0.60    0.27   18   -1.82    1.11    0.14    0.13
+      12      CubePaintingQ3   65    1.48    0.21   65    1.48    0.21   26    1.20    0.22   19   -1.45    0.66    0.19    0.10
+      23         RacingCarQ1   66    1.03    0.14   66    1.03    0.14   27    0.04    0.26   20   -2.04    0.92    0.12    0.09
+      24         RacingCarQ2   67    1.30    0.12   67    1.30    0.12   28    1.65    0.20   21   -2.46    1.61    0.08    0.12
+      25         RacingCarQ3   68    1.22    0.17   68    1.22    0.17   29    1.05    0.28   22   -1.21    0.72    0.23    0.13
+      26         RacingCarQ5   69    1.76    0.25   69    1.76    0.25   30   -3.09    0.39   23   -3.49    0.50    0.03    0.01
+      27         TrianglesQ1   70    0.84    0.15   70    0.84    0.15   31   -0.69    0.33   24   -2.14    0.86    0.11    0.08
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+Graded Items for Group 1: USA
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#     c 1    s.e.   P#     c 2    s.e.   P#     c 3    s.e.
+       6           WalkingQ3   77    1.27    0.10   77    1.27    0.10   44   -0.49    0.08   45   -2.99    0.16   46   -4.44    0.23
+       9            ApplesQ3   71    1.88    0.13   71    1.88    0.13   32   -2.72    0.15   33   -3.92    0.18
+      15       ContinentArea   72    1.21    0.08   72    1.21    0.08   34   -0.55    0.07   35   -3.31    0.13
+      17         GrowingUpQ2   73    0.92    0.05   73    0.92    0.05   36    1.52    0.06   37   -0.62    0.05
+      20       PopPyramidsQ2   74    1.00    0.06   74    1.00    0.06   38    1.54    0.06   39    0.00    0.05
+      21       PopPyramidsQ3   75    1.21    0.08   75    1.21    0.08   40   -1.38    0.09   41   -3.24    0.12
+      28         RobberiesQ1   76    1.22    0.08   76    1.22    0.08   42   -0.58    0.08   43   -3.14    0.13
+
+*** Random effects calibration in Group 2: Ireland
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+2PL Items for Group 2: Ireland
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#       c    s.e.
+       2            BricksQ1   47    1.17    0.07   47    1.17    0.07    1   -1.34    0.07
+       3             FarmsQ1   48    1.17    0.08   48    1.17    0.08    2    0.40    0.07
+       4             FarmsQ2   49    1.00    0.08   49    1.00    0.08    3    0.89    0.07
+       5           WalkingQ1   50    1.56    0.12   50    1.56    0.12    4   -1.78    0.11
+       7            ApplesQ1   51    1.13    0.07   51    1.13    0.07    5   -0.38    0.05
+       8            ApplesQ2   52    1.71    0.11   52    1.71    0.11    6   -1.54    0.11
+      10      CubePaintingQ1   53    0.85    0.07   53    0.85    0.07    7   -0.13    0.06
+      11      CubePaintingQ2   54    0.68    0.08   54    0.68    0.08    8   -1.98    0.09
+      13      CubePaintingQ4   55    1.03    0.09   55    1.03    0.09    9   -0.70    0.08
+      14             CubesQ1   56    1.32    0.07   56    1.32    0.07   10   -0.11    0.06
+      16         GrowingUpQ1   57    1.38    0.08   57    1.38    0.08   11   -0.15    0.06
+      18         GrowingUpQ3   58    1.17    0.07   58    1.17    0.07   12    0.23    0.06
+      19       PopPyramidsQ1   59    1.09    0.07   59    1.09    0.07   13    0.67    0.06
+      22       PopPyramidsQ4   60    0.89    0.06   60    0.89    0.06   14    0.01    0.05
+      29        ContainersQ1   61    1.21    0.07   61    1.21    0.07   15   -1.81    0.08
+      30        CarpenterQ01   62    1.02    0.09   62    1.02    0.09   16   -2.74    0.13
+      31         PipelinesQ1   63    0.66    0.06   63    0.66    0.06   17   -0.38    0.06
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+3PL Items for Group 2: Ireland
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#       c    s.e.   P# logit-g    s.e.       g    s.e.
+       1          ViewRoomQ1   64    0.77    0.11   64    0.77    0.11   25    0.60    0.27   18   -1.82    1.11    0.14    0.13
+      12      CubePaintingQ3   65    1.48    0.21   65    1.48    0.21   26    1.20    0.22   19   -1.45    0.66    0.19    0.10
+      23         RacingCarQ1   66    1.03    0.14   66    1.03    0.14   27    0.04    0.26   20   -2.04    0.92    0.12    0.09
+      24         RacingCarQ2   67    1.30    0.12   67    1.30    0.12   28    1.65    0.20   21   -2.46    1.61    0.08    0.12
+      25         RacingCarQ3   68    1.22    0.17   68    1.22    0.17   29    1.05    0.28   22   -1.21    0.72    0.23    0.13
+      26         RacingCarQ5   69    1.76    0.25   69    1.76    0.25   30   -3.09    0.39   23   -3.49    0.50    0.03    0.01
+      27         TrianglesQ1   70    0.84    0.15   70    0.84    0.15   31   -0.69    0.33   24   -2.14    0.86    0.11    0.08
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+Graded Items for Group 2: Ireland
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#     c 1    s.e.   P#     c 2    s.e.   P#     c 3    s.e.
+       6           WalkingQ3   77    1.27    0.10   77    1.27    0.10   44   -0.49    0.08   45   -2.99    0.16   46   -4.44    0.23
+       9            ApplesQ3   71    1.88    0.13   71    1.88    0.13   32   -2.72    0.15   33   -3.92    0.18
+      15       ContinentArea   72    1.21    0.08   72    1.21    0.08   34   -0.55    0.07   35   -3.31    0.13
+      17         GrowingUpQ2   73    0.92    0.05   73    0.92    0.05   36    1.52    0.06   37   -0.62    0.05
+      20       PopPyramidsQ2   74    1.00    0.06   74    1.00    0.06   38    1.54    0.06   39    0.00    0.05
+      21       PopPyramidsQ3   75    1.21    0.08   75    1.21    0.08   40   -1.38    0.09   41   -3.24    0.12
+      28         RobberiesQ1   76    1.22    0.08   76    1.22    0.08   42   -0.58    0.08   43   -3.14    0.13
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.
+       1                 USA         0.00    ----         0.00    ----
+       2             Ireland   79    0.36    0.04         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: USA
+   P# Theta  1    s.e.   P# Theta  2    s.e.
+   78     0.52    0.07
+          0.00    ----          1.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  2: Ireland
+   P# Theta  1    s.e.   P# Theta  2    s.e.
+   80     0.11    0.02
+          0.00    ----          1.00    ----
+
+PISA 2000 Math Data: Two-Level Unidimensional
+31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools
+
+Statistics based on the loglikelihood of the fitted model:
+                         -2loglikelihood:    71510.75
+      Akaike Information Criterion (AIC):    71670.75
+    Bayesian Information Criterion (BIC):    72178.94
+
+Full-information fit statistics of the fitted model:
+  The contingency table is too large to compute the general multinomial goodness of fit statistics.
+
+Limited-information fit statistics of the fitted model:
+  The M2 statistics were not requested.
+
+Wed Nov 18 13:43:31 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

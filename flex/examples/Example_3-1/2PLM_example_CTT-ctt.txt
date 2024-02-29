@@ -1,0 +1,121 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+CTT example
+12 dichotmous items, N = 2844
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items        12
+     Number of Cases      2844
+
+Output Files
+Text results and control parameters: 2PLM_example_CTT-ctt.txt
+
+Item and (Weighted) Summed-Score Statistics for Group 1: Group1
+
+Item 1:               v1
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:    1251    1593       0
+Listwise-Complete Freq.:    1251    1593
+    Average (wtd) Score:    6.72    9.12
+  Std. Dev. (wtd) Score:    2.00    1.83
+
+Item 2:               v2
+        Category/Weight:  0/ 0.0  1/ 0.5       .
+                  Freq.:     251    2593       0
+Listwise-Complete Freq.:     251    2593
+    Average (wtd) Score:    5.86    8.28
+  Std. Dev. (wtd) Score:    2.35    2.12
+
+Item 3:               v3
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:    1456    1388       0
+Listwise-Complete Freq.:    1456    1388
+    Average (wtd) Score:    7.00    9.18
+  Std. Dev. (wtd) Score:    2.04    1.89
+
+Item 4:               v4
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:     902    1942       0
+Listwise-Complete Freq.:     902    1942
+    Average (wtd) Score:    6.38    8.85
+  Std. Dev. (wtd) Score:    2.06    1.87
+
+Item 5:               v5
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:    1224    1620       0
+Listwise-Complete Freq.:    1224    1620
+    Average (wtd) Score:    6.81    9.02
+  Std. Dev. (wtd) Score:    2.02    1.92
+
+Item 6:               v6
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:     480    2364       0
+Listwise-Complete Freq.:     480    2364
+    Average (wtd) Score:    5.68    8.55
+  Std. Dev. (wtd) Score:    2.07    1.95
+
+Item 7:               v7
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:     140    2704       0
+Listwise-Complete Freq.:     140    2704
+    Average (wtd) Score:    4.56    8.25
+  Std. Dev. (wtd) Score:    2.31    2.09
+
+Item 8:               v8
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:     621    2223       0
+Listwise-Complete Freq.:     621    2223
+    Average (wtd) Score:    6.15    8.60
+  Std. Dev. (wtd) Score:    2.12    1.98
+
+Item 9:               v9
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:     273    2571       0
+Listwise-Complete Freq.:     273    2571
+    Average (wtd) Score:    5.00    8.39
+  Std. Dev. (wtd) Score:    2.08    2.01
+
+Item 10:              v10
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:     382    2462       0
+Listwise-Complete Freq.:     382    2462
+    Average (wtd) Score:    5.60    8.45
+  Std. Dev. (wtd) Score:    2.16    2.01
+
+Item 11:              v11
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:    1581    1263       0
+Listwise-Complete Freq.:    1581    1263
+    Average (wtd) Score:    7.09    9.29
+  Std. Dev. (wtd) Score:    2.02    1.89
+
+Item 12:              v12
+        Category/Weight:  0/ 0.0  1/ 1.0       .
+                  Freq.:    1334    1510       0
+Listwise-Complete Freq.:    1334    1510
+    Average (wtd) Score:    6.82    9.16
+  Std. Dev. (wtd) Score:    2.01    1.84
+
+Classical item statistics are computed only for the listwise-complete data (N = 2844.00):
+
+Coefficient alpha:  0.6515
+
+          Response        Item-Total       Alpha
+Item   Average  Std.Dev. Correlation  If Deleted
+   1     0.560     0.496      0.3408      0.6224
+   2     0.456     0.142      0.2457      0.6457
+   3     0.488     0.500      0.2888      0.6336
+   4     0.683     0.465      0.3331      0.6238
+   5     0.570     0.495      0.2913      0.6329
+   6     0.831     0.375      0.3344      0.6250
+   7     0.951     0.216      0.2661      0.6400
+   8     0.782     0.413      0.2848      0.6328
+   9     0.904     0.295      0.3307      0.6290
+  10     0.866     0.341      0.2974      0.6316
+  11     0.444     0.497      0.2903      0.6332
+  12     0.531     0.499      0.3287      0.6250
+
+Wed Nov 18 13:42:59 2020

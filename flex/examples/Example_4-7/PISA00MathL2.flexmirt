@@ -1,0 +1,173 @@
+<Project>
+Title = "PISA 2000 Math Data: Two-Level Unidimensional";
+Description = "31 Items
+US Data: 2115 Students, 152 Schools
+IE Data: 2125 Students, 139 Schools";
+
+<Options>
+  Mode = Calibration;
+  Quadrature = 21,5;
+  Etol = 1e-3;
+  Processors = 8;
+
+<Groups>
+%USA%
+  File = "PISA00Math.US.dat";
+  Missing = 9;
+  Varnames = SchID,StdID,
+    ViewRoomQ1, BricksQ1,
+    FarmsQ1,FarmsQ2, WalkingQ1, WalkingQ3,
+    ApplesQ1,ApplesQ2,ApplesQ3,
+    CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,CubePaintingQ4,
+    CubesQ1, ContinentArea,
+    GrowingUpQ1,GrowingUpQ2,GrowingUpQ3,
+    PopPyramidsQ1,PopPyramidsQ2,PopPyramidsQ3,PopPyramidsQ4,
+    RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,
+    TrianglesQ1, RobberiesQ1, ContainersQ1, 
+    CarpenterQ01, PipelinesQ1;
+  Select = ViewRoomQ1,BricksQ1,
+      FarmsQ1,FarmsQ2,WalkingQ1,WalkingQ3,
+     ApplesQ1,ApplesQ2,ApplesQ3,CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,
+     CubePaintingQ4,CubesQ1,ContinentArea,GrowingUpQ1,GrowingUpQ2,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ2,PopPyramidsQ3,PopPyramidsQ4,
+     RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1,RobberiesQ1, ContainersQ1,
+     CarpenterQ01,PipelinesQ1;
+  CaseID = StdID;
+  Cluster = SchID;
+  Dimensions = 2;
+  Between = 1;
+  N = 2115;
+  Ncats(ViewRoomQ1,BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1,
+     ContainersQ1,CarpenterQ01,PipelinesQ1) = 2;
+  Ncats(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1) = 3;
+  Ncats(WalkingQ3) = 4;
+
+  Model(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1) = Graded(2);
+  Model(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1) = threePL;
+  Model(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1) = Graded(3);
+  Model(WalkingQ3) = Graded(4);
+
+  BetaPriors(ViewRoomQ1,BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,WalkingQ3,
+     ApplesQ1,ApplesQ2,ApplesQ3,CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,
+     CubePaintingQ4,CubesQ1,ContinentArea,GrowingUpQ1,GrowingUpQ2,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ2,PopPyramidsQ3,PopPyramidsQ4,
+     RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1,RobberiesQ1,
+     ContainersQ1,CarpenterQ01,PipelinesQ1) = 1.5;
+
+%Ireland%
+  File = "PISA00Math.IE.dat";
+  Missing = 9;
+  Varnames = SchID,StdID,
+    ViewRoomQ1,
+    BricksQ1,
+    FarmsQ1,FarmsQ2,
+    WalkingQ1,WalkingQ3,
+    ApplesQ1,ApplesQ2,ApplesQ3,
+    CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,CubePaintingQ4,
+    CubesQ1,
+    ContinentArea,
+    GrowingUpQ1,GrowingUpQ2,GrowingUpQ3,
+    PopPyramidsQ1,PopPyramidsQ2,PopPyramidsQ3,PopPyramidsQ4,
+    RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,
+    TrianglesQ1, RobberiesQ1, ContainersQ1, CarpenterQ01, PipelinesQ1;
+  Select = ViewRoomQ1,BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,WalkingQ3,
+     ApplesQ1,ApplesQ2,ApplesQ3,CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,
+     CubePaintingQ4,CubesQ1,ContinentArea,GrowingUpQ1,GrowingUpQ2,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ2,PopPyramidsQ3,PopPyramidsQ4,
+     RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1,RobberiesQ1,
+     ContainersQ1,CarpenterQ01,PipelinesQ1;
+  CaseID = StdID;
+  Cluster = SchID;
+  Dimensions = 2;
+  Between = 1;
+  N = 2125;
+  Ncats(ViewRoomQ1,BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1,
+     ContainersQ1,CarpenterQ01,PipelinesQ1) = 2;
+  Ncats(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1) = 3;
+  Ncats(WalkingQ3) = 4;
+
+  Model(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1) = Graded(2);
+  Model(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1) = threePL;
+  Model(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1) = Graded(3);
+  Model(WalkingQ3) = Graded(4);
+
+  BetaPriors(ViewRoomQ1,BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,WalkingQ3,
+     ApplesQ1,ApplesQ2,ApplesQ3,CubePaintingQ1,CubePaintingQ2,CubePaintingQ3,
+     CubePaintingQ4,CubesQ1,ContinentArea,GrowingUpQ1,GrowingUpQ2,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ2,PopPyramidsQ3,PopPyramidsQ4,
+     RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1,RobberiesQ1,
+     ContainersQ1,CarpenterQ01,PipelinesQ1) = 1.5;
+
+<Constraints>
+  Prior USA,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3),Guessing:Beta(1.0,3.0);
+  Prior USA,(RacingCarQ5,TrianglesQ1),Guessing:Beta(1.0,4.0);
+
+  Equal USA,(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1),Intercept:
+        Ireland,(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1),Intercept;
+  Equal USA,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Guessing:
+        Ireland,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Guessing;
+  Equal USA,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Intercept:
+        Ireland,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Intercept;
+  Equal USA,(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1),Intercept:
+        Ireland,(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1),Intercept;
+  Equal USA,(WalkingQ3),Intercept:Ireland,(WalkingQ3),Intercept;
+
+
+  Equal USA,(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1),Slope(1):
+        USA,(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1),Slope(2):
+        Ireland,(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1),Slope(1):
+        Ireland,(BricksQ1,FarmsQ1,FarmsQ2,WalkingQ1,
+     ApplesQ1,ApplesQ2,CubePaintingQ1,CubePaintingQ2,
+     CubePaintingQ4,CubesQ1,GrowingUpQ1,GrowingUpQ3,
+     PopPyramidsQ1,PopPyramidsQ4,
+     ContainersQ1,CarpenterQ01,PipelinesQ1),Slope(2);
+  Equal USA,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Slope(1):
+        USA,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Slope(2):
+        Ireland,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Slope(1):
+        Ireland,(ViewRoomQ1,CubePaintingQ3,RacingCarQ1,RacingCarQ2,RacingCarQ3,RacingCarQ5,TrianglesQ1),Slope(2);
+  Equal USA,(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1),Slope(1):
+        USA,(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1),Slope(2):
+        Ireland,(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1),Slope(1):
+        Ireland,(ApplesQ3,ContinentArea,GrowingUpQ2,PopPyramidsQ2,PopPyramidsQ3,RobberiesQ1),Slope(2);
+  Equal USA,(WalkingQ3),Slope(1):USA,(WalkingQ3),Slope(2):Ireland,(WalkingQ3),Slope(1):Ireland,(WalkingQ3),Slope(2);
+
+  Free USA,Cov(1,1);
+  Free Ireland,Mean(1);
+  Free Ireland,Cov(1,1);
+

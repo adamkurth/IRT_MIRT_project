@@ -1,0 +1,18 @@
+<Project>
+Title = "Fit Model";
+Description = "10 Items 3PL N=500 Non-Normal Priors";
+
+<Options>
+  Mode = Simulation;
+  RndSeed = 1;
+  ReadPRMFile = "EHgenparams.txt";
+  Quadrature = (121,6.0);
+
+<Groups>
+%Group1%
+  File = "sim2.dat";
+  Varnames = v1-v10;
+  N = 500;
+  EmpHist = Yes;
+
+<Constraints>

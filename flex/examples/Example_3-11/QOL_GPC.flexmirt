@@ -1,0 +1,19 @@
+<Project>
+Title = "QOL Data";
+Description = "35 Items - GPC";
+
+<Options>
+  Mode = Calibration;
+  Etol = 1e-4;
+  Mtol = 1e-5;
+  Processors = 2;
+
+<Groups>
+%Group1%
+  File = "QOL.DAT";
+  Varnames = v1-v35;
+  N = 586;
+  Ncats(v1-v35) = 7;
+  Model(v1-v35) = GPC(7);
+
+<Constraints>

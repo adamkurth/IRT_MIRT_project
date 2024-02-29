@@ -1,0 +1,38 @@
+<Project>
+Title = "Fit Two-level MIRT Model to Simulated Data";
+Description = "6 Items, 100 L2 units, 20 respondents within each";
+
+<Options>
+  Mode = Calibration;
+  Algorithm = MHRM;
+  ProposalStd = 1.0;
+  ProposalStd2 = 1.0;
+  Processors = 2;
+  MCsize = 10000;
+
+<Groups>
+
+%Gr%
+  File = "simL2.dat";
+  Varnames = v1-v6,l2id;
+  Select = v1-v6;
+  Cluster = l2id;
+  Dimensions = 4;
+  Between = 2;
+  N = 2000;
+  Ncats(v1-v6) = 2;
+  Model(v1-v6) = Graded(2);
+
+<Constraints>
+  Fix (v1-v6),Slope; // fix all slopes to begin with
+  Free (v1-v3),Slope(1); // level-2 factor 1
+  Free (v4-v6),Slope(2); // level-2 factor 2
+  Free (v1-v3),Slope(3); // level-1 factor 1
+  Free (v4-v6),Slope(4); // level-1 factor 2
+  Equal Gr,(v1-v3),Slope(1) : Gr,(v1-v3),Slope(3); // cross-level equality
+  Equal Gr,(v4-v6),Slope(2) : Gr,(v4-v6),Slope(4);
+  Free Cov(1,1);
+  Free Cov(2,2);
+  Free Cov(2,1);
+  Free Cov(4,3);
+

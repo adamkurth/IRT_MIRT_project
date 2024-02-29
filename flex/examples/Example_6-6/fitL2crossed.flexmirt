@@ -1,0 +1,41 @@
+<Project>
+Title = "Two-level CFA";
+Description = "Crossed Random Effect";
+
+<Options>
+  Mode = Calibration;
+  Rndseed = 10;
+  Algorithm = MHRM;
+  Processors = 2;
+  ProposalStd = 2.0;
+  ProposalStd2 = 2.0;
+  Stage1 = 2000;
+  Stage2 = 100;
+  MCsize = 1;
+  SaveMCO = Yes;
+  SaveSco = Yes;
+  Score = EAP;
+  SavePRM = Yes;
+
+<Groups>
+
+%Gr%
+  File = "simL2crossed.dat";
+  Varnames = v1, indiv_ID, item_fam, obs_cnt, theta, delta;
+  Select = v1;
+  
+  Cluster = indiv_ID;
+  Block = item_fam;
+  Crossed = Yes;
+  
+  Ncats(v1) = 2;
+  Model(v1) = Graded(2);
+  Dimensions = 2;
+  Between = 1;
+
+
+<Constraints>
+  Value (v1),Intercept,0.5;
+
+
+

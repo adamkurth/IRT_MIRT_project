@@ -1,0 +1,201 @@
+TITLE: !section that appears in header of output file
+Chapter 9 - Mplus Estimation, simulated data set.
+Example #2
+Full LCDM applied to seven item, three attribute data set.
+Saturated structural model (Mplus default).
+
+DATA:!location of free format data file (in syntax file folder);
+    FILE IS ch9data.dat; 
+
+VARIABLE:
+    NAMES = x1-x7 truec; !list of variables in input file
+    USEVARIABLE = x1-x7; !use only variables x1 through x7
+    CATEGORICAL = x1-x7; !variables x1 through x7 are categorical (binary)
+    CLASSES = c(8); !8 possible attribute patterns for 3 attribute model;
+
+ANALYSIS:
+    TYPE=MIXTURE;  !estimates latent classes;
+    STARTS=0; !turn off multiple random start feature (disabled anyway);
+
+MODEL:
+
+%OVERALL%
+[C#1] (m1); !latent variable mean for attribute pattern [0,0,0];
+[C#2] (m2); !latent variable mean for attribute pattern [0,0,1];
+[C#3] (m3); !latent variable mean for attribute pattern [0,1,0];
+[C#4] (m4); !latent variable mean for attribute pattern [0,1,1];
+[C#5] (m5); !latent variable mean for attribute pattern [1,0,0];
+[C#6] (m6); !latent variable mean for attribute pattern [1,0,1];
+[C#7] (m7); !latent variable mean for attribute pattern [1,1,0];
+
+%c#1% !for attribute pattern [0,0,0];
+[x1$1] (t1_1); !threshold for item 1 LCDM kernel 1
+[x2$1] (t2_1); !threshold for item 2 LCDM kernel 1
+[x3$1] (t3_1); !threshold for item 3 LCDM kernel 1
+[x4$1] (t4_1); !threshold for item 4 LCDM kernel 1
+[x5$1] (t5_1); !threshold for item 5 LCDM kernel 1
+[x6$1] (t6_1); !threshold for item 6 LCDM kernel 1
+[x7$1] (t7_1); !threshold for item 7 LCDM kernel 1
+
+%c#2% !for attribute pattern [0,0,1];
+[x1$1] (t1_1); !threshold for item 1 LCDM kernel 1
+[x2$1] (t2_1); !threshold for item 2 LCDM kernel 1
+[x3$1] (t3_2); !threshold for item 3 LCDM kernel 2 
+[x4$1] (t4_1); !threshold for item 4 LCDM kernel 1
+[x5$1] (t5_2); !threshold for item 5 LCDM kernel 2
+[x6$1] (t6_2); !threshold for item 6 LCDM kernel 2
+[x7$1] (t7_2); !threshold for item 7 LCDM kernel 2
+
+%c#3% !for attribute pattern [0,1,0];
+[x1$1] (t1_1); !threshold for item 1 LCDM kernel 1
+[x2$1] (t2_2); !threshold for item 2 LCDM kernel 2
+[x3$1] (t3_1); !threshold for item 3 LCDM kernel 1
+[x4$1] (t4_2); !threshold for item 4 LCDM kernel 2
+[x5$1] (t5_1); !threshold for item 5 LCDM kernel 1
+[x6$1] (t6_3); !threshold for item 6 LCDM kernel 3
+[x7$1] (t7_3); !threshold for item 7 LCDM kernel 3
+
+%c#4% !for attribute pattern [0,1,1];
+[x1$1] (t1_1); !threshold for item 1 LCDM kernel 1
+[x2$1] (t2_2); !threshold for item 2 LCDM kernel 2
+[x3$1] (t3_2); !threshold for item 3 LCDM kernel 2 
+[x4$1] (t4_2); !threshold for item 4 LCDM kernel 2
+[x5$1] (t5_2); !threshold for item 5 LCDM kernel 2
+[x6$1] (t6_4); !threshold for item 6 LCDM kernel 4
+[x7$1] (t7_4); !threshold for item 7 LCDM kernel 4
+
+%c#5% !for attribute pattern [1,0,0];
+[x1$1] (t1_2); !threshold for item 1 LCDM kernel 2
+[x2$1] (t2_1); !threshold for item 2 LCDM kernel 1
+[x3$1] (t3_1); !threshold for item 3 LCDM kernel 1
+[x4$1] (t4_3); !threshold for item 4 LCDM kernel 3
+[x5$1] (t5_3); !threshold for item 5 LCDM kernel 3
+[x6$1] (t6_1); !threshold for item 6 LCDM kernel 1
+[x7$1] (t7_5); !threshold for item 7 LCDM kernel 5
+
+%c#6% !for attribute pattern [1,0,1];
+[x1$1] (t1_2); !threshold for item 1 LCDM kernel 2
+[x2$1] (t2_1); !threshold for item 2 LCDM kernel 1
+[x3$1] (t3_2); !threshold for item 3 LCDM kernel 2
+[x4$1] (t4_3); !threshold for item 4 LCDM kernel 3
+[x5$1] (t5_4); !threshold for item 5 LCDM kernel 4
+[x6$1] (t6_2); !threshold for item 6 LCDM kernel 2
+[x7$1] (t7_6); !threshold for item 7 LCDM kernel 6
+
+%c#7% !for attribute pattern [1,1,0];
+[x1$1] (t1_2); !threshold for item 1 LCDM kernel 2
+[x2$1] (t2_2); !threshold for item 2 LCDM kernel 2
+[x3$1] (t3_1); !threshold for item 3 LCDM kernel 1
+[x4$1] (t4_4); !threshold for item 4 LCDM kernel 4
+[x5$1] (t5_3); !threshold for item 5 LCDM kernel 3
+[x6$1] (t6_3); !threshold for item 6 LCDM kernel 3
+[x7$1] (t7_7); !threshold for item 7 LCDM kernel 7
+
+%c#8% !for attribute pattern [1,1,1];
+[x1$1] (t1_2); !threshold for item 1 LCDM kernel 2
+[x2$1] (t2_2); !threshold for item 2 LCDM kernel 2
+[x3$1] (t3_2); !threshold for item 3 LCDM kernel 2
+[x4$1] (t4_4); !threshold for item 4 LCDM kernel 4
+[x5$1] (t5_4); !threshold for item 5 LCDM kernel 4
+[x6$1] (t6_4); !threshold for item 6 LCDM kernel 4
+[x7$1] (t7_8); !threshold for item 7 LCDM kernel 8
+
+
+MODEL CONSTRAINT: !used to define LCDM parameters and constraints
+!NOTE: Mplus uses P(X=0) rather than P(X=1) so terms must be multiplied by -1
+
+!ITEM 1: 
+!Q-matrix Entry [1 0 0]
+!One attibute measured: 1 intercept; 1 main effect
+NEW(l1_0 l1_11);    !define LCDM parameters present for item 1
+t1_1=-(l1_0);       !set equal to intercept by LCDM kernel 
+t1_2=-(l1_0+l1_11); !set equal to intercept plus main effect for attribute 1
+l1_11>0;            !make sure main effect is positive (higher probability for mastering attribute)
+
+!ITEM 2: 
+!Q-matrix Entry [0 1 0]
+!One attibute measured: 1 intercept; 1 main effect
+NEW(l2_0 l2_12);    !define LCDM parameters present for item 2
+t2_1=-(l2_0);
+t2_2=-(l2_0+l2_12);
+l2_12>0;            !the order constraints necessary for the main effect
+
+!ITEM 3:
+!Q-matrix Entry [0 0 1]
+!One attibute measured: 1 intercept; 1 main effect
+NEW(l3_0 l3_13);    !define LCDM parameters present for item 3
+t3_1=-(l3_0);
+t3_2=-(l3_0+l3_13);
+l3_13>0;            !the order constraints necessary for the main effect
+
+!ITEM 4:
+!Q-matrix Entry [1 1 0]
+!two attibutes measured: 1 intercept; 2 main effects; 1 two-way interaction
+NEW(l4_0 l4_11 l4_12 l4_212);       !define LCDM parameters present for item 4
+t4_1=-(l4_0);
+t4_2=-(l4_0+l4_11);
+t4_3=-(l4_0+l4_12);
+t4_4=-(l4_0+l4_11+l4_12+l4_212);
+l4_11>0;                            !the order constraints necessary for the main effects
+l4_12>0;
+l4_212>-l4_11;                      !the order constraints necessary for the interaction
+l4_212>-l4_12;
+
+!ITEM 5:
+!Q-matrix Entry [1 0 1]
+!two attibutes measured: 1 intercept; 2 main effects; 1 two-way interaction
+NEW(l5_0 l5_11 l5_13 l5_213);       !define LCDM parameters present for item 5
+t5_1=-(l5_0);
+t5_2=-(l5_0+l5_11);
+t5_3=-(l5_0+l5_13);
+t5_4=-(l5_0+l5_11+l5_13+l5_213);
+l5_11>0;                            !the order constraints necessary for the main effects
+l5_13>0;
+l5_213>-l5_11;                      !the order constraints for the two-way interaction
+l5_213>-l5_13;
+
+!ITEM 6:
+!Q-matrix Entry [0 1 1]
+!two attibutes measured: 1 intercept; 2 main effects; 1 two-way interaction
+NEW(l6_0 l6_12 l6_13 l6_223);       !define LCDM parameters present for item 6
+t6_1=-(l6_0);
+t6_2=-(l6_0+l6_12);
+t6_3=-(l6_0+l6_13);
+t6_4=-(l6_0+l6_12+l6_13+l6_223);
+l6_12>0;
+l6_13>0;
+l6_223>-l6_12;                      !the order constraints for the two-way interaction
+l6_223>-l6_13;
+
+!ITEM 7:
+!Q-matrix Entry [1 1 1]
+!two attibutes measured: 1 intercept; 3 main effects; 3 two-way interactions; 1 three-way interaction
+NEW(l7_0 l7_11 l7_12 l7_13 l7_212 l7_213 l7_223 l7_3123);   !define LCDM parameters present for item 7
+t7_1=-(l7_0);
+t7_2=-(l7_0+l7_13);
+t7_3=-(l7_0+l7_12);
+t7_4=-(l7_0+l7_12+l7_13+l7_223);
+t7_5=-(l7_0+l7_11);
+t7_6=-(l7_0+l7_11+l7_13+l7_213);
+t7_7=-(l7_0+l7_11+l7_12+l7_212);
+t7_8=-(l7_0+l7_11+l7_12+l7_13+l7_212+l7_213+l7_223+l7_3123);
+l7_11>0;                                                    !the order constraints necessary for the main effects
+l7_12>0;
+l7_13>0;
+l7_212>-l7_11;                                              !the order constraints for the two-way interactions
+l7_212>-l7_12;
+l7_213>-l7_11;
+l7_213>-l7_13;
+l7_223>-l7_12;
+l7_223>-l7_13;
+l7_3123>-(l7_223+l7_213+l7_13);                             !the order constraints for the three way interaction
+l7_3123>-(l7_223+l7_212+l7_12);
+l7_3123>-(l7_213+l7_212+l7_11);
+
+OUTPUT:
+    TECH10; !request additional model fit statistics be reported
+ 
+SAVEDATA:
+    FORMAT IS f10.5;             !format for output file
+    FILE IS respondent_ex9.2.dat; !print attribute estimates for respondents in file listed
+    SAVE = CPROBABILITIES;       !instruct Mplus to save posterior probabilities of class membership

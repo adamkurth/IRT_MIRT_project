@@ -1,0 +1,30 @@
+TITLE: "2PL Model Example";
+
+DATA: 
+  FILE = "your_data_file.dat";
+  FORMAT = FREE;
+  NITEMS = N;  // Replace N with the actual number of items
+  NGROUPS = 1;
+  MISSING = -9; // or whatever your missing data code is
+
+MODEL: 
+  ITEM = 1-N;  // Replace N with your actual number of items
+  MODEL = 2PL;
+  // If you have specific item labels, you can specify them individually like:
+  // ITEM 1: MODEL = 2PL;
+  // ITEM 2: MODEL = 2PL;
+  // and so on for each item.
+
+GROUP: 
+  NAME = "YourGroupName"; // Optional, can be used if you have specific group names
+
+OUTPUT: 
+  PARAM = YES; // To save parameter estimates
+  // Additional output options as needed
+
+OPTIONS: 
+  MAXITER = 500; // Maximum number of EM iterations
+  CONVERGE = 0.0001; // Convergence criterion
+  SEED = 12345; // Seed for random number generation, if needed
+
+END;

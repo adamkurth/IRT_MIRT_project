@@ -1,0 +1,23 @@
+<Project>
+Title = "G341-19";
+Description = "12 Items 3PL 2 Groups MAP
+ from Parameter Estimates";
+
+<Options>
+  Mode = Scoring;
+  ReadPRMFile = "g341-19.calib.normal-prm.txt";
+  Score = MAP;
+
+<Groups>
+
+%Grade4%
+  File = "g341-19.grp1.dat";
+  Varnames = v1-v12;
+  N = 1314;
+
+%Grade3%
+  File = "g341-19.grp2.dat";
+  Varnames = v1-v12;
+  N = 1530;
+
+<Constraints>

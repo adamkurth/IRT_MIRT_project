@@ -1,0 +1,19 @@
+<Project>
+Title = "3PLM ML Scoring example";
+Description = "12 items 1 Factor, 1 Group Scoring";
+
+<Options>
+ Mode = Scoring;
+ ReadPRMFile = "3PLM_example-prm.txt";
+ Score = ML;
+ SaveSCO = YES;
+ MaxMLscore = 3.5;
+ MinMLScore = -5.5;
+
+<Groups>
+%Group1%
+ File = "g341-19.dat";
+ Varnames = v1-v12;
+ N = 2844;
+ 
+<Constraints>

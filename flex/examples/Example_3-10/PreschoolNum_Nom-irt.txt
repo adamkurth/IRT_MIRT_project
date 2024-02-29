@@ -1,0 +1,188 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Pre-School Numerical Knowledge
+2 Redefined Items Nominal
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items         2
+     Number of Cases       592
+ # Latent Dimensions         1
+
+Item  Categories       Model          Ta          Tc
+   1           4     Nominal    Identity    Identity
+   2           4     Nominal    Identity    Identity
+
+Bock-Aitkin EM Algorithm Control Values
+Maximum number of cycles:   500
+Convergence criterion:    5.00e-05
+Maximum number of M-step iterations:   100
+Convergence criterion for iterative M-steps:    1.00e-09
+Number of rectangular quadrature points:    49
+Minimum, Maximum quadrature points:   -6.00,    6.00
+SEM algorithm tolerance:    1.00e-03
+Standard error computation algorithm: Cai-Thissen Modified Supplemented EM
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:     9
+Number of processor cores used:    1
+
+Processing times (in seconds)
+E-step computations:      0.01
+M-step computations:      0.01
+Standard error computations:      0.01
+Goodness-of-fit statistics:      0.00
+Total:       0.03
+
+Output Files
+Text results and control parameters: PreschoolNum_Nom-irt.txt
+Text parameter estimate file: PreschoolNum_Nom-prm.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+SEM algorithm status: Normal
+SEM cost: 29 forced-EM steps
+Number of cycles completed:    29
+Maximum parameter change (P#):   0.00003936 (    8)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 194.9570
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: Group1
+
+Pre-School Numerical Knowledge
+2 Redefined Items Nominal
+
+Nominal Model Slopes and Scoring Function Contrasts for Items for Group 1: Group1
+    Item               Label   P#       a    s.e. Contrasts   P# alpha  1    s.e.   P# alpha  2    s.e.   P# alpha  3    s.e.
+       1            Identify    2    0.80    0.70  Identity          1.00    ----          0.00    ----    1     1.21    0.47
+       2               Match    6    0.82    0.72  Identity          1.00    ----    8     0.46    0.31    8     0.46    0.31
+
+Nominal Model Scoring Function Values Group 1: Group1
+    Item               Label     s  1     s  2     s  3     s  4
+       1            Identify     0.00     0.00     1.21     3.00
+       2               Match     0.00     0.46     0.46     3.00
+
+Nominal Model Intercept Contrasts for Items for Group 1: Group1
+    Item               Label Contrasts   P# gamma  1    s.e.   P# gamma  2    s.e.   P# gamma  3    s.e.
+       1            Identify  Identity    3    -0.86    0.14    4    -0.80    0.49    5     0.65    0.20
+       2               Match  Identity    9    -0.42    0.31    9    -0.42    0.31    7     0.52    0.20
+
+Original (Bock, 1972) Parameters, Nominal Items for Group 1: Group1
+    Item               Label   Category:       1       2       3       4
+       1            Identify           a    0.00    0.00    0.97    2.41
+                                       c    0.00   -0.86   -0.80    0.65
+       2               Match           a    0.00    0.38    0.38    2.45
+                                       c    0.00   -0.42   -0.42    0.52
+
+Pre-School Numerical Knowledge
+2 Redefined Items Nominal
+
+Group Parameter Estimates:
+   Group               Label   P#      mu    s.e.   P#      s2    s.e.      sd    s.e.
+       1              Group1         0.00    ----         1.00    ----    1.00    ----
+
+Pre-School Numerical Knowledge
+2 Redefined Items Nominal
+
+Marginal fit (Chi-square) and Standardized LD X2 Statistics for Group 1: Group1
+
+      Marginal
+  Item    Chi2      1 
+     1     0.0
+     2     0.1   -0.0p
+
+
+Pre-School Numerical Knowledge
+2 Redefined Items Nominal
+
+Item Information Function Values at 15 Values of theta from -2.8 to 2.8 for Group 1: Group1
+                      Theta:
+  Item               Label  -2.8  -2.4  -2.0  -1.6  -1.2  -0.8  -0.4  -0.0   0.4   0.8   1.2   1.6   2.0   2.4   2.8
+     1            Identify  0.03  0.05  0.10  0.19  0.39  0.74  1.14  1.27  0.97  0.56  0.28  0.13  0.06  0.03  0.01
+     2               Match  0.04  0.05  0.07  0.13  0.26  0.52  0.92  1.24  1.15  0.75  0.39  0.18  0.08  0.03  0.01
+
+         Test Information:  1.07  1.10  1.17  1.33  1.66  2.26  3.06  3.51  3.13  2.32  1.67  1.31  1.14  1.06  1.03
+            Expected s.e.:  0.97  0.95  0.92  0.87  0.78  0.66  0.57  0.53  0.57  0.66  0.77  0.87  0.94  0.97  0.99
+Marginal reliability for response pattern scores: 0.54
+
+Pre-School Numerical Knowledge
+2 Redefined Items Nominal
+
+Response Pattern Observed and Expected Frequencies, Standardized Residuals, EAPs and SDs
+
+Group 1: Group1
+Item:     Frequencies    Standard
+  1  2 Observed Expected Residual EAP[q |u]  SD[q |u]
+  0  0    71.00    70.23     0.10     -0.99      0.71
+  0  1    34.00    32.85     0.21     -0.81      0.67
+  0  2    30.00    32.85    -0.51     -0.81      0.67
+  0  3    38.00    37.08     0.16     -0.02      0.59
+  1  0    30.00    29.63     0.07     -0.99      0.71
+  1  1    13.00    13.86    -0.23     -0.81      0.67
+  1  2    15.00    13.86     0.31     -0.81      0.67
+  1  3    15.00    15.64    -0.17     -0.02      0.59
+  2  0    13.00    15.08    -0.54     -0.56      0.63
+  2  1     4.00     8.25    -1.49     -0.41      0.61
+  2  2    15.00     8.25     2.37     -0.41      0.61
+  2  3    19.00    19.41    -0.10      0.33      0.60
+  3  0    43.00    42.06     0.15     -0.03      0.59
+  3  1    30.00    28.04     0.38      0.10      0.59
+  3  2    25.00    28.04    -0.59      0.10      0.59
+  3  3   197.00   196.87     0.01      0.92      0.69
+
+Statistics based on the loglikelihood of the fitted model:
+                         -2loglikelihood:     2766.69
+      Akaike Information Criterion (AIC):     2784.69
+    Bayesian Information Criterion (BIC):     2824.14
+
+Statistics based on the loglikelihood of the zero-factor null model:
+                         -2loglikelihood:     2885.67
+      Akaike Information Criterion (AIC):     2895.67
+    Bayesian Information Criterion (BIC):     2917.58
+
+Full-information fit statistics of the fitted model:
+                 Degrees
+          G2  of freedom Probability       F0hat       RMSEA
+        8.45           6      0.2064      0.0143        0.03
+                 Degrees
+          X2  of freedom Probability       F0hat       RMSEA
+        8.99           6      0.1739      0.0152        0.03
+
+Full-information fit statistics of the zero-factor null model:
+                 Degrees
+          G2  of freedom Probability       F0hat       RMSEA
+      127.43          10      0.0001      0.2153        0.14
+                 Degrees
+          X2  of freedom Probability       F0hat       RMSEA
+      124.58          10      0.0001      0.2104        0.14
+
+  With the zero-factor null model, Tucker-Lewis (non-normed) fit index based on G2 is     0.97
+
+  With the zero-factor null model, Tucker-Lewis (non-normed) fit index based on X2 is     0.96
+
+Limited-information fit statistics of the fitted model:
+                 Degrees
+          M2  of freedom Probability       F0hat       RMSEA
+        8.24           6      0.2207      0.0139        0.03
+Note: M2 is based on full marginal tables.
+Note: Model-based weight matrix is used.
+
+Limited-information fit statistics of the zero-factor null model:
+                 Degrees
+          M2  of freedom Probability       F0hat       RMSEA
+      124.58          10      0.0001      0.2104        0.14
+Note: M2 is based on full marginal tables.
+Note: Model-based weight matrix is used.
+
+  With the zero-factor null model, Tucker-Lewis (non-normed) fit index based on M2 is     0.97
+
+Wed Nov 18 13:43:05 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

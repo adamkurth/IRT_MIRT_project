@@ -1,0 +1,46 @@
+<Project>
+Title = "Calibrate and Score Simulated DM Data";
+Description = "C-RIM Model";
+
+<Options>
+  Mode = Calibration;
+  MaxE = 20000;
+  MaxM = 5;
+  Etol = 1e-5;
+  SE = REM;
+  GOF = extended;
+  SaveCOV = Yes;
+  SavePRM = Yes;
+  SaveSCO = Yes;
+  Score = SSC;
+
+<Groups>
+
+%G%
+  File = "DMsim.dat";
+  Varnames = v1-v15;
+  N = 3000;
+  Ncats(v1-v15) = 2;
+  Model(v1-v15) = Graded(2);
+
+  Attributes = 4;
+  InteractionEffects = (2);
+  Dimensions = 10; //4 ME and 6 2nd order int.
+
+%D%
+  Varnames = a1-a4;
+  DM = G;
+
+<Constraints>
+  Fix G,(v1-v15),MainEffect;
+
+  Free G,(v1-v3),MainEffect(1);
+  Free G,(v4-v6),MainEffect(2);
+  Free G,(v7-v9),MainEffect(3);
+  Free G,(v10-v12),MainEffect(4);
+
+// item 13-15 fit with DINA model that depends on int of attribs 3,4
+  Free G,(v13-v15),Interaction(3,4);
+
+ 
+ 

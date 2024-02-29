@@ -1,0 +1,170 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+QOL Data
+35 Items Bifactor Showing Respond Collapsing
+
+Summary of the Data and Dimensions
+   Missing data code        -9
+     Number of Items        35
+     Number of Cases       586
+ # Latent Dimensions         8
+ Dimension Reduction  Yes[  1]
+
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+   7           2      Graded
+   8           2      Graded
+   9           2      Graded
+  10           2      Graded
+  11           2      Graded
+  12           2      Graded
+  13           2      Graded
+  14           2      Graded
+  15           2      Graded
+  16           2      Graded
+  17           2      Graded
+  18           2      Graded
+  19           2      Graded
+  20           2      Graded
+  21           2      Graded
+  22           2      Graded
+  23           2      Graded
+  24           2      Graded
+  25           2      Graded
+  26           2      Graded
+  27           2      Graded
+  28           2      Graded
+  29           2      Graded
+  30           2      Graded
+  31           2      Graded
+  32           2      Graded
+  33           2      Graded
+  34           2      Graded
+  35           2      Graded
+
+Bock-Aitkin EM Algorithm Control Values
+Maximum number of cycles:   500
+Convergence criterion:    1.00e-04
+Maximum number of M-step iterations:   100
+Convergence criterion for iterative M-steps:    1.00e-07
+Number of rectangular quadrature points:    21
+Minimum, Maximum quadrature points:   -5.00,    5.00
+Standard error computation algorithm: Cross-product approximation
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:   104
+Number of processor cores used:    4
+  Parallelization granularity: Coarse (may be more optimal for large sample size)
+
+Processing times (in seconds)
+E-step computations:      2.30
+M-step computations:      1.15
+Standard error computations:      0.30
+Goodness-of-fit statistics:      0.01
+Total:       3.77
+
+Output Files
+Text results and control parameters: QOLbifac-2PL-irt.txt
+Text parameter estimate file: QOLbifac-2PL-prm.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:   270
+Maximum parameter change (P#):   0.00000000 (    1)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 3356.8318
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: Group1
+
+QOL Data
+35 Items Bifactor Showing Respond Collapsing
+
+2PL Items for Group 1: Group1
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#    a  3    s.e.   P#    a  4    s.e.   P#    a  5    s.e.   P#    a  6    s.e.   P#    a  7    s.e.   P#    a  8    s.e.   P#       c    s.e.
+       1                  v1   36    2.26    0.36         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    1    2.13    0.27
+       2                  v2   37    2.31    0.48   71    2.51    0.46         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    2    3.78    0.55
+       3                  v3   38    1.62    0.24   72    1.42    0.24         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    3    1.69    0.21
+       4                  v4   39    3.86    1.26   73    4.89    1.77         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    4    3.76    1.24
+       5                  v5   40    2.77    0.55   74    3.08    0.62         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    5    2.87    0.51
+       6                  v6   41    2.77    0.52         0.00    ----   75    3.20    0.66         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    6    0.86    0.30
+       7                  v7   42    1.38    0.23         0.00    ----   76    1.50    0.24         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    7    1.38    0.20
+       8                  v8   43    2.60    0.44         0.00    ----   77    2.86    0.52         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    8    0.49    0.25
+       9                  v9   44    1.78    0.28         0.00    ----   78    1.97    0.31         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    9    0.30    0.18
+      10                 v10   45    1.91    0.35         0.00    ----         0.00    ----   79    1.74    0.52         0.00    ----         0.00    ----         0.00    ----         0.00    ----   10    3.09    0.47
+      11                 v11   46    1.42    0.27         0.00    ----         0.00    ----   80    0.71    0.28         0.00    ----         0.00    ----         0.00    ----         0.00    ----   11    2.57    0.27
+      12                 v12   47    1.40    0.24         0.00    ----         0.00    ----   81    0.72    0.23         0.00    ----         0.00    ----         0.00    ----         0.00    ----   12    1.88    0.20
+      13                 v13   48    1.57    0.25         0.00    ----         0.00    ----   82    0.13    0.25         0.00    ----         0.00    ----         0.00    ----         0.00    ----   13    2.30    0.22
+      14                 v14   49    4.02    2.15         0.00    ----         0.00    ----   83    3.80    2.54         0.00    ----         0.00    ----         0.00    ----         0.00    ----   14    5.16    2.80
+      15                 v15   50    2.49    0.41         0.00    ----         0.00    ----   84    0.66    0.23         0.00    ----         0.00    ----         0.00    ----         0.00    ----   15    2.09    0.30
+      16                 v16   51    2.17    0.28         0.00    ----         0.00    ----         0.00    ----   85    0.93    0.25         0.00    ----         0.00    ----         0.00    ----   16    1.45    0.21
+      17                 v17   52    1.66    0.26         0.00    ----         0.00    ----         0.00    ----   86    1.23    0.32         0.00    ----         0.00    ----         0.00    ----   17    1.78    0.23
+      18                 v18   53    2.40    0.40         0.00    ----         0.00    ----         0.00    ----   87    1.40    0.36         0.00    ----         0.00    ----         0.00    ----   18    2.54    0.36
+      19                 v19   54    2.93    0.55         0.00    ----         0.00    ----         0.00    ----   88    1.98    0.54         0.00    ----         0.00    ----         0.00    ----   19    2.05    0.41
+      20                 v20   55    1.81    0.27         0.00    ----         0.00    ----         0.00    ----   89    1.04    0.26         0.00    ----         0.00    ----         0.00    ----   20    1.73    0.21
+      21                 v21   56    1.18    0.25         0.00    ----         0.00    ----         0.00    ----   90    0.48    0.23         0.00    ----         0.00    ----         0.00    ----   21    2.63    0.24
+      22                 v22   57    2.08    0.33         0.00    ----         0.00    ----         0.00    ----         0.00    ----   91    1.46    0.30         0.00    ----         0.00    ----   22    2.32    0.30
+      23                 v23   58    1.41    0.32         0.00    ----         0.00    ----         0.00    ----         0.00    ----   92    1.41    0.31         0.00    ----         0.00    ----   23    2.98    0.35
+      24                 v24   59    2.00    0.35         0.00    ----         0.00    ----         0.00    ----         0.00    ----   93    1.93    0.41         0.00    ----         0.00    ----   24    2.58    0.37
+      25                 v25   60    2.76    0.72         0.00    ----         0.00    ----         0.00    ----         0.00    ----   94    2.68    0.70         0.00    ----         0.00    ----   25    4.13    0.86
+      26                 v26   61    1.45    0.22         0.00    ----         0.00    ----         0.00    ----         0.00    ----   95    1.38    0.27         0.00    ----         0.00    ----   26    0.95    0.17
+      27                 v27   62    1.92    0.31         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----   96    1.81    0.36         0.00    ----   27    2.27    0.31
+      28                 v28   63    2.30    0.45         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----   97    1.81    0.41         0.00    ----   28    3.41    0.50
+      29                 v29   64    0.91    0.17         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----   98    0.96    0.21         0.00    ----   29    0.95    0.14
+      30                 v30   65    2.09    0.39         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----   99    2.33    0.51         0.00    ----   30    2.08    0.37
+      31                 v31   66    2.02    0.35         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----  100    1.54    0.33         0.00    ----   31    3.00    0.37
+      32                 v32   67    2.47    0.70         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----  101    2.58    0.87   32    4.51    1.08
+      33                 v33   68    2.99    0.84         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----  102    2.73    1.01   33    4.10    1.09
+      34                 v34   69    1.67    0.33         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----  103    1.30    0.31   34    2.95    0.36
+      35                 v35   70    1.40    0.31         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----  104    0.44    0.24   35    3.22    0.33
+
+QOL Data
+35 Items Bifactor Showing Respond Collapsing
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.   P#   mu  3    s.e.   P#   mu  4    s.e.   P#   mu  5    s.e.   P#   mu  6    s.e.   P#   mu  7    s.e.   P#   mu  8    s.e.
+       1              Group1         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: Group1
+   P# Theta  1    s.e.   P# Theta  2    s.e.   P# Theta  3    s.e.   P# Theta  4    s.e.   P# Theta  5    s.e.   P# Theta  6    s.e.   P# Theta  7    s.e.   P# Theta  8    s.e.
+          1.00    ----
+          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+
+QOL Data
+35 Items Bifactor Showing Respond Collapsing
+
+Statistics based on the loglikelihood of the fitted model:
+                         -2loglikelihood:    16559.41
+      Akaike Information Criterion (AIC):    16767.41
+    Bayesian Information Criterion (BIC):    17222.24
+
+Full-information fit statistics of the fitted model:
+                 Degrees
+          G2  of freedom Probability       F0hat       RMSEA
+     9837.64         373      0.0001     16.7878        0.21
+  The table is too sparse to compute the Pearson X2 statistic.
+  Even though G2 is shown, it should be interpreted with caution.
+
+Limited-information fit statistics of the fitted model:
+  The M2 statistics were not requested.
+
+Wed Nov 18 14:52:57 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

@@ -1,0 +1,35 @@
+<Project>
+Title = "Two-level Bifactor Model (Two Groups)";
+Description = "12 Items: 1 L2 factor, 
+5 L1 factors with 1 General, 4 Specific, 
+100 L2 units, 10 respondents within each";
+
+<Options>
+  Mode = Simulation;
+  Rndseed = 7471;
+  ReadPrmFile = "MGsimL2 covariates-prm.txt";
+
+<Groups>
+%G1%
+  File = "simL2.g1.dat";
+  Varnames = v1-v12;
+  Dimensions = 6;
+  Primary = 2;
+  Between = 1;
+  N = 1000;
+  Nlevel2 = 100;
+  Covariates = 2;
+  L2covariates = 1;
+  CovariateCorr = 0.4;
+
+%G2%
+  File = "simL2.g2.dat";
+  Varnames = v1-v12;
+  Dimensions = 6;
+  Primary = 2;
+  Between = 1;
+  N = 1000;
+  Nlevel2 = 100;
+  Covariates = 1;
+
+<Constraints>

@@ -1,0 +1,52 @@
+<Project>
+Title = "Rupp Templin Henson Example 9.2";
+Description = "LCDM model - 7 items, 3 attributes";
+
+<Options>
+  Mode = Calibration;
+  MaxE = 20000;
+  Etol = 1e-6;
+  MaxM = 50;
+  Mtol = 1e-9;
+  GOF = Extended;
+  SE = REM;
+  SavePRM = Yes;
+  SaveCOV = Yes;
+  SaveSCO = Yes;
+  Score = EAP;
+
+<Groups>
+
+%G%
+  File = "ch9data.dat";
+  N = 10000;
+  Varnames = v1-v7,truec;
+  Select = v1-v7;
+  Ncats(v1-v7) = 2;
+  Model(v1-v7) = Graded(2);
+  Dimensions = 7; // 3 main + 3 2nd-order + 1 3rd-order
+  Attributes = 3;
+  InteractionEffects = (2,3); // generate 2nd- and 3rd-order interactions
+
+<Constraints>
+  Fix G,(v1-v7),MainEffect;
+  Free G,(v1),MainEffect(1);  // 1
+  Free G,(v2),MainEffect(2);  // 2
+  Free G,(v3),MainEffect(3);  // 3
+  Free G,(v4),MainEffect(1);  // 1
+  Free G,(v4),MainEffect(2);  // 2
+  Free G,(v4),Interaction(1,2);  // 1x2
+  Free G,(v5),MainEffect(1);  // 1
+  Free G,(v5),MainEffect(3);  // 3
+  Free G,(v5),Interaction(1,3);  // 1x3
+  Free G,(v6),MainEffect(2);  // 2
+  Free G,(v6),MainEffect(3);  // 3
+  Free G,(v6),Interaction(2,3);  // 2x3
+  Free G,(v7),MainEffect(1);  // 1
+  Free G,(v7),MainEffect(2);  // 2
+  Free G,(v7),MainEffect(3);  // 3
+  Free G,(v7),Interaction(1,2);  // 1x2
+  Free G,(v7),Interaction(1,3);  // 1x3
+  Free G,(v7),Interaction(2,3);  // 2x3
+  Free G,(v7),Interaction(1,2,3);  // 1x2x3
+

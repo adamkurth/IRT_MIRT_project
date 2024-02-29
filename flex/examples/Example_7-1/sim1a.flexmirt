@@ -1,0 +1,24 @@
+<Project>
+Title = "Simulate Data";
+Description = "4 Items Graded Syntax Only";
+
+<Options>
+  Mode = Simulation;
+  Rndseed = 7474;
+
+<Groups>
+%G%
+  File = "sim1a.dat";
+  Varnames = v1-v4;
+  N = 1000;
+  Model(v1-v4) = Graded(3);
+
+<Constraints>
+  Value (v1),Slope,0.7;
+  Value (v2),Slope,1.0;
+  Value (v3),Slope,1.2;
+  Value (v4),Slope,1.5;
+  Value (v1,v2),Intercept(1),2.0;
+  Value (v1,v2),Intercept(2),1.0;
+  Value (v3,v4),Intercept(1),0.0;
+  Value (v3,v4),Intercept(2),-1.0;

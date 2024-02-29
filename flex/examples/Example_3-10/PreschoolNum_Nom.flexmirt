@@ -1,0 +1,32 @@
+<Project>
+Title = "Pre-School Numerical Knowledge";
+Description = "2 Redefined Items Nominal";
+
+<Options>
+  Mode = Calibration;
+  SE = SEM;
+  Etol = 5e-5;
+  Mtol = 1e-9;
+  GOF = Extended;
+  M2 = Full;
+  SX2Tbl = Yes;
+  HabermanResTbl = Yes;
+  FitNullModel = Yes;
+  SavePRM = Yes;
+
+<Groups>
+%Group1%
+  File = "PreschoolNum.dat";
+  Varnames = Identify,Match,Identify3,Identify4,Match3,Match4;
+  Select = Identify,Match;
+  N = 592;
+  Ncats(Identify,Match) = 4;
+  Code(Identify,Match) = (0,3,4,34),(0,1,2,3);
+  Model(Identify,Match) = Nominal(4);
+  Ta(Identify,Match) = Identity;
+  Tc(Identify,Match) = Identity;
+
+<Constraints>
+  Fix (Identify),ScoringFn(2);
+  Equal Group1, (Match), ScoringFn(2) : Group1, (Match), ScoringFn(3);
+  Equal Group1, (Match), Intercept(1) : Group1, (Match), Intercept(2);

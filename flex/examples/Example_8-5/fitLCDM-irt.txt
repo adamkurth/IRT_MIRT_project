@@ -1,0 +1,206 @@
+flexMIRT(R) Engine Version 3.62 (64-bit)
+Flexible Multilevel Multidimensional Item Response Modeling and Test Scoring
+(C) 2013-2020 Vector Psychometric Group, LLC., Chapel Hill, NC, USA
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Summary of the Data and Dimensions
+               Group         G         D
+   Missing data code        -9        -9
+     Number of Items         7         1
+     Number of Cases     10000         8
+ # Latent Dimensions         7         1
+    Diagnostic Model   L1[  3]         G
+
+ Group 1
+Item  Categories       Model
+   1           2      Graded
+   2           2      Graded
+   3           2      Graded
+   4           2      Graded
+   5           2      Graded
+   6           2      Graded
+   7           2      Graded
+
+Slope:Main Effect
+    1:1
+    2:2
+    3:3
+
+Slope:Interaction
+    4:1x2
+    5:1x3
+    6:2x3
+    7:1x2x3
+
+ Group 2
+Item  Categories       Model          Ta          Tc
+   1           8     Nominal       Trend    Identity
+
+Bock-Aitkin EM Algorithm Control Values
+Maximum number of cycles: 20000
+Convergence criterion:    1.00e-06
+Maximum number of M-step iterations:    50
+Convergence criterion for iterative M-steps:    1.00e-09
+Number of rectangular quadrature points:    49
+Minimum, Maximum quadrature points:   -6.00,    6.00
+Standard error computation algorithm: Richardson Extrapolation
+
+User-Defined Initial Values for Parameters
+      P#       Value
+      97        0.00
+
+Miscellaneous Control Values 
+Z tolerance, max. abs. logit value:     50.00
+Number of free parameters:    33
+Number of processor cores used:    1
+
+Processing times (in seconds)
+E-step computations:      3.77
+M-step computations:      0.28
+Standard error computations:      0.74
+Goodness-of-fit statistics:      0.00
+Total:       4.78
+
+Output Files
+Text results and control parameters: fitLCDM-irt.txt
+Text parameter estimate file: fitLCDM-prm.txt
+Text parameter error covariance file: fitLCDM-cov.txt
+
+Convergence and Numerical Stability
+flexMIRT(R) engine status: Normal termination
+Number of cycles completed:   697
+Maximum parameter change (P#):  -0.00000066 (    5)
+First-order test: Convergence criteria satisfied
+Condition number of information matrix: 3640.5711
+Second-order test: Solution is a possible local maximum
+
+*** Random effects calibration in Group 1: G
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+2PL Items for Group 1: G
+    Item               Label   P#    a  1    s.e.   P#    a  2    s.e.   P#    a  3    s.e.   P#    a  4    s.e.   P#    a  5    s.e.   P#    a  6    s.e.   P#    a  7    s.e.   P#       c    s.e.
+       1                  v1   15    1.87    0.06         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    1   -0.91    0.04
+       2                  v2         0.00    ----   16    2.04    0.20         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----    2   -1.01    0.15
+       3                  v3         0.00    ----         0.00    ----   17    2.01    0.14         0.00    ----         0.00    ----         0.00    ----         0.00    ----    3   -0.96    0.10
+       4                  v4   18    2.05    0.16   19    1.86    0.19         0.00    ----   20    1.03    0.33         0.00    ----         0.00    ----         0.00    ----    4   -2.44    0.11
+       5                  v5   21    1.79    0.32         0.00    ----   22    1.72    0.35         0.00    ----   23    1.38    0.56         0.00    ----         0.00    ----    5   -2.24    0.24
+       6                  v6         0.00    ----   24    2.15    0.12   25    2.10    0.11         0.00    ----         0.00    ----   26    1.11    0.28         0.00    ----    6   -2.54    0.05
+       7                  v7   27    2.47    0.22   28    2.13    0.26   29    2.06    0.28   30    0.81    0.42   31    0.75    0.43   32    0.98    0.44   33   -1.30    0.84    7   -3.63    0.10
+
+Diagnostic IRT Attributes and Cross-classification Probabilities for Group   1: G
+
+ Pattern          Prob
+   0 0 0    0.24810623
+   0 0 1    0.07355038
+   0 1 0    0.09927255
+   0 1 1    0.09119653
+   1 0 0    0.08634180
+   1 0 1    0.09134963
+   1 1 0    0.09358630
+   1 1 1    0.21659659
+
+*** Random effects calibration in Group 2: D
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+GPC Items for Group 2: D
+    Item               Label   P#       a    s.e.       b    s.e.    d  1    d  2    s.e.    d  3    s.e.    d  4    s.e.    d  5    s.e.    d  6    s.e.    d  7    s.e.    d  8    s.e.
+       1                   a         0.00            ----    ----       0    ----    ----    ----    ----    ----    ----    ----    ----    ----    ----    ----    ----    ----    ----
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Nominal Model Slopes and Scoring Function Contrasts for Items for Group 2: D
+    Item               Label   P#       a    s.e. Contrasts   P# alpha  1    s.e.   P# alpha  2    s.e.   P# alpha  3    s.e.   P# alpha  4    s.e.   P# alpha  5    s.e.   P# alpha  6    s.e.   P# alpha  7    s.e.
+       1                   a         0.00    ----     Trend          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----
+
+Nominal Model Scoring Function Values Group 2: D
+    Item               Label     s  1     s  2     s  3     s  4     s  5     s  6     s  7     s  8
+       1                   a     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+
+Nominal Model Intercept Contrasts for Items for Group 2: D
+    Item               Label Contrasts   P# gamma  1    s.e.   P# gamma  2    s.e.   P# gamma  3    s.e.   P# gamma  4    s.e.   P# gamma  5    s.e.   P# gamma  6    s.e.   P# gamma  7    s.e.
+       1                   a  Identity    8    -1.22    0.51    9    -0.92    0.42   10    -1.00    0.13   11    -1.06    0.30   12    -1.00    0.36   13    -0.97    0.23   14    -0.14    0.05
+
+Original (Bock, 1972) Parameters, Nominal Items for Group 2: D
+    Item               Label   Category:       1       2       3       4       5       6       7       8
+       1                   a           a    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00
+                                       c   -0.00   -1.22   -0.92   -1.00   -1.06   -1.00   -0.97   -0.14
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Group Latent Variable Means:
+   Group               Label   P#   mu  1    s.e.   P#   mu  2    s.e.   P#   mu  3    s.e.   P#   mu  4    s.e.   P#   mu  5    s.e.   P#   mu  6    s.e.   P#   mu  7    s.e.
+       1                   G         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----         0.00    ----
+       2                   D         0.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  1: G
+   P# Theta  1    s.e.   P# Theta  2    s.e.   P# Theta  3    s.e.   P# Theta  4    s.e.   P# Theta  5    s.e.   P# Theta  6    s.e.   P# Theta  7    s.e.
+          1.00    ----
+          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          0.00    ----          1.00    ----
+
+Latent Variable Variance-Covariance Matrix for Group  2: D
+   P# Theta  1    s.e.
+          1.00    ----
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Marginal fit (Chi-square) and Standardized LD X2 Statistics for Group 1: G
+
+      Marginal
+  Item    Chi2      1       2       3       4       5       6 
+     1     0.0
+     2     0.0   -0.3n
+     3     0.0   -0.6n   -0.4n
+     4     0.0   -0.6n   -0.1n    0.0n
+     5     0.0   -0.2p   -0.6n   -0.7n   -0.7n
+     6     0.0    0.5p   -0.7p   -0.7n   -0.7n   -0.4p
+     7     0.0   -0.7n   -0.5n   -0.7p   -0.5p   -0.7n   -0.7n
+
+
+Rupp Templin Henson Example 9.2
+LCDM model - 7 items, 3 attributes
+
+Item Information Function Values at 15 Values of theta from -2.8 to 2.8 for Group 2: D
+                      Theta:
+  Item               Label  -2.8  -2.4  -2.0  -1.6  -1.2  -0.8  -0.4  -0.0   0.4   0.8   1.2   1.6   2.0   2.4   2.8
+     1                   a  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+
+         Test Information:  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00
+            Expected s.e.:  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00  1.00
+Marginal reliability for response pattern scores: 0.00
+
+Statistics based on the loglikelihood of the fitted model:
+                         -2loglikelihood:    85741.39
+      Akaike Information Criterion (AIC):    85807.39
+    Bayesian Information Criterion (BIC):    86045.33
+
+Full-information fit statistics of the fitted model:
+                 Degrees
+          G2  of freedom Probability       F0hat       RMSEA
+      103.76          94      0.2303      0.0104        0.00
+                 Degrees
+          X2  of freedom Probability       F0hat       RMSEA
+      101.68          94      0.2760      0.0102        0.00
+
+Limited-information fit statistics of the fitted model:
+  The M2 statistics were not requested.
+
+Wed Nov 18 15:05:27 2020
+
+Product: flexMIRT®
+Master key: dfe1e4f6-aac2-4d7b-af27-02449fa06087
+Installation key: e976fbb4-21dd-4c03-83b7-30f2a4040eec
+Valid until: 1/25/2032 11:00:00 PM

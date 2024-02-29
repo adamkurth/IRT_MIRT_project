@@ -1,0 +1,23 @@
+<Project>
+Title = "LSAT 6 -  Fixed Effects Calibration";
+Description = "5 Items 1PL N=1000";
+
+<Options>
+  Mode = Calibration;
+  Algorithm = MHRM;
+  GOF = Extended;
+  Stage1 = 0;
+  Stage2 = 0;
+
+<Groups>
+%Group1%
+  File = "lsat6.dat";
+  Varnames = v1-v5,id,theta;
+  Select = v1-v5;
+  N = 1000;
+  NCats(v1-v5) = 2;
+  Model(v1-v5) = Graded(2);
+  FixedTheta = theta;
+
+<Constraints>
+  Equal (v1-v5),Slope;

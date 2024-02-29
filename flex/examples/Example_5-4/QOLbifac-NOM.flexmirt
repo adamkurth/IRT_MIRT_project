@@ -1,0 +1,34 @@
+<Project>
+Title = "QOL Data";
+Description = "35 Items Bifactor Nominal Model";
+
+<Options>
+  Mode = Calibration;
+  Quadrature = 21,5.0;
+  Etol = 1e-4;
+  Mtol = 1e-5;
+  Processors = 2;
+
+<Groups>
+%Group1%
+  File = "QOL.DAT";
+  Varnames = v1-v35;
+  N = 586;
+  Ncats(v1-v35) = 7;
+  Model(v1-v35) = Nominal(7);
+  Dimensions = 8;
+  Primary = 1;
+
+<Constraints>
+  Fix (v1-v35),ScoringFn(1);
+  
+  Fix (v1-v35),Slope;
+  
+  Free (v1-v35),Slope(1);
+  Free (v2-v5),Slope(2);
+  Free (v6-v9),Slope(3);
+  Free (v10-v15),Slope(4);
+  Free (v16-v21),Slope(5);
+  Free (v22-v26),Slope(6);
+  Free (v27-v31),Slope(7);
+  Free (v32-v35),Slope(8);
