@@ -1,30 +1,39 @@
-TITLE: "2PL Model Example";
+<Project>
+// Printed as output  
+Title = "CTT example";
+Description = "12 dichotmous items, N = 2844";
 
-DATA: 
-  FILE = "your_data_file.dat";
-  FORMAT = FREE;
-  NITEMS = N;  // Replace N with the actual number of items
-  NGROUPS = 1;
-  MISSING = -9; // or whatever your missing data code is
+<Options>
+Mode = Classical; 
+// Mode declares this to be Classical test theory
 
-MODEL: 
-  ITEM = 1-N;  // Replace N with your actual number of items
-  MODEL = 2PL;
-  // If you have specific item labels, you can specify them individually like:
-  // ITEM 1: MODEL = 2PL;
-  // ITEM 2: MODEL = 2PL;
-  // and so on for each item.
+<Groups>
+%Group1%  
+  //Section header 
+File = "/Users/k33go/Documents/vscode/IRT_MIRT_project/flex/examples/Example_3-1/g341-19.dat"; 
+  //path to data file 
+  // When command file (*.flexmirt) and datafile are in the same folder, the name of the data file is sufficient for flexmirt to locate it.
+  // It not, then specify the full path.
+Varnames = v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12; 
+  // variable names
+N = 2844;
+  //Number of examinees
+Ncats (v1-v12) = 2; 
+  // Number of categories, (shortened to v1-v12)
+Model (_ALL_) = Graded(2); 
+  // Model intended to be fit to each item
+  // _ALL_ : macro type variable (Only used in Groups Section)
+  // limited in that all variables must have same properties,
+  // i.e. all items must have the same number of response categories, be fit with same item model.)
+  // V1-V12 cannot be used
+  // _ALL_ macro variable is only available for use in <Groups> section
+  // attempts to use if in <Constraints> section will be ignored and likely to result in errirs or unintended models
+ItemWeights (v2) = (0, 0.5);
+  // default weighting of responses (e.g. a 0-response given a weight of 0)
+  // ItemWeights (vars) = ; command in <Groups> can be used to assign alternate weights
+  //(e.g. 0-response is given a weight of 0, 1-response given weight of 0.5)
+  
+  
+<Constraints>
 
-GROUP: 
-  NAME = "YourGroupName"; // Optional, can be used if you have specific group names
-
-OUTPUT: 
-  PARAM = YES; // To save parameter estimates
-  // Additional output options as needed
-
-OPTIONS: 
-  MAXITER = 500; // Maximum number of EM iterations
-  CONVERGE = 0.0001; // Convergence criterion
-  SEED = 12345; // Seed for random number generation, if needed
-
-END;
+ 
