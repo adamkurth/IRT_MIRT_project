@@ -50,8 +50,8 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
         b <- cross.param$b
 
         theta.matrix <- matrix(rep(theta, each = n.items), nrow = n.persons, byrow = TRUE)
-        a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = FALSE)
-        b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = FALSE)
+        a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = TRUE)
+        b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = TRUE)
 
         p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
 
@@ -103,8 +103,8 @@ quick.sim.response <- function(theta.values, cross.param, seed=123) {
 
     # create matrices for theta, a, and b
     theta.matrix <- matrix(rep(theta.values, each = n.items), nrow = n.persons, byrow = TRUE)
-    a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = FALSE)
-    b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = FALSE)
+    a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = TRUE)
+    b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = TRUE)
     
     # calculate the probability matrix
     p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
@@ -150,7 +150,7 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 } # end export.data
 
 #### Method 2
-fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications=10) {
+fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) {
     require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
 
@@ -187,7 +187,7 @@ fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replicati
                     message(paste("Replication", rep, ": Completed", "- Time to convergence:", total.time[rep]))
 
                     # coefficient 
-                    coefs <- coef(fit, simplify = TRUE)$items # working
+                    coefs <- coef(fit, simplify = TRUE)$items # working #######
                     est.params.a[rep, ] <- coefs[, "a1"] # for a  
                     est.params.b[rep, ] <- coefs[, "d"] # for b
 
@@ -318,7 +318,7 @@ dist.types <- c("stnd.norm")
 
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-metrics <- fit.mirt(dist.type='stnd.norm', rep=1, cross.param, methods, dentypes, 10) # for quick testing
+metrics <- fit.mirt(dist.type='stnd.norm', cross.param, methods, dentypes, 10) # for quick testing
 
 # metrics.revised <- fit.mirt(den.type='stnd.norm', rep, cross.param, methods, dentypes, 100) 
 # metrics.revised # view
