@@ -11,7 +11,7 @@ Summary of the Data and Dimensions
 Number of Data Lines      2844
 
 Output Files
-Text results and control parameters: 2PLM_example_CTT-ctt.txt
+Text results and control parameters: test-ctt.txt
 
 Item and (Weighted) Summed-Score Statistics for Group 1: Group1
 
@@ -118,4 +118,4 @@ Item   Average  Std.Dev. Correlation  If Deleted
   11     0.444     0.497      0.2903      0.6332
   12     0.531     0.499      0.3287      0.6250
 
-Sun Mar  3 13:06:30 2024
+Sun Mar  3 13:08:33 2024
