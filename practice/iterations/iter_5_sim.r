@@ -153,7 +153,7 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) {
     require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
-
+    
     # initialize results list
     results <- list()
     n.items <- length(cross.param$a)
@@ -314,12 +314,16 @@ export.data(cross.param, output.dir='response_data', n=300, replications=10, see
 
 methods <- c("BL")
 dentypes <- c("Gaussian")
-dist.types <- c("stnd.norm")
+dist.types <- c("stnd.norm", "left.skew", "right.skew")
 
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-metrics <- fit.mirt(dist.type='stnd.norm', cross.param, methods, dentypes, 10) # for quick testing
+metrics_stnd <- fit.mirt(dist.type=dist.types[1], cross.param, methods, dentypes, 10) 
+metrics_left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
+metrics_right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10)
 
+metrics <- list(stnd.norm = metrics_stnd, left.skew = metrics_left, right.skew = metrics_right)
+metrics # view
 # metrics.revised <- fit.mirt(den.type='stnd.norm', rep, cross.param, methods, dentypes, 100) 
 # metrics.revised # view
 
