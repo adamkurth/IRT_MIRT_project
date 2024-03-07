@@ -1,7 +1,7 @@
 rm(list=ls())
 
 load <- function(){
-    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "progressr")
+    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "dplyr")
 
     sapply(packages, require, character.only = TRUE)
 } # end load
@@ -161,7 +161,7 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 } # end export.data
 
 #### Method 2
-fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) { # adjusted no rep parameter
+fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) {
     require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
     
@@ -226,9 +226,13 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
                 metrics$rmse.a <- sqrt(colMeans((est.params.a - rep(metrics$true.a, each = n.replications))^2, na.rm = TRUE))
                 metrics$rmse.b <- sqrt(colMeans((est.params.b - rep(metrics$true.b, each = n.replications))^2, na.rm = TRUE))
 
+                metrics$est.a <- colMeans(est.params.a, na.rm = TRUE)
+                metrics$est.b <- colMeans(est.params.b, na.rm = TRUE)
+
                 # Store metrics in the results list with a unique name
                 results[[paste("method", method, "dentype", dentype)]] <- metrics
                 
+
                 # calculating the average bias and RMSE for each item
                 # summarizing over replications for each item not accross all items!
             } else {
@@ -308,9 +312,84 @@ read.data.all <- function(){
 
 # visuals: 439, 442, 445 ?
 
-characteristic.curves <- function(cross.param, theta.df){
+# plot.characteristic.curves <- function(dist.data, probabilities.data, metrics){
+#     # Ensure the presence of necessary columns
+#     if (!"theta" %in% names(dist.data)) {
+#         stop("dist.data must contain a 'theta' column.")
+#     }
     
-} # end characteristic.curves
+#     # Ensure the number of rows match
+#     if (nrow(dist.data) != nrow(probabilities.data)) {
+#         stop("The number of rows in dist.data and probabilities must be the same.")
+#     }
+
+#     # print the distribution in dist.data to be aware
+#     message(paste("Please check to ensure that dist.type is correct:", names(all.distributions)))
+
+
+#     # combine the theta and probabilites into 1 dataframe
+#     combined <- cbind(dist.data, probabilities.data) %>%
+#         pivot_longer(cols = starts_with("P"), names_to = "item", values_to = "probability") %>%
+#         mutate(item = as.numeric(gsub("P", "", item)))
+
+#     # subset to only include the items corresponding to "b" parameter 
+#     message(paste("Fixing parameter a = 1.5"))
+#     items.to.plot <- cross.param[cross.param$a == 1.5, "b"]
+#     combined <- combined %>% filter(item %in% items.to.plot)
+    
+#     calc_prob_2pl <- function(theta, a, b) {
+#         1 / (1 + exp(-a * (theta - b)))
+#     }
+    
+#     curve_data <- metrics %>%
+#         rowwise() %>%
+#         do({
+#             data.frame(
+#                 theta = dist.data$theta,
+#                 probability_true = calc_prob_2pl(dist.data$theta, .$true.a, .$true.b),
+#                 probability_est = calc_prob_2pl(dist.data$theta, .$est.a, .$est.b),
+#                 item = as.factor(.$item)
+#             )
+#         }) %>%
+#         ungroup()
+
+#     p <- ggplot() +
+#         geom_line(data = combined, aes(x = theta, y = probability, group = item, color = item), alpha = 0.3) +
+#         geom_line(data = curve_data, aes(x = theta, y = probability_true, color = item), linewidth = 1.2) +
+#         geom_line(data = curve_data, aes(x = theta, y = probability_est, color = item), linewidth = 0.6, linetype = "dashed") +
+#         scale_color_manual(values = rainbow(length(unique(curve_data$item)))) +
+#         labs(title = "Item Characteristic Curves: True vs. Estimated", x = "Theta", y = "Probability") +
+#         theme_minimal() +
+#         theme(legend.position = "none")
+
+#     print(p)
+    
+# } # end characteristic.curves
+
+plot.a.comparison <- function(metrics_df) {
+    # Convert metrics to a dataframe if it's a list containing one
+    if (is.list(metrics) && length(metrics) == 1) {
+        metrics <- metrics[[1]]  # Assuming the desired dataframe is the first element
+    } else if (is.list(metrics)) {
+        stop("Multiple elements found in metrics. Please specify the correct element to use.")
+    }
+    
+    # Ensure metrics is now a dataframe
+    if (!inherits(metrics, "data.frame")) {
+        stop("metrics must be a dataframe")
+        
+    metrics_df <- metrics_df %>% 
+        mutate(a_diff = true.a - est.a, a_avg = (true.a + est.a) / 2)
+
+    ggplot(metrics_df, aes(x = true.a, y = est.a)) +
+        geom_point(alpha = 0.6) +
+        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
+        labs(title = "Comparison of True and Estimated 'a' Parameters",
+            x = "True a",
+            y = "Estimated a") +
+        theme_minimal()
+}
+
 
 load()
 n <- 300
@@ -324,8 +403,8 @@ cross.param$b <- with(cross.param, -d/a)
 # simulate response data: for each dist, has 300 rows of 20 item responses
 # response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
 sim <- simulate.response.data(all.distributions, cross.param)
-response.dataframes <- sim$response  # added 
-probabilities.dataframes <- sim$probabilities  # added
+response.dataframes <- sim$response
+probabilities.dataframes <- sim$probabilities
 
 # output here: response.dataframes$left.skew, response.dataframes$right.skew, response.dataframes$stnd.norm
 
@@ -334,9 +413,9 @@ probabilities.dataframes <- sim$probabilities  # added
 dist.data <- quick.gen.dist(300, dist.type='stnd.norm', seed=123)
 
 sim <- quick.sim.response(dist.data$theta, cross.param, seed=123)
-response.data <- sim$response   # added
-probabilities.data <- sim$probabilities # added 
-export.data(cross.param, output.dir='response_data', n=300, replications=10, seed=123)
+response.data <- sim$response
+probabilities.data <- sim$probabilities
+export.data(cross.param, output.dir='response_data', n=300, replications=10, seed=123) # calls quick.sim.response and quick.gen.dist
 
 methods <- c("BL")
 dentypes <- c("Gaussian")
@@ -352,3 +431,6 @@ metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentype
 metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics # view
 
+# testing
+# plot.characteristic.curves(dist.data, probabilities.data, as.data.frame(metrics.stnd)) # same distribution type
+plot.a.comparison(metrics.stnd)
