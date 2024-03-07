@@ -43,7 +43,7 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
     all_distributions$theta <- as.numeric(all_distributions$theta)
     all_distributions$distribution <- as.factor(all_distributions$distribution)
     
-    simulate_response <- function(theta, cross.param) {
+    simulate.response <- function(theta, cross.param) {
         n.persons <- length(theta)
         n.items <- nrow(cross.param)
         a <- cross.param$a
@@ -56,19 +56,27 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
         p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
 
         response.matrix <- ifelse(runif(n.persons * n.items) < p.matrix, 1, 0)
-
         response.df <- as.data.frame(response.matrix)
         colnames(response.df) <- paste0("I", seq_len(n.items))
-        return(response.df)
+        
+        # added: return probabilities for plotting
+        # return probabilities for plotting 
+        prob.df <- as.data.frame(p.matrix)
+        colnames(prob.df) <- paste0("P", seq_len(n.items))
+
+    return(list(response = response.df, probabilities = prob.df))
     }
     # apply simulate_response to each group of theta values
     response.dataframes <- list()
+    prob.dataframes <- list()
     distributions <- unique(all.distributions$distribution)
     for (distribution in distributions) {
         theta.values <- all_distributions$theta[all_distributions$distribution == distribution]
-        response.dataframes[[distribution]] <- simulate_response(theta.values, cross.param)
+        simulated.data <- simulate.response(theta.values, cross.param)
+        response.dataframes[[distribution]] <- simulated.data$response # added
+        prob.dataframes[[distribution]] <- simulated.data$probabilities # added
     }
-    return(response.dataframes)
+    return(list(response = response.dataframes, probabilities = prob.dataframes))
 } # end simulate.response.data
 
 # Method 2
@@ -111,8 +119,10 @@ quick.sim.response <- function(theta.values, cross.param, seed=123) {
     response.matrix <- ifelse(runif(n.persons * n.items) < p.matrix, 1, 0)
 
     response.df <- as.data.frame(response.matrix)
+    prob.df <- as.data.frame(p.matrix)
+    colnames(prob.df) <- paste0("P", seq_len(n.items))
     colnames(response.df) <- paste0("I", seq_len(n.items))
-    return(response.df)
+    return(list(response = response.df, probabilities = prob.df))
 } # end quick.sim.response
 
 # for reading a specific response data file 
@@ -139,7 +149,8 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
             # generate theta values
             theta.data <- quick.gen.dist(n, dist.type = dist.type, seed = seed + rep) # seed is incremented by rep
             # simulate response data
-            response.data <- quick.sim.response(theta.data$theta, cross.param, seed=123+rep) # seed is incremented by rep
+            sim <- quick.sim.response(theta.data$theta, cross.param, seed=123+rep) # seed is incremented by rep
+            response.data <- sim$response # only want pure response data
             # generate filename with replication number 
             filename <- sprintf("%s/response_%s_rep_%02d.txt", output.dir, gsub("\\.", "_", dist.type), rep)
             write.table(response.data, filename, sep = "\t", row.names = FALSE, col.names = TRUE)
@@ -151,7 +162,7 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 
 #### Method 2
 fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) { # adjusted no rep parameter
-     require(mirt, quietly = TRUE)
+    require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
     
     # initialize results list
@@ -188,9 +199,6 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
 
                     # coefficient 
                     coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE )$items # adjusted 
-                    # print(names(coefs))
-                    # print(str(coefs))
-                    # print(coefs)
 
                     est.params.a[rep, ] <- coefs[, "a"]  # Corrected from "a1" to "a"
                     est.params.b[rep, ] <- coefs[, "b"]  # Corrected from "d" to "b"
@@ -237,7 +245,11 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     require(mirt, quietly = TRUE)
     
     # Generate or load response dataframes for each distribution type
-    response.dataframes <- simulate.response.data(all.distributions, cross.param)  # Placeholder; adjust as needed
+    sim <- simulate.response.data(all.distributions, cross.param)  # Placeholder; adjust as needed
+    response.dataframes <- sim$response  # added 
+    probabilities.dataframes <- sim$probabilities  # added
+
+    # FIX THIS: Need to ensure response dataframes are implemented correctly
 
     log <- "parallel_fit_mirt.log"
     write(paste("Starting parallel processing at", Sys.time()), file = log)
@@ -296,6 +308,10 @@ read.data.all <- function(){
 
 # visuals: 439, 442, 445 ?
 
+characteristic.curves <- function(cross.param, theta.df){
+    
+} # end characteristic.curves
+
 load()
 n <- 300
 # Method 1: initial implementation
@@ -306,13 +322,20 @@ cross.param <- expand.grid(d = c(-2.5, -1.25, 0, 1.25, 2.5), a = c(0.5, 1, 1.5, 
 cross.param$b <- with(cross.param, -d/a)
 
 # simulate response data: for each dist, has 300 rows of 20 item responses
-response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+# response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+sim <- simulate.response.data(all.distributions, cross.param)
+response.dataframes <- sim$response  # added 
+probabilities.dataframes <- sim$probabilities  # added
+
 # output here: response.dataframes$left.skew, response.dataframes$right.skew, response.dataframes$stnd.norm
 
 ######
 # Method 2: revised implementation 
 dist.data <- quick.gen.dist(300, dist.type='stnd.norm', seed=123)
-response.data <- quick.sim.response(dist.data$theta, cross.param, seed=123) # test call 
+
+sim <- quick.sim.response(dist.data$theta, cross.param, seed=123)
+response.data <- sim$response   # added
+probabilities.data <- sim$probabilities # added 
 export.data(cross.param, output.dir='response_data', n=300, replications=10, seed=123)
 
 methods <- c("BL")
@@ -328,3 +351,4 @@ metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentype
 
 metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics # view
+
