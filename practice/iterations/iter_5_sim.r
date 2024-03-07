@@ -49,9 +49,9 @@ simulate.response.data <- function(all_distributions, cross.param, seed = 123) {
         a <- cross.param$a
         b <- cross.param$b
 
-        theta.matrix <- matrix(rep(theta, each = n.items), nrow = n.persons, byrow = TRUE)
-        a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = TRUE)
-        b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = TRUE)
+        theta.matrix <- matrix(rep(theta, each = n.items), nrow = n.persons, byrow = TRUE) 
+        a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = TRUE) # BYROW = TRUE
+        b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = TRUE) # BYROW = TRUE  
 
         p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
 
@@ -103,8 +103,8 @@ quick.sim.response <- function(theta.values, cross.param, seed=123) {
 
     # create matrices for theta, a, and b
     theta.matrix <- matrix(rep(theta.values, each = n.items), nrow = n.persons, byrow = TRUE)
-    a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = TRUE)
-    b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = TRUE)
+    a.matrix <- matrix(rep(a, n.persons), nrow = n.persons, byrow = TRUE) # BYROW = TRUE adjusted 
+    b.matrix <- matrix(rep(b, n.persons), nrow = n.persons, byrow = TRUE) # BYROW = TRUE adjusted 
     
     # calculate the probability matrix
     p.matrix <- 1 / (1 + exp(-(a.matrix * (theta.matrix - b.matrix))))
@@ -150,8 +150,8 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 } # end export.data
 
 #### Method 2
-fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) {
-    require(mirt, quietly = TRUE)
+fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) { # adjusted no rep parameter
+     require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
     
     # initialize results list
@@ -187,9 +187,13 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
                     message(paste("Replication", rep, ": Completed", "- Time to convergence:", total.time[rep]))
 
                     # coefficient 
-                    coefs <- coef(fit, simplify = TRUE)$items # working #######
-                    est.params.a[rep, ] <- coefs[, "a1"] # for a  
-                    est.params.b[rep, ] <- coefs[, "d"] # for b
+                    coefs <- coef(fit, simplify = TRUE, IRTpars = TRUE )$items # adjusted 
+                    # print(names(coefs))
+                    # print(str(coefs))
+                    # print(coefs)
+
+                    est.params.a[rep, ] <- coefs[, "a"]  # Corrected from "a1" to "a"
+                    est.params.b[rep, ] <- coefs[, "b"]  # Corrected from "d" to "b"
 
                 }, error = function(e) {
                     message(sprintf("Error during replication %d: %s", rep, e$message))
@@ -290,11 +294,10 @@ read.data.all <- function(){
     return(response.dataframes)
 } # end read.data.all
 
-
+# visuals: 439, 442, 445 ?
 
 load()
 n <- 300
-######
 # Method 1: initial implementation
 all.distributions <- generate.skewed.distribitions(n, seed=123)
 
@@ -318,13 +321,10 @@ dist.types <- c("stnd.norm", "left.skew", "right.skew")
 
 
 # Corrected function call to specifically use 'stnd.norm' dataframe
-metrics_stnd <- fit.mirt(dist.type=dist.types[1], cross.param, methods, dentypes, 10) 
-metrics_left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
-metrics_right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10)
+# no rep parameter
+metrics.stnd <- fit.mirt(dist.type=dist.types[1], cross.param, methods, dentypes, 10) 
+metrics.left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
+metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10)
 
-metrics <- list(stnd.norm = metrics_stnd, left.skew = metrics_left, right.skew = metrics_right)
+metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics # view
-# metrics.revised <- fit.mirt(den.type='stnd.norm', rep, cross.param, methods, dentypes, 100) 
-# metrics.revised # view
-
-# fit.mirt <- function(dist.type, rep, cross.param, methods, dentypes, n.replications = 10) {
