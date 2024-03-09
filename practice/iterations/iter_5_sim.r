@@ -366,11 +366,11 @@ read.data.all <- function(){
     
 # } # end characteristic.curves
 
-# plot.icc <- function(cross.param, metrics, dist.data, probabilities.data) {
+plot.icc <- function(cross.param, metrics, dist.data, probabilities.data) {
+    # waiting for direction
+}
 
-# }
-
-
+# working base function 
 plot.method.comparison.rmse <- function(metrics.BL, metrics.EM){
     # ensure arguments are of the form metrics[[1]] for proper handling of dataframes
     metrics.BL <- metrics.BL %>% mutate(Method = "BL")
@@ -401,46 +401,89 @@ plot.method.comparison.rmse <- function(metrics.BL, metrics.EM){
     
 }
 
-plot.rmse.differences.with.true.values <- function(metrics.BL, metrics.EM) {
+# working
+plot.rmse.differences <- function(metrics.BL, metrics.EM) {
+    # join metrics 
     combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
   
-    # Convert to long format for easier plotting
+    # convert to longer format
     combined.long <- combined.metrics %>%
         pivot_longer(cols = c("rmse.a_BL", "rmse.a_EM", "rmse.b_BL", "rmse.b_EM"), 
-                     names_to = "Parameter_Method", values_to = "RMSE") %>%
-        mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"),
-               Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b"),
-               RMSE_Diff = RMSE * ifelse(Method == "BL", 1, -1)) %>%
-        select(-Parameter_Method)
+                     names_to = "Parameter_Method", values_to = "RMSE") %>% 
+        mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"), # extract method
+               Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b"), # extract parameter
+               RMSE_Diff = RMSE * ifelse(Method == "BL", 1, -1)) %>% # calc difference
+        select(-Parameter_Method) # remove intermediate column
 
-    # Create a single row per item and parameter in true.values for annotations
+    # separate the true values for annotations
+    true.values <- combined.metrics %>% 
+        select(item, starts_with("true")) %>% 
+        pivot_longer(cols = starts_with("true"), names_to = "True_Param", values_to = "True_Value") %>% 
+        mutate(Parameter = ifelse(str_detect(True_Param, "a"), "a", "b")) %>% # extract parameter
+        distinct(item, Parameter, .keep_all = TRUE)  # ensure unique item-parameter pairs
+
+    # join the true values for plotting
+    combined.long <- left_join(combined.long, true.values, by = c("item", "Parameter")) 
+
+    # plot the RMSE differences with true values annotated
+    p <- ggplot(combined.long, aes(x = Parameter, y = RMSE_Diff, fill = Method)) +
+        geom_col(position = position_dodge(width = 0.8)) +
+        facet_wrap(~ item, scales = "fixed", labeller = label_both) +  # Set fixed scales and label each plot with "Item"
+        geom_text(aes(label = sprintf("True %s: %.2f", Parameter, True_Value)),
+                  position = position_dodge(width = 0.8), check_overlap = TRUE,
+                  vjust = -0.5, size = 2.5) +
+        scale_fill_manual(values = c("blue", "red")) +
+        labs(title = "RMSE Comparison for Each Item: BL vs. EM", x = "Parameter", y = "RMSE Difference") +
+        theme_minimal() +
+        theme(legend.position = "bottom",
+              strip.background = element_blank(),
+              strip.text.x = element_text(size = 8)) + 
+        ylim(-0.5, 0.5) # Set fixed y-axis limits
+
+    print(p)
+}
+
+plot.bias.differences <- function(metrics.BL, metrics.EM){
+    # combine metrics
+    combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
+  
+    # convert to long format for easier plotting of bias
+    combined.long <- combined.metrics %>%
+        pivot_longer(cols = c("bias.a_BL", "bias.a_EM", "bias.b_BL", "bias.b_EM"), 
+                     names_to = "Parameter_Method", values_to = "Bias") %>%
+        mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"),
+               Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b"), # extract parameter
+               Bias_Diff = Bias * ifelse(Method == "BL", 1, -1)) %>% # calculate difference
+        select(-Parameter_Method) # remove intermediate column
+
+    # prep true values for annotations
     true.values <- combined.metrics %>%
         select(item, starts_with("true")) %>%
         pivot_longer(cols = starts_with("true"), names_to = "True_Param", values_to = "True_Value") %>%
         mutate(Parameter = ifelse(str_detect(True_Param, "a"), "a", "b")) %>%
         distinct(item, Parameter, .keep_all = TRUE)  # Ensure unique item-parameter pairs
 
-    # Join the true values for plotting
+    # join the true values for plotting
     combined.long <- left_join(combined.long, true.values, by = c("item", "Parameter"))
 
-    # Plot the RMSE differences with true values annotated
-    p <- ggplot(combined.long, aes(x = Parameter, y = RMSE_Diff, fill = Method)) +
+    # plot the Bias differences with true values annotated
+    p <- ggplot(combined.long, aes(x = Parameter, y = Bias_Diff, fill = Method)) +
         geom_col(position = position_dodge(width = 0.8)) +
-        facet_wrap(~ item, scales = "free_y", labeller = label_bquote(Item~.x)) +  # Add 'Item' label to the top of each plot
+        facet_wrap(~ item, scales = "fixed", labeller = label_both) +
         geom_text(aes(label = sprintf("True %s: %.2f", Parameter, True_Value)),
                   position = position_dodge(width = 0.8), check_overlap = TRUE,
                   vjust = -0.5, size = 2.5) +
         scale_fill_manual(values = c("blue", "red")) +
-        labs(title = "RMSE Comparison for Each Item: BL vs. EM", x = "", y = "RMSE Difference") +
+        labs(title = "Bias Comparison for Each Item: BL vs. EM", x = "Parameter", y = "Bias Difference") +
         theme_minimal() +
         theme(legend.position = "bottom",
               strip.background = element_blank(),
-              strip.text.x = element_text(size = 8)) +
-        ylim(-0.5, 0.5)  # Set y-axis limits to -0.5 to 0.5
-
+              strip.text.x = element_text(size = 8)) + 
+        ylim(-0.5, 0.5)  # Set the same scale for all plots
 
     print(p)
 }
+
 
 load()
 n <- 300
@@ -482,8 +525,7 @@ metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentype
 metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics # view
 
-# testing
-# plot.icc(cross.param, metrics.stnd, dist.data, probabilities.data)
-plot.method.comparison.rmse(metrics.stnd[[1]], metrics.stnd[[2]])
+# working 
+plot.rmse.differences(metrics.stnd[[1]], metrics.stnd[[2]])
+plot.bias.differences(metrics.stnd[[1]], metrics.stnd[[2]])
 
-plot.rmse.differences.with.true.values(metrics.stnd[[1]], metrics.stnd[[2]])
