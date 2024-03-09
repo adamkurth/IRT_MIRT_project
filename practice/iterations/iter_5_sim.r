@@ -312,59 +312,51 @@ read.data.all <- function(){
 
 # visuals: 439, 442, 445 ?
 
-plot.characteristic.curves <- function(dist.data, probabilities.data, metrics){
+plot.characteristic.curves <- function(fixed.a, dist.data, probabilities.data, metrics) {
     # Ensure the presence of necessary columns
     if (!"theta" %in% names(dist.data)) {
         stop("dist.data must contain a 'theta' column.")
     }
-    
-    # Ensure the number of rows match
     if (nrow(dist.data) != nrow(probabilities.data)) {
         stop("The number of rows in dist.data and probabilities must be the same.")
     }
 
-    # print the distribution in dist.data to be aware
-    message(paste("Please check to ensure that dist.type is correct:", names(all.distributions)))
-
-
-    # combine the theta and probabilites into 1 dataframe
-    combined <- cbind(dist.data, probabilities.data) %>%
-        pivot_longer(cols = starts_with("P"), names_to = "item", values_to = "probability") %>%
-        mutate(item = as.numeric(gsub("P", "", item)))
-
-    # subset to only include the items corresponding to "b" parameter 
-    message(paste("Fixing parameter a = 1.5"))
-    items.to.plot <- cross.param[cross.param$a == 1.5, "b"]
-    combined <- combined %>% filter(item %in% items.to.plot)
+    # Corrected the message to use the fixed.a
+    message(paste("Fixing parameter a to", fixed.a))
     
+    # Filter metrics for the specified 'fixed.a' value
+    metrics.filtered <- filter(metrics, a == fixed.a)
+
+    # Function to calculate probability using 2PL model
     calc_prob_2pl <- function(theta, a, b) {
         1 / (1 + exp(-a * (theta - b)))
     }
-    
-    curve_data <- metrics %>%
-        rowwise() %>%
-        do({
-            data.frame(
-                theta = dist.data$theta,
-                probability_true = calc_prob_2pl(dist.data$theta, .$true.a, .$true.b),
-                probability_est = calc_prob_2pl(dist.data$theta, .$est.a, .$est.b),
-                item = as.factor(.$item)
-            )
-        }) %>%
-        ungroup()
 
+    # Preparing data for plotting
+    curve.data <- metrics.filtered %>%
+        mutate(
+            probability_true = map2(theta, true.b, ~calc_prob_2pl(dist.data$theta, fixed.a, .x)),
+            probability_est = map2(theta, est.b, ~calc_prob_2pl(dist.data$theta, fixed.a, .x))
+        ) %>%
+        unnest(c(probability_true, probability_est))
+    
+    # Combine theta and probabilities for plotting
+    combined <- cbind(dist.data, probabilities.data) %>%
+        pivot_longer(cols = starts_with("P"), names_to = "item", values_to = "probability") %>%
+        mutate(item = as.numeric(gsub("P", "", item)))
+    
+    # Plot
     p <- ggplot() +
-        geom_line(data = combined, aes(x = theta, y = probability, group = item, color = item), alpha = 0.3) +
-        geom_line(data = curve_data, aes(x = theta, y = probability_true, color = item), linewidth = 1.2) +
-        geom_line(data = curve_data, aes(x = theta, y = probability_est, color = item), linewidth = 0.6, linetype = "dashed") +
-        scale_color_manual(values = rainbow(length(unique(curve_data$item)))) +
-        labs(title = "Item Characteristic Curves: True vs. Estimated", x = "Theta", y = "Probability") +
+        geom_line(data = combined, aes(x = theta, y = probability, group = item, color = as.factor(item)), alpha = 0.3) +
+        geom_line(data = curve.data, aes(x = theta, y = probability_true, color = as.factor(item)), size = 1.2) +
+        geom_line(data = curve.data, aes(x = theta, y = probability_est, color = as.factor(item)), size = 0.6, linetype = "dashed") +
+        scale_color_manual(values = rainbow(n_distinct(metrics.filtered$item))) +
+        labs(title = "Item Characteristic Curves: True vs. Estimated", x = "Theta", y = "Probability", color = "Item") +
         theme_minimal() +
         theme(legend.position = "none")
 
     print(p)
-    
-} # end characteristic.curves
+}
 
 
 # # working base function 
@@ -592,5 +584,5 @@ dist.list <- list(stnd.norm=dist.stnd, left.skew=dist.left, right.skew=dist.righ
 plot.dist.combined(dist.list)
 
 # icc
-# testing 
-plot.characteristic.curves(dist.data, probabilities.data, metrics.stnd[[1]])
+# testing/unfinished 
+plot.characteristic.curves(fixed.a=0.5, dist.data=dist.data, probabilities.data=probabilities.data, metrics=metrics.stnd[[1]],)
