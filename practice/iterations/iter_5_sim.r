@@ -1,7 +1,7 @@
 rm(list=ls())
 
 load <- function(){
-    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "dplyr")
+    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "dplyr", "stringr")
 
     sapply(packages, require, character.only = TRUE)
 } # end load
@@ -366,30 +366,81 @@ read.data.all <- function(){
     
 # } # end characteristic.curves
 
-plot.a.comparison <- function(metrics_df) {
-    # Convert metrics to a dataframe if it's a list containing one
-    if (is.list(metrics) && length(metrics) == 1) {
-        metrics <- metrics[[1]]  # Assuming the desired dataframe is the first element
-    } else if (is.list(metrics)) {
-        stop("Multiple elements found in metrics. Please specify the correct element to use.")
-    }
-    
-    # Ensure metrics is now a dataframe
-    if (!inherits(metrics, "data.frame")) {
-        stop("metrics must be a dataframe")
-        
-    metrics_df <- metrics_df %>% 
-        mutate(a_diff = true.a - est.a, a_avg = (true.a + est.a) / 2)
+# plot.icc <- function(cross.param, metrics, dist.data, probabilities.data) {
 
-    ggplot(metrics_df, aes(x = true.a, y = est.a)) +
-        geom_point(alpha = 0.6) +
-        geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "red") +
-        labs(title = "Comparison of True and Estimated 'a' Parameters",
-            x = "True a",
-            y = "Estimated a") +
-        theme_minimal()
+# }
+
+
+plot.method.comparison.rmse <- function(metrics.BL, metrics.EM){
+    # ensure arguments are of the form metrics[[1]] for proper handling of dataframes
+    metrics.BL <- metrics.BL %>% mutate(Method = "BL")
+    metrics.EM <- metrics.EM %>% mutate(Method = "EM")
+    combined.metrics <- rbind(metrics.BL, metrics.EM)
+
+    # convert items into factors for proper ordering
+    combined.metrics$item <- as.factor(combined.metrics$item)
+
+    # into long format
+    long.metrics <- combined.metrics %>% 
+        gather(key="Parameter", value="RMSE", rmse.a, rmse.b) %>%
+        mutate(Parameter = gsub("rmse.a.", "", Parameter)) %>%
+        mutate(Difference = ifelse(Method == "BL", RMSE, -RMSE))
+
+    p <- ggplot(long.metrics, aes(x = Parameter, y = Difference, fill = Method)) + 
+        geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+        facet_wrap(~ item, scales = "free_y") +
+        labs(title = "RMSE Comparison for Each Item: BL vs. EM", 
+             x = "Parameter", y = "RMSE Difference") +
+        theme_minimal() +
+        theme(legend.position = "bottom",
+              axis.text.x = element_text(angle = 45, hjust = 1),
+              strip.background = element_blank(),
+              strip.text.x = element_text(size = 8))
+        
+    print(p)
+    
 }
 
+plot.rmse.differences.with.true.values <- function(metrics.BL, metrics.EM) {
+    combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
+  
+    # Convert to long format for easier plotting
+    combined.long <- combined.metrics %>%
+        pivot_longer(cols = c("rmse.a_BL", "rmse.a_EM", "rmse.b_BL", "rmse.b_EM"), 
+                     names_to = "Parameter_Method", values_to = "RMSE") %>%
+        mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"),
+               Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b"),
+               RMSE_Diff = RMSE * ifelse(Method == "BL", 1, -1)) %>%
+        select(-Parameter_Method)
+
+    # Create a single row per item and parameter in true.values for annotations
+    true.values <- combined.metrics %>%
+        select(item, starts_with("true")) %>%
+        pivot_longer(cols = starts_with("true"), names_to = "True_Param", values_to = "True_Value") %>%
+        mutate(Parameter = ifelse(str_detect(True_Param, "a"), "a", "b")) %>%
+        distinct(item, Parameter, .keep_all = TRUE)  # Ensure unique item-parameter pairs
+
+    # Join the true values for plotting
+    combined.long <- left_join(combined.long, true.values, by = c("item", "Parameter"))
+
+    # Plot the RMSE differences with true values annotated
+    p <- ggplot(combined.long, aes(x = Parameter, y = RMSE_Diff, fill = Method)) +
+        geom_col(position = position_dodge(width = 0.8)) +
+        facet_wrap(~ item, scales = "free_y", labeller = label_bquote(Item~.x)) +  # Add 'Item' label to the top of each plot
+        geom_text(aes(label = sprintf("True %s: %.2f", Parameter, True_Value)),
+                  position = position_dodge(width = 0.8), check_overlap = TRUE,
+                  vjust = -0.5, size = 2.5) +
+        scale_fill_manual(values = c("blue", "red")) +
+        labs(title = "RMSE Comparison for Each Item: BL vs. EM", x = "", y = "RMSE Difference") +
+        theme_minimal() +
+        theme(legend.position = "bottom",
+              strip.background = element_blank(),
+              strip.text.x = element_text(size = 8)) +
+        ylim(-0.5, 0.5)  # Set y-axis limits to -0.5 to 0.5
+
+
+    print(p)
+}
 
 load()
 n <- 300
@@ -417,7 +468,7 @@ response.data <- sim$response
 probabilities.data <- sim$probabilities
 export.data(cross.param, output.dir='response_data', n=300, replications=10, seed=123) # calls quick.sim.response and quick.gen.dist
 
-methods <- c("BL")
+methods <- c("BL", "EM")
 dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm", "left.skew", "right.skew")
 
@@ -432,5 +483,7 @@ metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew =
 metrics # view
 
 # testing
-# plot.characteristic.curves(dist.data, probabilities.data, as.data.frame(metrics.stnd)) # same distribution type
-plot.a.comparison(metrics.stnd)
+# plot.icc(cross.param, metrics.stnd, dist.data, probabilities.data)
+plot.method.comparison.rmse(metrics.stnd[[1]], metrics.stnd[[2]])
+
+plot.rmse.differences.with.true.values(metrics.stnd[[1]], metrics.stnd[[2]])
