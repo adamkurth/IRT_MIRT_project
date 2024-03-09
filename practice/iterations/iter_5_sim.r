@@ -1,7 +1,7 @@
 rm(list=ls())
 
 load <- function(){
-    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "dplyr", "stringr")
+    packages <- c("mirt", "ggplot2", "reshape2", "tibble", "ggpubr", "gridExtra", "sn", "tidyr", "dplyr", "moments", "parallel", "dplyr", "stringr", "tidyverse")
 
     sapply(packages, require, character.only = TRUE)
 } # end load
@@ -312,93 +312,94 @@ read.data.all <- function(){
 
 # visuals: 439, 442, 445 ?
 
-# plot.characteristic.curves <- function(dist.data, probabilities.data, metrics){
-#     # Ensure the presence of necessary columns
-#     if (!"theta" %in% names(dist.data)) {
-#         stop("dist.data must contain a 'theta' column.")
-#     }
+plot.characteristic.curves <- function(dist.data, probabilities.data, metrics){
+    # Ensure the presence of necessary columns
+    if (!"theta" %in% names(dist.data)) {
+        stop("dist.data must contain a 'theta' column.")
+    }
     
-#     # Ensure the number of rows match
-#     if (nrow(dist.data) != nrow(probabilities.data)) {
-#         stop("The number of rows in dist.data and probabilities must be the same.")
-#     }
+    # Ensure the number of rows match
+    if (nrow(dist.data) != nrow(probabilities.data)) {
+        stop("The number of rows in dist.data and probabilities must be the same.")
+    }
 
-#     # print the distribution in dist.data to be aware
-#     message(paste("Please check to ensure that dist.type is correct:", names(all.distributions)))
+    # print the distribution in dist.data to be aware
+    message(paste("Please check to ensure that dist.type is correct:", names(all.distributions)))
 
 
-#     # combine the theta and probabilites into 1 dataframe
-#     combined <- cbind(dist.data, probabilities.data) %>%
-#         pivot_longer(cols = starts_with("P"), names_to = "item", values_to = "probability") %>%
-#         mutate(item = as.numeric(gsub("P", "", item)))
+    # combine the theta and probabilites into 1 dataframe
+    combined <- cbind(dist.data, probabilities.data) %>%
+        pivot_longer(cols = starts_with("P"), names_to = "item", values_to = "probability") %>%
+        mutate(item = as.numeric(gsub("P", "", item)))
 
-#     # subset to only include the items corresponding to "b" parameter 
-#     message(paste("Fixing parameter a = 1.5"))
-#     items.to.plot <- cross.param[cross.param$a == 1.5, "b"]
-#     combined <- combined %>% filter(item %in% items.to.plot)
+    # subset to only include the items corresponding to "b" parameter 
+    message(paste("Fixing parameter a = 1.5"))
+    items.to.plot <- cross.param[cross.param$a == 1.5, "b"]
+    combined <- combined %>% filter(item %in% items.to.plot)
     
-#     calc_prob_2pl <- function(theta, a, b) {
-#         1 / (1 + exp(-a * (theta - b)))
-#     }
+    calc_prob_2pl <- function(theta, a, b) {
+        1 / (1 + exp(-a * (theta - b)))
+    }
     
-#     curve_data <- metrics %>%
-#         rowwise() %>%
-#         do({
-#             data.frame(
-#                 theta = dist.data$theta,
-#                 probability_true = calc_prob_2pl(dist.data$theta, .$true.a, .$true.b),
-#                 probability_est = calc_prob_2pl(dist.data$theta, .$est.a, .$est.b),
-#                 item = as.factor(.$item)
-#             )
-#         }) %>%
-#         ungroup()
+    curve_data <- metrics %>%
+        rowwise() %>%
+        do({
+            data.frame(
+                theta = dist.data$theta,
+                probability_true = calc_prob_2pl(dist.data$theta, .$true.a, .$true.b),
+                probability_est = calc_prob_2pl(dist.data$theta, .$est.a, .$est.b),
+                item = as.factor(.$item)
+            )
+        }) %>%
+        ungroup()
 
-#     p <- ggplot() +
-#         geom_line(data = combined, aes(x = theta, y = probability, group = item, color = item), alpha = 0.3) +
-#         geom_line(data = curve_data, aes(x = theta, y = probability_true, color = item), linewidth = 1.2) +
-#         geom_line(data = curve_data, aes(x = theta, y = probability_est, color = item), linewidth = 0.6, linetype = "dashed") +
-#         scale_color_manual(values = rainbow(length(unique(curve_data$item)))) +
-#         labs(title = "Item Characteristic Curves: True vs. Estimated", x = "Theta", y = "Probability") +
+    p <- ggplot() +
+        geom_line(data = combined, aes(x = theta, y = probability, group = item, color = item), alpha = 0.3) +
+        geom_line(data = curve_data, aes(x = theta, y = probability_true, color = item), linewidth = 1.2) +
+        geom_line(data = curve_data, aes(x = theta, y = probability_est, color = item), linewidth = 0.6, linetype = "dashed") +
+        scale_color_manual(values = rainbow(length(unique(curve_data$item)))) +
+        labs(title = "Item Characteristic Curves: True vs. Estimated", x = "Theta", y = "Probability") +
+        theme_minimal() +
+        theme(legend.position = "none")
+
+    print(p)
+    
+} # end characteristic.curves
+
+
+# # working base function 
+# plot.method.comparison.rmse <- function(metrics.BL, metrics.EM){
+#     # ensure arguments are of the form metrics[[1]] for proper handling of dataframes
+#     metrics.BL <- metrics.BL %>% mutate(Method = "BL")
+#     metrics.EM <- metrics.EM %>% mutate(Method = "EM")
+#     combined.metrics <- rbind(metrics.BL, metrics.EM)
+
+#     # convert items into factors for proper ordering
+#     combined.metrics$item <- as.factor(combined.metrics$item)
+
+#     # into long format
+#     long.metrics <- combined.metrics %>% 
+#         gather(key="Parameter", value="RMSE", rmse.a, rmse.b) %>%
+#         mutate(Parameter = gsub("rmse.a.", "", Parameter)) %>%
+#         mutate(Difference = ifelse(Method == "BL", RMSE, -RMSE))
+
+#     p <- ggplot(long.metrics, aes(x = Parameter, y = Difference, fill = Method)) + 
+#         geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
+#         facet_wrap(~ item, scales = "free_y") +
+#         labs(title = "RMSE Comparison for Each Item: BL vs. EM", 
+#              x = "Parameter", y = "RMSE Difference") +
 #         theme_minimal() +
-#         theme(legend.position = "none")
-
+#         theme(legend.position = "bottom",
+#               axis.text.x = element_text(angle = 45, hjust = 1),
+#               strip.background = element_blank(),
+#               strip.text.x = element_text(size = 8))
+        
 #     print(p)
     
-# } # end characteristic.curves
+# }
 
 plot.icc <- function(cross.param, metrics, dist.data, probabilities.data) {
     # waiting for direction
-}
-
-# working base function 
-plot.method.comparison.rmse <- function(metrics.BL, metrics.EM){
-    # ensure arguments are of the form metrics[[1]] for proper handling of dataframes
-    metrics.BL <- metrics.BL %>% mutate(Method = "BL")
-    metrics.EM <- metrics.EM %>% mutate(Method = "EM")
-    combined.metrics <- rbind(metrics.BL, metrics.EM)
-
-    # convert items into factors for proper ordering
-    combined.metrics$item <- as.factor(combined.metrics$item)
-
-    # into long format
-    long.metrics <- combined.metrics %>% 
-        gather(key="Parameter", value="RMSE", rmse.a, rmse.b) %>%
-        mutate(Parameter = gsub("rmse.a.", "", Parameter)) %>%
-        mutate(Difference = ifelse(Method == "BL", RMSE, -RMSE))
-
-    p <- ggplot(long.metrics, aes(x = Parameter, y = Difference, fill = Method)) + 
-        geom_bar(stat = "identity", position = position_dodge(width = 0.8)) +
-        facet_wrap(~ item, scales = "free_y") +
-        labs(title = "RMSE Comparison for Each Item: BL vs. EM", 
-             x = "Parameter", y = "RMSE Difference") +
-        theme_minimal() +
-        theme(legend.position = "bottom",
-              axis.text.x = element_text(angle = 45, hjust = 1),
-              strip.background = element_blank(),
-              strip.text.x = element_text(size = 8))
-        
-    print(p)
-    
 }
 
 # working
@@ -484,6 +485,56 @@ plot.bias.differences <- function(metrics.BL, metrics.EM){
     print(p)
 }
 
+# plots single theta distribution (dist.data)
+plot.dist <- function(dist.data) {
+    # Ensure 'theta' and 'distribution' columns are present in the dataframe
+    if (!("theta" %in% names(dist.data)) | !("distribution" %in% names(dist.data))) {
+        stop("dist.data must contain 'theta' and 'distribution' columns")
+    }
+
+    # Generate the plot
+    p <- ggplot(dist.data, aes(x = theta, color = distribution)) +
+            geom_density() +
+            labs(x = "Theta", y = "Density") +
+            theme_minimal() +
+            theme(legend.title = element_blank()) # Hide the legend title if desired
+
+    return(p)
+} # end plot.dist
+ 
+# show all three distributions (dist.list) in one plot
+plot.dist.combined <- function(dist.list) {
+    # Check if the list is not empty
+    if (length(dist.list) == 0) {
+        stop("The input list is empty.")
+    }
+  
+    # Combine all distribution data into one dataframe
+    combined.data <- do.call(rbind, lapply(seq_along(dist.list), function(i) {
+        # Ensure 'theta' column is present
+        if (!"theta" %in% names(dist.list[[i]])) {
+            stop("Each dataframe in dist.list must contain a 'theta' column.")
+        }
+        # Add or overwrite the 'distribution' column with the correct name
+        dist.data <- dist.list[[i]]
+        dist.data$distribution <- names(dist.list)[i]
+        return(dist.data)
+    }))
+    
+    # Ensure 'distribution' column is treated as a factor
+    combined.data$distribution <- factor(combined.data$distribution, levels = names(dist.list))
+    
+    # Plot
+    p <- ggplot(combined.data, aes(x = theta, color = distribution)) +
+        geom_density() +
+        labs(x = "Theta", y = "Density", color = "Distribution") +
+        scale_color_brewer(palette = "Set1") +
+        theme_minimal() +
+        theme(legend.title = element_blank())
+    
+    print(p)
+} # end plot.dist.combined
+
 
 load()
 n <- 300
@@ -505,6 +556,9 @@ probabilities.dataframes <- sim$probabilities
 ######
 # Method 2: revised implementation 
 dist.data <- quick.gen.dist(300, dist.type='stnd.norm', seed=123)
+dist.stnd <-
+dist.right <-  quick.gen.dist(300, dist.type='right.skew', seed=123)
+dist.left <- quick.gen.dist(300, dist.type='left.skew', seed=123)
 
 sim <- quick.sim.response(dist.data$theta, cross.param, seed=123)
 response.data <- sim$response
@@ -525,7 +579,18 @@ metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentype
 metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics # view
 
-# working 
+# rmse/bias
 plot.rmse.differences(metrics.stnd[[1]], metrics.stnd[[2]])
 plot.bias.differences(metrics.stnd[[1]], metrics.stnd[[2]])
 
+# distribution
+plot.dist(dist.stnd)
+plot.dist(dist.left)
+plot.dist(dist.right)
+
+dist.list <- list(stnd.norm=dist.stnd, left.skew=dist.left, right.skew=dist.right)
+plot.dist.combined(dist.list)
+
+# icc
+# testing 
+plot.characteristic.curves(dist.data, probabilities.data, metrics.stnd[[1]])
