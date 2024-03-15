@@ -34,7 +34,7 @@ plot.characteristic.curves <- function(cross.param, dist.data, probabilities.dat
 } # end characteristic.curves
 
 
-# 3/9/23 RMSE/Bias plot compares method for each item
+# 3/9/24 RMSE/Bias plot compares method for each item
 
 # working
 plot.rmse.differences <- function(metrics.BL, metrics.EM) {
@@ -120,7 +120,64 @@ plot.bias.differences <- function(metrics.BL, metrics.EM){
 }
 
 
-# 3/9/23 wanted to plot rmse using *args, passing the entire list into function 
+# 3/9/24 Implemented icc curves using prob.data and dist.data, and metrics 
+
+plot.characteristic.curves <- function(dist.data, probabilities.data, metrics){
+    # Ensure the presence of necessary columns
+    if (!"theta" %in% names(dist.data)) {
+        stop("dist.data must contain a 'theta' column.")
+    }
+    
+    # Ensure the number of rows match
+    if (nrow(dist.data) != nrow(probabilities.data)) {
+        stop("The number of rows in dist.data and probabilities must be the same.")
+    }
+
+    # print the distribution in dist.data to be aware
+    message(paste("Please check to ensure that dist.type is correct:", names(all.distributions)))
+
+
+    # combine the theta and probabilites into 1 dataframe
+    combined <- cbind(dist.data, probabilities.data) %>%
+        pivot_longer(cols = starts_with("P"), names_to = "item", values_to = "probability") %>%
+        mutate(item = as.numeric(gsub("P", "", item)))
+
+    # subset to only include the items corresponding to "b" parameter 
+    message(paste("Fixing parameter a = 1.5"))
+    items.to.plot <- cross.param[cross.param$a == 1.5, "b"]
+    combined <- combined %>% filter(item %in% items.to.plot)
+    
+    calc_prob_2pl <- function(theta, a, b) {
+        1 / (1 + exp(-a * (theta - b)))
+    }
+    
+    curve_data <- metrics %>%
+        rowwise() %>%
+        do({
+            data.frame(
+                theta = dist.data$theta,
+                probability_true = calc_prob_2pl(dist.data$theta, .$true.a, .$true.b),
+                probability_est = calc_prob_2pl(dist.data$theta, .$est.a, .$est.b),
+                item = as.factor(.$item)
+            )
+        }) %>%
+        ungroup()
+
+    p <- ggplot() +
+        geom_line(data = combined, aes(x = theta, y = probability, group = item, color = item), alpha = 0.3) +
+        geom_line(data = curve_data, aes(x = theta, y = probability_true, color = item), linewidth = 1.2) +
+        geom_line(data = curve_data, aes(x = theta, y = probability_est, color = item), linewidth = 0.6, linetype = "dashed") +
+        scale_color_manual(values = rainbow(length(unique(curve_data$item)))) +
+        labs(title = "Item Characteristic Curves: True vs. Estimated", x = "Theta", y = "Probability") +
+        theme_minimal() +
+        theme(legend.position = "none")
+
+    print(p)
+    
+} # end characteristic.curves
+
+
+# 3/9/24 wanted to plot rmse using *args, passing the entire list into function 
 
 plot.rmse.differences.test <- function(metrics.list) {
     combined_metrics <- bind_rows(metrics.list, .id = "Method") %>%
