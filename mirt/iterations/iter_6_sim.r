@@ -230,7 +230,7 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
                 metrics$est.b <- colMeans(est.params.b, na.rm = TRUE)
 
                 # Store metrics in the results list with a unique name
-                results[[paste0("method:", method, "dentype:", dentype)]] <- metrics
+                results[[paste0("method_", method, "_dentype_", dentype)]] <- metrics
                 
 
                 # calculating the average bias and RMSE for each item
@@ -347,73 +347,200 @@ plot.icc <- function(cross.param, metrics, dist.data, probabilities.data) {
     # waiting for direction
 }
 
-# working
-plot.rmse.differences <- function(metrics.BL, metrics.EM) {
-    # join metrics 
-    combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
-  
-    # convert to longer format
-    combined.long <- combined.metrics %>%
-        pivot_longer(cols = c("rmse.a_BL", "rmse.a_EM", "rmse.b_BL", "rmse.b_EM"), 
-                     names_to = "Parameter_Method", values_to = "RMSE") %>% 
-        mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"), # extract method
-               Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b"), # extract parameter
-               RMSE_Diff = RMSE * ifelse(Method == "BL", 1, -1)) %>% # calc difference
-        select(-Parameter_Method) # remove intermediate column
 
-    # separate the true values for annotations
-    true.values <- combined.metrics %>% 
-        select(item, starts_with("true")) %>% 
-        pivot_longer(cols = starts_with("true"), names_to = "True_Param", values_to = "True_Value") %>% 
-        mutate(Parameter = ifelse(str_detect(True_Param, "a"), "a", "b")) %>% # extract parameter
-        distinct(item, Parameter, .keep_all = TRUE)  # ensure unique item-parameter pairs
+#### plot a,b parameters 
+plot.rmse.a.diff <- function(metrics_list) {
+    # Combine all metrics into a single dataframe with 'method' and 'dentype' columns
+    combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
+        df <- metrics_list[[name]]
+        method_dentype <- strsplit(name, "_", fixed = TRUE)[[1]]
+        method <- method_dentype[2]
+        dentype <- method_dentype[4]
+        df %>% mutate(method = method, dentype = dentype, item = as.factor(item))
+    }), .id = "id") %>% 
+        select(-id) %>% 
+        mutate(method = factor(method), dentype = factor(dentype))
 
-    # join the true values for plotting
-    combined.long <- left_join(combined.long, true.values, by = c("item", "Parameter")) 
+    # Ensure 'rmse.a' is available for plotting
+    if (!"rmse.a" %in% names(combined_data)) {
+        stop("The dataframe does not contain 'rmse.a' column.")
+    }
 
-    # plot the RMSE differences with true values annotated
-    p <- ggplot(combined.long, aes(x = Parameter, y = RMSE_Diff, fill = Method)) +
-        geom_col(position = position_dodge(width = 0.8)) +
-        facet_wrap(~ item, scales = "fixed", labeller = label_both) +  # Set fixed scales and label each plot with "Item"
-        geom_text(aes(label = sprintf("True %s: %.2f", Parameter, True_Value)),
-                  position = position_dodge(width = 0.8), check_overlap = TRUE,
-                  vjust = -0.5, size = 2.5) +
-        scale_fill_manual(values = c("blue", "red")) +
-        labs(title = "RMSE Comparison for Each Item: BL vs. EM", x = "Parameter", y = "RMSE Difference") +
+    # Optionally, sort by 'item' if needed
+    combined_data <- combined_data %>% arrange(item)
+
+    # Dynamically calculate the number of columns for a symmetric grid
+    n_plots <- length(unique(combined_data$item))
+    n_cols <- ceiling(sqrt(n_plots))
+
+    # Plot RMSE differences by Method and Dentype across a flexible grid
+    p <- ggplot(combined_data, aes(x = item, y = rmse.a, group = interaction(method, dentype), color = method)) +
+        geom_point() +
+        geom_line() +
+        facet_wrap(~method + dentype, scales = "free_y", ncol = n_cols) +  # Using facet_wrap with dynamic ncol
+        labs(title = "RMSE differences for parameter 'a' across methods and dentypes",
+             x = "Item",
+             y = "RMSE for 'a'") +
         theme_minimal() +
-        theme(legend.position = "bottom",
-              strip.background = element_blank(),
-              strip.text.x = element_text(size = 8)) + 
-        ylim(-0.5, 0.5) # Set fixed y-axis limits
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              legend.position = "bottom") +
+        scale_color_manual(values = c("BL" = "blue", "EM" = "red", "MCEM" = "green")) # add more colors as needed
 
-    print(p)
+    return(p)
+}
+plot.rmse.b.diff <- function(metrics_list) {
+    # Combine all metrics into a single dataframe with 'method' and 'dentype' columns
+    combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
+        df <- metrics_list[[name]]
+        method_dentype <- strsplit(name, "_", fixed = TRUE)[[1]]
+        method <- method_dentype[2]
+        dentype <- method_dentype[4]
+        df %>% mutate(method = method, dentype = dentype, item = as.factor(item))
+    }), .id = "id") %>% 
+        select(-id) %>% 
+        mutate(method = factor(method), dentype = factor(dentype))
+
+    # Ensure 'rmse.b' is available for plotting
+    if (!"rmse.b" %in% names(combined_data)) {
+        stop("The dataframe does not contain 'rmse.b' column.")
+    }
+
+    # Optionally, sort by 'item' if needed
+    combined_data <- combined_data %>% arrange(item)
+
+    # Dynamically calculate the number of columns for a symmetric grid
+    n_plots <- length(unique(combined_data$item))
+    n_cols <- ceiling(sqrt(n_plots))
+
+    # Plot RMSE differences by Method and Dentype across a flexible grid
+    p <- ggplot(combined_data, aes(x = item, y = rmse.b, group = interaction(method, dentype), color = method)) +
+        geom_point() +
+        geom_line() +
+        facet_wrap(~method + dentype, scales = "free_y", ncol = n_cols) +  # Using facet_wrap with dynamic ncol
+        labs(title = "RMSE differences for parameter 'b' across methods and dentypes",
+             x = "Item",
+             y = "RMSE for 'b'") +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 45, hjust = 1),
+              legend.position = "bottom") +
+            scale_color_manual(values = c("BL" = "blue", "EM" = "red", "MCEM" = "green")) # add more colors as needed
+
+    return(p)
+}
+# for bias
+plot.bias.a.diff <- function(metrics_list) {
+  combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
+    df <- metrics_list[[name]]
+    method_dentype <- strsplit(name, "_", simplify = TRUE)[[1]]
+    method <- method_dentype[2]
+    dentype <- method_dentype[4]
+    df %>% mutate(method = method, dentype = dentype, item = as.factor(item))
+  }), .id = "id") %>%
+    select(-id) %>%
+    mutate(method = factor(method), dentype = factor(dentype))
+
+  if (!"bias.a" %in% names(combined_data)) {
+    stop("The dataframe does not contain 'bias.a' column.")
+  }
+
+  combined_data <- combined_data %>% arrange(item)
+
+  n_plots <- length(unique(combined_data$item))
+  n_cols <- ceiling(sqrt(n_plots))
+
+  p <- ggplot(combined_data, aes(x = item, y = bias.a, group = interaction(method, dentype), color = method)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~method + dentype, scales = "free_y", ncol = n_cols) +
+    labs(title = "Bias differences for parameter 'a' across methods and dentypes",
+         x = "Item",
+         y = "Bias for 'a'") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "bottom") +
+    scale_color_manual(values = c("BL" = "blue", "EM" = "red", "MCEM" = "green")) # add more colors as needed
+
+  return(p)
 }
 
-########
-plot.rmse <- function(metrics.df){
-    # metrics is single dataframe
+plot.bias.b.diff <- function(metrics_list) {
+  combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
+    df <- metrics_list[[name]]
+    method_dentype <- strsplit(name, "_", simplify = TRUE)[[1]]
+    method <- method_dentype[2]
+    dentype <- method_dentype[4]
+    df %>% mutate(method = method, dentype = dentype, item = as.factor(item))
+  }), .id = "id") %>%
+    select(-id) %>%
+    mutate(method = factor(method), dentype = factor(dentype))
 
-    long.rmse <- metrics.df %>%
-        pivot_longer(cols = c("rmse.a", "rmse.b"), names_to = "Metric", values_to = "Value") %>%
-        mutate(Parameter = ifelse(str_detect(Metric, "a$"), "a", "b"),
-               Method = as.factor(Method),
-               Item = as.factor(Item))
+  if (!"bias.b" %in% names(combined_data)) {
+    stop("The dataframe does not contain 'bias.b' column.")
+  }
 
-    # plot
-    p <- ggplot(long.rmse, aes(x = Interaction, y = Value, fill = Method)) +
-        geom_bar(stat = "identity", position = position_dodge()) +
-        facet_wrap(~ Item, scales = "free_y") +
-        scale_fill_brewer(palette = "Set1") +
-        labs(title = "RMSE Differences by Method", x = "Item and Parameter", y = "RMSE") +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
-    
-    print(p)
-} # end plot.rmse
+  combined_data <- combined_data %>% arrange(item)
 
+  n_plots <- length(unique(combined_data$item))
+  n_cols <- ceiling(sqrt(n_plots))
+
+  p <- ggplot(combined_data, aes(x = item, y = bias.b, group = interaction(method, dentype), color = method)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~method + dentype, scales = "free_y", ncol = n_cols) +
+    labs(title = "Bias differences for parameter 'b' across methods and dentypes",
+         x = "Item",
+         y = "Bias for 'b'") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "bottom") +
+    scale_color_manual(values = c("BL" = "blue", "EM" = "red", "MCEM" = "green")) # add more colors as needed
+
+  return(p)
+}
+#### plot a,b parameters HISTOGRAMS
+plot.rmse.hist <- function(metrics_list) {
+  # Combine all metrics into a single dataframe with added 'MethodType' column
+  combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
+    df <- metrics_list[[name]]
+    method_dentype <- strsplit(name, "_", simplify = TRUE)[[1]]
+    method <- method_dentype[2]
+    dentype <- method_dentype[4]
+    cbind(df, MethodType = paste(method, dentype, sep = "_"))
+  }), .id = "id") %>%
+    select(-id)
+
+  # Check if 'rmse.a' and 'rmse.b' columns exist
+  if (!("rmse.a" %in% names(combined_data) && "rmse.b" %in% names(combined_data))) {
+    stop("The dataframe does not contain 'rmse.a' or 'rmse.b' columns.")
+  }
+  
+  # Convert the data to a long format suitable for histogram plotting
+  long_data <- pivot_longer(
+    combined_data,
+    cols = c("rmse.a", "rmse.b"),
+    names_to = "Parameter",
+    values_to = "RMSE"
+  )
+
+  # Plotting histograms to show RMSE differences across methods and parameters
+  p <- ggplot(long_data, aes(x = RMSE, fill = MethodType)) +
+    geom_histogram(position = "dodge", binwidth = 0.05, alpha = 0.7) +
+    facet_wrap(~Parameter, scales = "free_y") +
+    scale_fill_brewer(palette = "Set3") +
+    labs(title = "RMSE Distribution for Parameters 'a' and 'b' Across Methods",
+         x = "RMSE Value",
+         y = "Frequency") +
+    theme_minimal() +
+    theme(legend.title = element_text(text = "Method Type"), 
+          legend.position = "bottom")
+
+  return(p)
+}
 ########
 
 plot.bias.differences <- function(metrics.BL, metrics.EM){
+    # these plots are kind of unintuitive 
+
     # combine metrics
     combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
   
@@ -450,6 +577,50 @@ plot.bias.differences <- function(metrics.BL, metrics.EM){
               strip.background = element_blank(),
               strip.text.x = element_text(size = 8)) + 
         ylim(-0.5, 0.5)  # Set the same scale for all plots
+
+    print(p)
+}
+
+
+plot.rmse.differences <- function(metrics.BL, metrics.EM) {
+    # these plots are kind of unintuitive 
+
+    # join metrics 
+    combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
+  
+    # convert to longer format
+    combined.long <- combined.metrics %>%
+        pivot_longer(cols = c("rmse.a_BL", "rmse.a_EM", "rmse.b_BL", "rmse.b_EM"), 
+                     names_to = "Parameter_Method", values_to = "RMSE") %>% 
+        mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"), # extract method
+               Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b"), # extract parameter
+               RMSE_Diff = RMSE * ifelse(Method == "BL", 1, -1)) %>% # calc difference
+        select(-Parameter_Method) # remove intermediate column
+
+    # separate the true values for annotations
+    true.values <- combined.metrics %>% 
+        select(item, starts_with("true")) %>% 
+        pivot_longer(cols = starts_with("true"), names_to = "True_Param", values_to = "True_Value") %>% 
+        mutate(Parameter = ifelse(str_detect(True_Param, "a"), "a", "b")) %>% # extract parameter
+        distinct(item, Parameter, .keep_all = TRUE)  # ensure unique item-parameter pairs
+
+    # join the true values for plotting
+    combined.long <- left_join(combined.long, true.values, by = c("item", "Parameter")) 
+
+    # plot the RMSE differences with true values annotated
+    p <- ggplot(combined.long, aes(x = Parameter, y = RMSE_Diff, fill = Method)) +
+        geom_col(position = position_dodge(width = 0.8)) +
+        facet_wrap(~ item, scales = "fixed", labeller = label_both) +  # Set fixed scales and label each plot with "Item"
+        geom_text(aes(label = sprintf("True %s: %.2f", Parameter, True_Value)),
+                  position = position_dodge(width = 0.8), check_overlap = TRUE,
+                  vjust = -0.5, size = 2.5) +
+        scale_fill_manual(values = c("blue", "red")) +
+        labs(title = "RMSE Comparison for Each Item: BL vs. EM", x = "Parameter", y = "RMSE Difference") +
+        theme_minimal() +
+        theme(legend.position = "bottom",
+              strip.background = element_blank(),
+              strip.text.x = element_text(size = 8)) + 
+        ylim(-0.5, 0.5) # Set fixed y-axis limits
 
     print(p)
 }
@@ -534,13 +705,10 @@ response.data <- sim$response
 probabilities.data <- sim$probabilities
 export.data(cross.param, output.dir='response_data', n=300, replications=10, seed=123) # calls quick.sim.response and quick.gen.dist
 
-methods <- c("BL", "EM")
+methods <- c("BL", "EM", "MCEM") 
 dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm", "left.skew", "right.skew")
 
-
-# Corrected function call to specifically use 'stnd.norm' dataframe
-# no rep parameter
 metrics.stnd <- fit.mirt(dist.type=dist.types[1], cross.param, methods, dentypes, 10) 
 metrics.left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
 metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10)
@@ -548,7 +716,54 @@ metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentype
 metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics # view
 
-# rmse/bias
+# RMSE
+# for a parameter
+p1 <- plot.rmse.a.diff(metrics.stnd) 
+p2 <- plot.rmse.a.diff(metrics.left) 
+p3 <- plot.rmse.a.diff(metrics.right)
+plot.a <- ggpubr::ggarrange(p1, p2, p3, nrow = 2, ncol = 2)
+print(plot.a)
+
+# plotting works for more than 1 method, add more as needed 
+
+# for b parameter
+p4 <- plot.rmse.b.diff(metrics.stnd)
+p5 <- plot.rmse.b.diff(metrics.left)
+p6 <- plot.rmse.b.diff(metrics.right)
+plot.b <- ggpubr::ggarrange(p4, p5, p6, nrow = 2, ncol = 2)
+print(plot.b)
+
+# RMSE histograms
+# for both a,b parameter
+plot.rmse.hist(metrics.stnd)
+plot.rmse.hist(metrics.left)
+plot.rmse.hist(metrics.right)
+plot.hist <- ggpubr::ggarrange(p4, p5, p6, nrow = 2, ncol = 2)
+print(plot.hist)
+
+
+
+
+
+# BIAS
+# for a parameter
+p1 <- plot.bias.a.diff(metrics.stnd)
+p2 <- plot.bias.a.diff(metrics.left)
+p3 <- plot.bias.a.diff(metrics.right)
+plot.a <- ggpubr::ggarrange(p1, p2, p3, nrow = 2, ncol = 2)
+print(plot.a)
+# for b parameter
+p4 <- plot.bias.b.diff(metrics.stnd)
+p5 <- plot.bias.b.diff(metrics.left)
+p6 <- plot.bias.b.diff(metrics.right)
+plot.b <- ggpubr::ggarrange(p4, p5, p6, nrow = 2, ncol = 2)
+print(plot.b)
+
+
+
+
+
+
 plot.rmse.differences(metrics.stnd[[1]], metrics.stnd[[2]])
 plot.bias.differences(metrics.stnd[[1]], metrics.stnd[[2]])
 
@@ -560,4 +775,3 @@ plot.dist(dist.right)
 dist.list <- list(stnd.norm=dist.stnd, left.skew=dist.left, right.skew=dist.right)
 plot.dist.combined(dist.list)
 
-# icc
