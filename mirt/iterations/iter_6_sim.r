@@ -230,7 +230,7 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
                 metrics$est.b <- colMeans(est.params.b, na.rm = TRUE)
 
                 # Store metrics in the results list with a unique name
-                results[[paste("method", method, "dentype", dentype)]] <- metrics
+                results[[paste0("method:", method, "dentype:", dentype)]] <- metrics
                 
 
                 # calculating the average bias and RMSE for each item
@@ -388,6 +388,30 @@ plot.rmse.differences <- function(metrics.BL, metrics.EM) {
 
     print(p)
 }
+
+########
+plot.rmse <- function(metrics.df){
+    # metrics is single dataframe
+
+    long.rmse <- metrics.df %>%
+        pivot_longer(cols = c("rmse.a", "rmse.b"), names_to = "Metric", values_to = "Value") %>%
+        mutate(Parameter = ifelse(str_detect(Metric, "a$"), "a", "b"),
+               Method = as.factor(Method),
+               Item = as.factor(Item))
+
+    # plot
+    p <- ggplot(long.rmse, aes(x = Interaction, y = Value, fill = Method)) +
+        geom_bar(stat = "identity", position = position_dodge()) +
+        facet_wrap(~ Item, scales = "free_y") +
+        scale_fill_brewer(palette = "Set1") +
+        labs(title = "RMSE Differences by Method", x = "Item and Parameter", y = "RMSE") +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+    
+    print(p)
+} # end plot.rmse
+
+########
 
 plot.bias.differences <- function(metrics.BL, metrics.EM){
     # combine metrics
