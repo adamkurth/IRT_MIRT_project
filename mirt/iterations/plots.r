@@ -233,4 +233,38 @@ plot.rmse.differences.test <- function(metrics.list) {
 }
 
 
+# 3/19/24 
+
+plot.rmse.a.diff <- function(metrics_list){
+    library(purrr)
+  rmse_data <- imap(metrics_list, function(df, name) {
+    # Extract method and dentype from the name
+    parts <- strsplit(name, "_")[[1]]
+    method <- parts[2]
+    dentype <- parts[4]
+    
+    # Select relevant columns and add method, dentype
+    mutate(df, method = method, dentype = dentype, item = as.factor(item))
+  }) %>% bind_rows()
+  
+  # Calculate differences in RMSE between true and estimated 'a'
+  rmse_data <- rmse_data %>%
+    group_by(item, method, dentype) %>%
+    summarize(rmse_difference_a = mean(rmse.a), .groups = 'drop')
+  
+  # Plot
+  ggplot(rmse_data, aes(x = item, y = rmse_difference_a, color = method, group = dentype)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap(~dentype, scales = "free_y") +
+    labs(title = "RMSE differences for parameter 'a'",
+         x = "Item",
+         y = "RMSE Difference for 'a'") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1),
+          legend.position = "bottom")
+} # end plot.rmse
+
+
+
 
