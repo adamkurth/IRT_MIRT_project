@@ -300,8 +300,6 @@ plot.rmse.bias.given.metrics.dfs <- function(metrics.BL, metrics.EM) {
   
 }
 
-
-
 plot.rmse.bias.hist.metrics.list <- function(metrics_list) {
   # Extract information for each dataframe in the list
   metrics_info <- extract.info.from.list(metrics_list)
@@ -343,4 +341,53 @@ plot.rmse.bias.hist.metrics.list <- function(metrics_list) {
 
   return(p)
 }
+
+# plots rmse and bias differences between different methods
+plot.rmse.bias.differences <- function(metrics_list) {    
+  
+  # Combine the list of data frames into one data frame
+  combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
+    df <- metrics_list[[name]]
+    parts <- strsplit(name, "_")[[1]]
+    method <- parts[length(parts) - 1]  # Assuming method is second to last
+    dentype <- parts[length(parts)]    # Assuming dentype is last
+    df %>% mutate(Method = method, Dentype = dentype, Item = as.factor(item))
+  }), .id = "id") %>%
+    select(-id) %>%
+    mutate(Method = factor(Method), Dentype = factor(Dentype))
+  
+  # Convert to longer format
+  combined_long <- combined_data %>%
+    pivot_longer(
+      cols = c(starts_with("rmse"), starts_with("bias")),
+      names_to = "Parameter_Method", values_to = "Value"
+    ) %>%
+    mutate(
+      Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"), 
+      Type = ifelse(str_detect(Parameter_Method, "rmse"), "RMSE", "Bias"), 
+      Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b")
+    ) %>%
+    select(-Parameter_Method)
+
+  # Plot the RMSE and Bias with true values annotated
+  p <- ggplot(combined_long, aes(x = interaction(Parameter, Type, sep = " "), y = Value, fill = Method)) +
+    geom_col(position = position_dodge(width = 0.8)) +
+    facet_wrap(~ Item, scales = "free", ncol = 4) +
+    geom_text(
+      aes(label = sprintf("%s", Parameter)),
+      position = position_dodge(width = 0.8), check_overlap = TRUE,
+      vjust = 1.5, size = 3, angle = 90
+    ) +
+    scale_fill_manual(values = c("blue", "red")) +
+    labs(title = "RMSE and Bias for Each Item: BL vs. EM", x = "Parameter and Type", y = "Value") +
+    theme_minimal() +
+    theme(
+      legend.position = "bottom",
+      strip.background = element_blank(),
+      strip.text.x = element_text(size = 8)
+    ) 
+  return(p)
+}
+
+
 

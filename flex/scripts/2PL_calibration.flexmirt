@@ -1,0 +1,34 @@
+<Project>
+Title = "2PLM multiple files example";
+Description = "Multiple datasets with 20 items, 1 Factor, 1 Group 2PLM Calibration";
+
+<Options>
+Mode = Calibration;
+
+<Globals>
+RootDir = "/Users/adamkurth/Documents/vscode/research/IRT_MIRT_project/response_data/"; 
+FilePrefix = "response_stnd_norm";
+FileSuffix = ".txt";
+NumFiles = 11; // Including the main file and 10 replications
+
+<Groups>
+// Main file
+%Group1%
+File = "{RootDir}{FilePrefix}{FileSuffix}";
+Varnames = v1-v20;
+Ncats(v1-v20) = 2;
+Model(v1-v20) = 2PL;
+
+// Replicated files
+%For i = 1 to (NumFiles - 1)%
+%Group{i + 1}%
+File = "{RootDir}{FilePrefix}_rep_0{i}{FileSuffix}";
+Varnames = v1-v20;
+Ncats(v1-v20) = 2;
+Model(v1-v20) = 2PL;
+%Next%
+
+<Constraints>
+// Add any constraints to the model here if needed
+
+<Run>
