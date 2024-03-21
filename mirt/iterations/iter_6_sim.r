@@ -556,54 +556,53 @@ extract.info.from.list <- function(metrics.list) {
 
 
 # plots rmse and bias differences between different methods
-plot.rmse.bias.differences <- function(metrics_list, param) {    
- 
-  # Combine the list of data frames into one data frame
-  combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
-    df <- metrics_list[[name]]
-    parts <- strsplit(name, "_")[[1]]
-    method <- parts[length(parts) - 1]  # Assuming method is second to last
-    dentype <- parts[length(parts)]    # Assuming dentype is last
-    df %>% mutate(Method = method, Dentype = dentype, Item = as.factor(item))
-  }), .id = "id") %>%
-    select(-id) %>%
-    mutate(Method = factor(Method), Dentype = factor(Dentype))
+plot.rmse.bias.differences <- function(metrics_list) {    
+ # Extract information for each dataframe in the list
+  metrics_info <- extract.info.from.list(metrics_list)
   
-  # Convert to longer format and filter by the specified parameter
-  combined_long <- combined_data %>%
-    pivot_longer(
-      cols = c(starts_with("rmse"), starts_with("bias")),
-      names_to = "Parameter_Method", values_to = "Value"
-    ) %>%
-    mutate(
-      Method = ifelse(str_detect(Parameter_Method, "_BL$"), "BL", "EM"), 
-      Type = ifelse(str_detect(Parameter_Method, "rmse"), "RMSE", "Bias"), 
-      Parameter = ifelse(str_detect(Parameter_Method, paste0("^", param, "_")), param, NA_character_)
-    ) %>%
-    filter(!is.na(Parameter)) %>%
-    select(-Parameter_Method)
+  # Combine all dataframes into one, ensuring 'Method' and 'Dentype' are included
+  combined_metrics <- do.call(rbind, lapply(metrics_info, function(info) {
+    cbind(info$data, Method = info$method, Dentype = info$dentype)
+  }))
   
-  # Check if there are no rows to facet
-  if (nrow(combined_long) == 0) {
-    stop("No data available for the selected parameter and methods combination.")
-  }
-
-  # Plot the RMSE and Bias with true values annotated
-  p <- ggplot(combined_long, aes(x = Type, y = Value, fill = Method)) +
-    geom_col(position = position_dodge(width = 0.8)) +
-    facet_wrap(~ Item, scales = "free_y", ncol = 4) +
-    geom_text(
-      aes(label = sprintf("%0.2f", Value)),
-      position = position_dodge(width = 0.8), vjust = 1.5, size = 3, angle = 90
-    ) +
-    scale_fill_manual(values = c("blue", "red")) +
-    labs(title = paste("RMSE and Bias for Each Item by", param, ": BL vs. EM"), x = "Metric Type", y = "Value") +
+  # Make sure all dataframe elements have a uniform 'item' column
+  combined_metrics$item <- factor(combined_metrics$item)
+  
+  # Pivot the data to a long format suitable for plotting
+  combined_long <- combined_metrics %>%
+    pivot_longer(cols = starts_with("rmse") | starts_with("bias"),
+                 names_to = c(".value", "Parameter"), 
+                 names_pattern = "(.*)\\.(.*)") 
+  
+  # Separate the parameter and the metric type (RMSE/Bias)
+  combined_long <- combined_long %>%
+    separate(Parameter, into = c("Metric_Type", "Parameter"), sep = "_")
+  
+  # Filter out the Parameter you want to plot (e.g., "a" or "b")
+  combined_long <- combined_long %>%
+    filter(Parameter == "a") # Change to "b" if you want to plot "b"
+  
+  # Create a label for each bar with the method, metric type, and parameter
+  combined_long$Label <- paste(combined_long$Method, combined_long$Metric_Type, combined_long$Parameter, sep = ": ")
+  
+  # Plot the RMSE and Bias for each parameter-method-dentype combination
+  p <- ggplot(combined_long, aes(x = Metric_Type, y = Value, fill = Method)) +
+    geom_bar(stat = "identity", position = position_dodge(width = 0.7)) +
+    geom_text(aes(label = Label, y = ifelse(Value > 0, Value + 0.02, Value - 0.02)), 
+              position = position_dodge(width = 0.7),
+              size = 3, angle = 90, hjust = 1, vjust = 1) +
+    facet_wrap(~ item, scales = "free_y", ncol = 4) +
+    scale_fill_brewer(palette = "Set1") +
+    labs(title = "RMSE and Bias for Each Item by Method and Dentype",
+         x = "", y = "Value") +
     theme_minimal() +
-    theme(
-      legend.position = "bottom",
-      strip.background = element_blank(),
-      strip.text.x = element_text(size = 8)
-    )
+    theme(legend.position = "bottom",
+          strip.background = element_blank(),
+          strip.text.x = element_text(size = 8, angle = 45, hjust = 1),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
+          axis.ticks.y = element_line(color = "black", size = 1.2)) +
+    scale_y_continuous(limits = c(NA, NA), oob = scales::rescale_none) # Use oob to handle out of bounds
+
   return(p)
 }
 
