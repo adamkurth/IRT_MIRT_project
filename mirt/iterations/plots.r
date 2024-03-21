@@ -268,3 +268,79 @@ plot.rmse.a.diff <- function(metrics_list){
 
 
 
+
+plot.rmse.bias.given.metrics.dfs <- function(metrics.BL, metrics.EM) {
+  # Join metrics
+  combined.metrics <- full_join(metrics.BL, metrics.EM, by = "item", suffix = c("_BL", "_EM"))
+  
+  # Convert to longer format
+  combined.long <- combined.metrics %>%
+    pivot_longer(cols = c("rmse.a_BL", "rmse.a_EM", "rmse.b_BL", "rmse.b_EM", "bias.a_BL", "bias.a_EM", "bias.b_BL", "bias.b_EM"),
+                 names_to = "Parameter_Method", values_to = "Value") %>%
+    mutate(Method = ifelse(str_detect(Parameter_Method, "_BL"), "BL", "EM"), # extract method
+           Type = ifelse(str_detect(Parameter_Method, "rmse"), "RMSE", "Bias"), # extract type
+           Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b")) %>% # extract parameter
+    select(-Parameter_Method) # remove intermediate column
+
+  # Plot the RMSE and Bias with true values annotated
+  p <- ggplot(combined.long, aes(x = interaction(Parameter, Type, sep = " "), y = Value, fill = Method)) +
+    geom_col(position = position_dodge(width = 0.8)) +
+    facet_wrap(~ item, scales = "free", ncol = 4) +  # Using free scales if the range of values varies significantly
+    geom_text(aes(label = sprintf("%s", Parameter)),
+              position = position_dodge(width = 0.8), check_overlap = TRUE,
+              vjust = 1.5, size = 3, angle = 90) +  # Annotations for 'a' and 'b'
+    scale_fill_manual(values = c("blue", "red")) +
+    labs(title = "RMSE and Bias for Each Item: BL vs. EM", x = "Parameter and Type", y = "Value") +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          strip.background = element_blank(),
+          strip.text.x = element_text(size = 8)) 
+
+  print(p)
+  
+}
+
+
+
+plot.rmse.bias.hist.metrics.list <- function(metrics_list) {
+  # Extract information for each dataframe in the list
+  metrics_info <- extract.info.from.list(metrics_list)
+  
+  # Combine all dataframes into one, ensuring 'Method' and 'Dentype' are included
+  combined.metrics <- do.call(rbind, lapply(metrics_info, function(info) {
+    cbind(info$data, Method = info$method, Dentype = info$dentype)
+  }))
+
+  # Make sure all dataframe elements have a uniform 'item' column
+  combined.metrics$item <- factor(combined.metrics$item)
+
+  # Pivot the data to a long format suitable for plotting
+  combined.long <- combined.metrics %>%
+    pivot_longer(cols = starts_with("rmse") | starts_with("bias"),
+                 names_to = c("Metric_Type", "Parameter"),
+                 names_sep = "\\.",
+                 values_to = "Value") 
+
+  # Add labels for RMSE and BIAS to the plot
+  combined.long$Label <- paste(combined.long$Metric_Type, combined.long$Parameter, sep = "\n")
+
+  # Plot the RMSE and Bias for each parameter-method-dentype combination
+  p <- ggplot(combined.long, aes(x = interaction(Dentype, Parameter, sep = ": "), y = Value, fill = Method, label = Label)) +
+    geom_bar(stat = "identity", position = position_dodge(width = 0.7)) +
+    geom_text(aes(y = ifelse(Value > 0, Value + 0.02, Value - 0.02)), # Adjust text position based on value
+              position = position_dodge(width = 0.7), 
+              size = 3, angle = 90, hjust = 1, vjust = 1) +
+    facet_wrap(~ item, scales = "free_y", ncol = 4) +
+    scale_fill_brewer(palette = "Set1") +
+    labs(title = "RMSE and Bias for Each Item by Method and Dentype",
+         x = "", y = "Value") +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          strip.background = element_blank(),
+          strip.text.x = element_text(size = 8, angle = 45, hjust = 1),
+          axis.ticks.y = element_line(color = "black", size = 1.2)) +
+    scale_y_continuous(limits = c(NA, NA), oob = scales::rescale_none) # Use oob to handle out of bounds
+
+  return(p)
+}
+
