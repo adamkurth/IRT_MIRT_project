@@ -503,6 +503,44 @@ extract.info.from.list <- function(metrics.list) {
     return(info_list)
 }
 
+plot.rmse.bias.given.metrics.dfs <- function(metrics_1, metrics_2) {
+  metrics_1$item <- as.character(metrics_1$item)
+  metrics_2$item <- as.character(metrics_2$item)
+  
+  cross_param <- metrics_1 %>%
+    select(item, true_a = true.a, true_b = true.b) %>%
+    distinct(item, .keep_all = TRUE)  # Ensure no duplicate items
+  
+  # Join metrics with cross parameters, ensuring true_a and true_b are carried through
+  combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
+
+  combined_long <- combined_metrics %>%
+    pivot_longer(cols = c("rmse.a_1", "rmse.a_2", "rmse.b_1", "rmse.b_2", 
+                          "bias.a_1", "bias.a_2", "bias.b_1", "bias.b_2"),
+                 names_to = "Parameter_Method", values_to = "Value") %>%
+    mutate(Method = ifelse(str_detect(Parameter_Method, "_1"), "1", "2"),
+           Type = ifelse(str_detect(Parameter_Method, "rmse"), "RMSE", "Bias"),
+           Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b")) %>%
+    left_join(cross_param, by = "item") %>%
+    mutate(True_Value = ifelse(Parameter == "a", sprintf("a = %.2f", true_a), sprintf("b = %.2f", true_b)),
+           AB_Label = paste("a =", true_a, ", b =", true_b))  #Combine a and b parameters into a single string
+
+    p <- ggplot(combined_long, aes(x = interaction(Parameter, Type, sep = " "), y = Value, fill = Method)) +
+        geom_col(position = position_dodge(width = 0.8)) +
+        facet_wrap(~ AB_Label, scales = "free", ncol = 4) +  # Using free scales if the range of values varies significantly
+        geom_text(aes(label = sprintf("%s", Parameter)),
+                position = position_dodge(width = 0.8), check_overlap = TRUE,
+                vjust = 1.5, size = 3, angle = 90) +  # Annotations for 'a' and 'b'
+        scale_fill_manual(values = c("blue", "red")) +
+        labs(title = "RMSE and Bias for Each Item", x = "True 'a' parameter", y = "True 'b' parameter") +
+        theme_minimal() +
+        theme(legend.position = "bottom",
+            strip.background = element_blank(),
+            strip.text.x = element_text(size = 8)) 
+
+  print(p)
+  return(p)
+}
 
 # plot.single.param.hist.metrics <- function(metrics_list, param) {
 #     # NOT WORKING 
@@ -665,8 +703,8 @@ n <- 300
 all.distributions <- generate.skewed.distribitions(n, seed=123)
 
 # cros.param has 20 rows and 3 columns (of true param values for a, b, and d)
-cross.param <- expand.grid(d = c(-2.5, -1.25, 0, 1.25, 2.5), a = c(0.5, 1, 1.5, 2.5))
-cross.param$b <- with(cross.param, -d/a)
+cross.param <- expand.grid(a = c(0.5, 1, 1.5, 1.25, 2.5),b = c(-2.5, -1.25, 0, 1.25, 2.5))
+# cross.param$b <- with(cross.param, -d/a)
 
 # simulate response data: for each dist, has 300 rows of 20 item responses
 # response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)

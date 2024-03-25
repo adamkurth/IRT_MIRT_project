@@ -6,7 +6,7 @@ Description = "Multiple datasets with 20 items, 1 Factor, 1 Group 2PLM Calibrati
 Mode = Calibration;
 
 <Globals>
-RootDir = "/Users/adamkurth/Documents/vscode/research/IRT_MIRT_project/response_data/"; 
+RootDir = "/Users/adamkurth/Documents/vscode/research/IRT_MIRT_project/response_data/";  // developed on MAC
 FilePrefix = "response_stnd_norm";
 FileSuffix = ".txt";
 NumFiles = 11; // Including the main file and 10 replications
@@ -29,6 +29,6 @@ Model(v1-v20) = 2PL;
 %Next%
 
 <Constraints>
-// Add any constraints to the model here if needed
+// ?
 
 <Run>
