@@ -6,7 +6,10 @@ load <- function(){
     sapply(packages, require, character.only = TRUE)
 } # end load
 
-# Method 1
+# ----------------------------------------------------
+# Simulation Data ------------------------------------
+# ----------------------------------------------------
+
 generate.skewed.distribitions <- function(n, seed=123) {
     require(sn, quietly = TRUE)
     set.seed(seed) # Set the seed for reproducibility
@@ -125,6 +128,10 @@ quick.sim.response <- function(theta.values, cross.param, seed=123) {
     return(list(response = response.df, probabilities = prob.df))
 } # end quick.sim.response
 
+# ----------------------------------------------------
+# Read/Write -----------------------------------------
+# ----------------------------------------------------
+
 # for reading a specific response data file 
 read.data <- function(dist.type='stnd.norm', rep=1, read.dir='response_data'){
     dist.type.pattern <- gsub("\\.", "_", dist.type)
@@ -160,7 +167,28 @@ export.data <- function(cross.param, output.dir='response_data', n=300, replicat
 
 } # end export.data
 
-#### Method 2
+read.data.all <- function(){
+    # read in response data from .txt files in the "response_data" directory
+    response.dataframes <- list()
+    filenames <- list.files(path = "response_data", pattern = "response_.*\\.txt", full.names = TRUE)
+    
+    for (f in filenames){
+        response.data <- read.table(f, header = TRUE, sep = "\t")
+
+        name <- basename(f) # remove path, leaving only the filename
+        name <- gsub("^response_", "", name)  # Remove 'response_' prefix
+        name <- gsub(".txt", "", name)  # Remove '.txt' suffix
+        name <- gsub("_", ".", name)  # Replace '_' with '.'
+        # modified name as the key name
+        response.dataframes[[name]] <- response.data
+    }
+    return(response.dataframes)
+} # end read.data.all
+
+# ----------------------------------------------------
+# fit.mirt functions ---------------------------------
+# ----------------------------------------------------
+
 fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=10) {
     require(mirt, quietly = TRUE)
     read.dir <- 'response_data'
@@ -292,26 +320,12 @@ fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes)
     return(metrics.df)
 } # end fit.mirt.parallel
 
-read.data.all <- function(){
-    # read in response data from .txt files in the "response_data" directory
-    response.dataframes <- list()
-    filenames <- list.files(path = "response_data", pattern = "response_.*\\.txt", full.names = TRUE)
-    
-    for (f in filenames){
-        response.data <- read.table(f, header = TRUE, sep = "\t")
-
-        name <- basename(f) # remove path, leaving only the filename
-        name <- gsub("^response_", "", name)  # Remove 'response_' prefix
-        name <- gsub(".txt", "", name)  # Remove '.txt' suffix
-        name <- gsub("_", ".", name)  # Replace '_' with '.'
-        # modified name as the key name
-        response.dataframes[[name]] <- response.data
-    }
-    return(response.dataframes)
-} # end read.data.all
-
+# ----------------------------------------------------
+# Plotting Functions----------------------------------
 # ----------------------------------------------------
 
+# Line Charts (Seperately) ---------------------------
+# Plotting RMSE for a/b parameters SEPERATELY
 plot.rmse.a.diff <- function(metrics_list) {
     # Combine all metrics into a single dataframe with 'method' and 'dentype' columns
     combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
@@ -390,8 +404,7 @@ plot.rmse.b.diff <- function(metrics_list) {
 
     return(p)
 }
-
-# for bias 
+# Plotting BIAS for a/b parameters SEPERATELY
 plot.bias.a.diff <- function(metrics_list) {
     combined_data <- bind_rows(lapply(names(metrics_list), function(name) {
         df <- metrics_list[[name]]
@@ -461,8 +474,9 @@ plot.bias.b.diff <- function(metrics_list) {
     return(p)
 }
 
-# designed to work with entire list of dataframes (metrics_list)
-# working function
+
+# Line Charts (Together) ------------------------------
+# Designed to work with entire list of dataframes (metrics_list)
 extract.info.from.list <- function(metrics.list) {
     # Use lapply to iterate over all items in the list
     info_list <- lapply(names(metrics.list), function(name) {
@@ -499,7 +513,7 @@ extract.info.from.list <- function(metrics.list) {
     return(info_list)
 }
 
-# NEW
+# Plot RMSE for a/b parameters TOGETHER
 plot.rmse.diff <- function(metrics_list, parameter = "a") {
     if (!parameter %in% c("a", "b")) {
         stop("Parameter must be either 'a' or 'b'.")
@@ -589,7 +603,7 @@ plot.bias.diff <- function(metrics_list, parameter = "a") {
 p1 <- plot.bias.diff(metrics.stnd, parameter = "a")
 p1
 
-
+# Bar Charts --------------------------------------------
 plot.rmse.bias.given.metrics.dfs <- function(metrics_1, metrics_2) {
   metrics_1$item <- as.character(metrics_1$item)
   metrics_2$item <- as.character(metrics_2$item)
@@ -637,6 +651,90 @@ plot.rmse.bias.given.metrics.dfs <- function(metrics_1, metrics_2) {
   return(p)
 }
 p1 <- plot.rmse.bias.given.metrics.dfs(metrics.stnd[[1]], metrics.stnd[[1]])
+p1
+
+
+# ----------------------------------------------------
+# NEW ADDITIONS
+# ----------------------------------------------------
+
+# RMSE for a/b parameters ----------------------------
+plot.rmse.hist <- function(metrics_1, metrics_2) {
+    metrics_1$item <- as.character(metrics_1$item)
+    metrics_2$item <- as.character(metrics_2$item)
+
+    cross_param <- metrics_1 %>%
+        select(item, true_a = true.a, true_b = true.b) %>%
+        distinct(item, .keep_all = TRUE)  # Ensure no duplicate items
+
+    combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
+
+    combined_long <- combined_metrics %>%
+        pivot_longer(cols = c("rmse.a_1", "rmse.a_2", "rmse.b_1", "rmse.b_2"),
+                    names_to = "Parameter_Method", values_to = "Value") %>%
+        mutate(Method = ifelse(str_detect(Parameter_Method, "_1"), "1", "2"),
+            Parameter = ifelse(str_detect(Parameter_Method, "a"), "a", "b")) %>%
+        left_join(cross_param, by = "item") %>%
+        mutate(AB_Label = factor(paste("a =", true_a, "b =", true_b),
+                                levels = unique(paste("a =", true_a, "b =", true_b))))
+
+  p1 <- ggplot(combined_long, aes(x = Parameter, y = Value, fill = Method)) +
+    geom_col(position = position_dodge(width = 0.8)) +
+    facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
+    geom_text(aes(label = sprintf("%s", Parameter)),
+              position = position_dodge(width = 0.8), check_overlap = TRUE,
+              vjust = 1.5, size = 3, angle = 90) +
+    scale_fill_manual(values = c("blue", "red")) +
+    labs(title = "RMSE for Each Item", x = "Parameter", y = "RMSE") +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          strip.background = element_blank(),
+          strip.text.x = element_text(size = 8))
+  
+  print(p1)
+  return(p1)
+}
+
+plot.bias.hist <- function(metrics_1, metrics_2) {
+  metrics_1$item <- as.character(metrics_1$item)
+  metrics_2$item <- as.character(metrics_2$item)
+  
+  cross_param <- metrics_1 %>%
+    select(item, true_a = true.a, true_b = true.b) %>%
+    distinct(item, .keep_all = TRUE)
+  
+  combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
+  
+  combined_long <- combined_metrics %>%
+    pivot_longer(cols = c("bias.a_1", "bias.a_2", "bias.b_1", "bias.b_2"),
+                 names_to = "Parameter_Method", values_to = "Value") %>%
+    mutate(Method = ifelse(str_detect(Parameter_Method, "_1"), "1", "2"),
+           Parameter = ifelse(str_detect(Parameter_Method, "a"), "a", "b")) %>%
+    left_join(cross_param, by = "item") %>%
+    mutate(AB_Label = factor(paste("a =", true_a, "b =", true_b),
+                             levels = unique(paste("a =", true_a, "b =", true_b))))
+  
+  p2 <- ggplot(combined_long, aes(x = Parameter, y = Value, fill = Method)) +
+    geom_col(position = position_dodge(width = 0.8)) +
+    facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
+    geom_text(aes(label = sprintf("%s", Parameter)),
+              position = position_dodge(width = 0.8), check_overlap = TRUE,
+              vjust = 1.5, size = 3, angle = 90) +
+    scale_fill_manual(values = c("blue", "red")) +
+    labs(title = "Bias for Each Item", x = "Parameter", y = "Bias") +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          strip.background = element_blank(),
+          strip.text.x = element_text(size = 8))
+  
+  print(p2)
+  return(p2)
+}
+
+p.rmse <- plot.rmse.hist(metrics.stnd[[1]], metrics.stnd[[1]])
+p.bias <- plot.bias.hist(metrics.stnd[[1]], metrics.stnd[[1]])
+
+# ----------------------------------------------------
 
 
 # plots rmse and bias differences between different methods
