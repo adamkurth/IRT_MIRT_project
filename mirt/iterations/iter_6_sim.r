@@ -682,8 +682,9 @@ plot.rmse.hist <- function(metrics_1, metrics_2) {
     geom_col(position = position_dodge(width = 0.8)) +
     facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
     geom_text(aes(label = sprintf("%s", Parameter)),
-              position = position_dodge(width = 0.8), check_overlap = TRUE,
-              vjust = 1.5, size = 3, angle = 90) +
+              position = position_dodge(width = 0.8), vjust = -0.25, # Adjust vertical position
+              size = 4.5,  # Fixed size for legibility
+              angle = 0) +
     scale_fill_manual(values = c("blue", "red")) +
     labs(title = "RMSE for Each Item", x = "Parameter", y = "RMSE") +
     theme_minimal() +
@@ -694,8 +695,11 @@ plot.rmse.hist <- function(metrics_1, metrics_2) {
   print(p1)
   return(p1)
 }
+p.rmse <- plot.rmse.hist(metrics.stnd[[1]], metrics.stnd[[1]])
+
 
 plot.bias.hist <- function(metrics_1, metrics_2) {
+
   metrics_1$item <- as.character(metrics_1$item)
   metrics_2$item <- as.character(metrics_2$item)
   
@@ -704,12 +708,14 @@ plot.bias.hist <- function(metrics_1, metrics_2) {
     distinct(item, .keep_all = TRUE)
   
   combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
-  
   combined_long <- combined_metrics %>%
     pivot_longer(cols = c("bias.a_1", "bias.a_2", "bias.b_1", "bias.b_2"),
                  names_to = "Parameter_Method", values_to = "Value") %>%
     mutate(Method = ifelse(str_detect(Parameter_Method, "_1"), "1", "2"),
-           Parameter = ifelse(str_detect(Parameter_Method, "a"), "a", "b")) %>%
+           Parameter = case_when(
+             str_detect(Parameter_Method, "a_") ~ "a",
+             str_detect(Parameter_Method, "b_") ~ "b",
+             TRUE ~ NA_character_)) %>%
     left_join(cross_param, by = "item") %>%
     mutate(AB_Label = factor(paste("a =", true_a, "b =", true_b),
                              levels = unique(paste("a =", true_a, "b =", true_b))))
@@ -717,22 +723,23 @@ plot.bias.hist <- function(metrics_1, metrics_2) {
   p2 <- ggplot(combined_long, aes(x = Parameter, y = Value, fill = Method)) +
     geom_col(position = position_dodge(width = 0.8)) +
     facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
-    geom_text(aes(label = sprintf("%s", Parameter)),
-              position = position_dodge(width = 0.8), check_overlap = TRUE,
-              vjust = 1.5, size = 3, angle = 90) +
+    geom_text(aes(label = Parameter),
+              position = position_dodge(width = 0.8), vjust = -0.25,
+              size = 4.5, angle = 0) +
     scale_fill_manual(values = c("blue", "red")) +
     labs(title = "Bias for Each Item", x = "Parameter", y = "Bias") +
     theme_minimal() +
     theme(legend.position = "bottom",
           strip.background = element_blank(),
-          strip.text.x = element_text(size = 8))
+          strip.text.x = element_text(size = 8),
+          axis.text.x = element_text(angle = 90, hjust = 1))
   
   print(p2)
   return(p2)
 }
+p.bias <- plot.bias.hist(metrics.stnd[[1]], metrics.stnd[[1]])
 
 p.rmse <- plot.rmse.hist(metrics.stnd[[1]], metrics.stnd[[1]])
-p.bias <- plot.bias.hist(metrics.stnd[[1]], metrics.stnd[[1]])
 
 # ----------------------------------------------------
 
