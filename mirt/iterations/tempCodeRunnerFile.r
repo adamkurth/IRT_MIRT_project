@@ -299,9 +299,6 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
   return(results)
 } # end fit.mirt
 
-metrics.left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
-metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10) 
-
 fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes) {
     require(parallel, quietly = TRUE)
     require(mirt, quietly = TRUE)
