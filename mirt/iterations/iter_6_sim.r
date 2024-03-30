@@ -524,19 +524,18 @@ plot.rmse.diff <- function(metrics_list, parameter = "a") {
     # Combine all structured data into a single dataframe
     combined_data <- bind_rows(lapply(structured_list, function(info) {
         df <- info$data
-        # Select only the relevant rmse column based on param
         rmse_col <- paste("rmse", parameter, sep = ".")
         if (!rmse_col %in% names(df)) {
             stop(paste("The dataframe does not contain '", rmse_col, "' column.", sep = ""))
         }
-        # Keep only necessary columns and add method and dentype
         df %>%
             select(item, !!rmse_col) %>%
             rename(rmse = !!rmse_col) %>%
             mutate(method = info$method, dentype = info$dentype, item = as.factor(item))
     }), .id = "id") %>%
     select(-id) %>%
-    mutate(method = factor(method), dentype = factor(dentype))
+    mutate(method = factor(method, levels = c("BL", "EM", "MCEM")))  # Reorder methods so "BL" is plotted first 
+
     
     # Dynamically calculate the number of columns for a symmetric grid if needed
     n_plots <- length(unique(combined_data$item))
@@ -544,19 +543,20 @@ plot.rmse.diff <- function(metrics_list, parameter = "a") {
     
     # Plotting RMSE differences across methods for a single parameter
     p <- ggplot(combined_data, aes(x = item, y = rmse, group = interaction(method, dentype), color = method)) +
-        geom_line() +
-        geom_point(aes(shape = method)) +  # Different shape for each method
-        facet_wrap(~ dentype, scales = "free_y", ncol = n_cols) +  # Separate plots for each dentype
+        geom_line(aes(linewidth = method)) +
+        geom_point(aes(shape = method)) +
+        scale_linewidth_manual(values = c("EM" = 1, "BL" = 2.5, "MCEM" = 1)) +  # Adjust line widths
+        facet_wrap(~ dentype, scales = "free_y", ncol = n_cols) +
         labs(title = paste("RMSE differences for parameter '", parameter, "' across methods", sep = ""),
              x = "Item", y = paste("RMSE for '", parameter, "'", sep = "")) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1),
               legend.position = "bottom") +
-        scale_color_manual(values = c("EM" = "blue", "BL" = "red", "MCEM" = "green"))  # Customize as needed
+        scale_color_manual(values = c("EM" = "blue", "BL" = "red", "MCEM" = "green"))
 
     return(p)
 }
-
+# Bias for a/b parameters -------------------------------
 plot.bias.diff <- function(metrics_list, parameter = "a") {
     if (!parameter %in% c("a", "b")) {
         stop("Parameter must be either 'a' or 'b'.")
@@ -587,85 +587,39 @@ plot.bias.diff <- function(metrics_list, parameter = "a") {
     
     # Plotting Bias differences across methods for a single parameter
     p <- ggplot(combined_data, aes(x = item, y = bias, group = interaction(method, dentype), color = method)) +
-        geom_line() +
-        geom_point(aes(shape = method)) +  # Different shape for each method
-        facet_wrap(~ dentype, scales = "free_y", ncol = n_cols) +  # Separate plots for each dentype
+        geom_line(aes(size = method)) +  # Control line size based on method
+        scale_size_manual(values = c("EM" = 1, "BL" = 2, "MCEM" = 1)) +  # Customize line width
+        geom_point(aes(shape = method)) +
+        facet_wrap(~ dentype, scales = "free_y", ncol = n_cols) +
         labs(title = paste("Bias differences for parameter '", parameter, "' across methods", sep = ""),
              x = "Item", y = paste("Bias for '", parameter, "'", sep = "")) +
         theme_minimal() +
         theme(axis.text.x = element_text(angle = 45, hjust = 1),
               legend.position = "bottom") +
-        scale_color_manual(values = c("EM" = "blue", "BL" = "red", "MCEM" = "green"))  # Customize as needed
-
+        scale_color_manual(values = c("EM" = "blue", "BL" = "red", "MCEM" = "green")) +
+        guides(size = "none")  # Hide the size guide since it's being used to differentiate lines
+    
     return(p)
 }
-
-p1 <- plot.bias.diff(metrics.stnd, parameter = "a")
-p1
+# testing 
+# # rmse
+# p1 <- plot.rmse.diff(metrics.stnd, parameter = "a")
+# p2 <- plot.rmse.diff(metrics.stnd, parameter = "b")
+# p.rmse <- ggarrange(p1, p2, ncol = 1, nrows = 2)
+# # bias
+# p1 <- plot.bias.diff(metrics.stnd, parameter = "a")
+# p2 <- plot.bias.diff(metrics.stnd, parameter = "a")
+# p.bias <- ggarrange(p1, p2, ncol = 1, nrows = 2)
 
 # Bar Charts --------------------------------------------
-plot.rmse.bias.given.metrics.dfs <- function(metrics_1, metrics_2) {
-  metrics_1$item <- as.character(metrics_1$item)
-  metrics_2$item <- as.character(metrics_2$item)
-  
-  cross_param <- metrics_1 %>%
-    select(item, true_a = true.a, true_b = true.b) %>%
-    distinct(item, .keep_all = TRUE)  # Ensure no duplicate items
-  
-  # Join metrics with cross parameters, ensuring true_a and true_b are carried through
-  combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
-
-  combined_long <- combined_metrics %>%
-    pivot_longer(cols = c("rmse.a_1", "rmse.a_2", "rmse.b_1", "rmse.b_2", 
-                          "bias.a_1", "bias.a_2", "bias.b_1", "bias.b_2"),
-                 names_to = "Parameter_Method", values_to = "Value") %>%
-    mutate(Method = ifelse(str_detect(Parameter_Method, "_1"), "1", "2"),
-           Type = ifelse(str_detect(Parameter_Method, "rmse"), "RMSE", "Bias"),
-           Parameter = ifelse(str_detect(Parameter_Method, "a_"), "a", "b")) %>%
-    left_join(cross_param, by = "item") %>%
-    mutate(True_Value = ifelse(Parameter == "a", sprintf("a = %.2f", true_a), sprintf("b = %.2f", true_b)))
-
-    # Adjusting factor levels for true_a and true_b for custom labels
-    # combined_long$true_a <- factor(combined_long$true_a, levels = unique(combined_long$true_a),
-    #                                 labels = paste("a =", unique(combined_long$true_a)))
-    # combined_long$true_b <- factor(combined_long$true_b, levels = unique(combined_long$true_b),
-    #                                 labels = paste("b =", unique(combined_long$true_b)))
-    combined_long$AB_Label <- factor(paste("a =", combined_long$true_a, "b =", combined_long$true_b),
-                                 levels = unique(paste("a =", combined_long$true_a, "b =", combined_long$true_b)))
-
-    p <- ggplot(combined_long, aes(x = interaction(Parameter, Type, sep = " "), y = Value, fill = Method)) +
-        geom_col(position = position_dodge(width = 0.8)) +
-        #   facet_grid(rows = vars(true_b), cols = vars(true_a)) +
-          facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
-          geom_text(aes(label = sprintf("%s", Parameter)),
-                position = position_dodge(width = 0.8), check_overlap = TRUE,
-                vjust = 1.5, size = 3, angle = 90) +  # Annotations for 'a' and 'b'
-        scale_fill_manual(values = c("blue", "red")) +
-        labs(title = "RMSE and Bias for Each Item", x = "True 'a' parameter", y = "True 'b' parameter") +
-        theme_minimal() +
-        theme(legend.position = "bottom",
-            strip.background = element_blank(),
-            strip.text.x = element_text(size = 8)) 
-
-  print(p)
-  return(p)
-}
-p1 <- plot.rmse.bias.given.metrics.dfs(metrics.stnd[[1]], metrics.stnd[[1]])
-p1
-
-
-# ----------------------------------------------------
-# NEW ADDITIONS
-# ----------------------------------------------------
-
-# RMSE for a/b parameters ----------------------------
-plot.rmse.hist <- function(metrics_1, metrics_2) {
+# RMSE for a/b parameters -------------------------------
+plot.rmse.bar <- function(metrics_1, metrics_2) {
     metrics_1$item <- as.character(metrics_1$item)
     metrics_2$item <- as.character(metrics_2$item)
 
     cross_param <- metrics_1 %>%
         select(item, true_a = true.a, true_b = true.b) %>%
-        distinct(item, .keep_all = TRUE)  # Ensure no duplicate items
+        distinct(item, .keep_all = TRUE)
 
     combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
 
@@ -678,62 +632,60 @@ plot.rmse.hist <- function(metrics_1, metrics_2) {
         mutate(AB_Label = factor(paste("a =", true_a, "b =", true_b), levels = unique(paste("a =", true_a, "b =", true_b))))
 
     p1 <- ggplot(combined_long, aes(x = Parameter, y = Value, fill = Method)) +
-            geom_col(position = position_dodge(width = 0.8)) +
-            facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
-            geom_text(aes(label = Parameter), position = position_dodge(width = 0.8), vjust = -0.25, size = 4.5, angle = 0) +
-            scale_fill_manual(values = c("blue", "red")) +
-            labs(title = "RMSE for Each Item", x = "Parameter", y = "RMSE") +
-            theme_minimal() +
-            theme(legend.position = "bottom",
-                        strip.background = element_blank(),
-                        strip.text.x = element_text(size = 8))
+        geom_col(position = position_dodge(width = 0.8)) +
+        facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
+        geom_text(aes(label = Parameter), position = position_dodge(width = 0.8), vjust = -0.25, size = 4.5, angle = 0) +
+        scale_fill_manual(values = c("blue", "red")) +
+        labs(title = "RMSE for Each Item", x = "Parameter", y = "RMSE") +
+        theme_minimal() +
+        theme(legend.position = "bottom",
+                    strip.background = element_blank(),
+                    strip.text.x = element_text(size = 8))
 
     print(p1)
     return(p1)
 }
-
-plot.bias.hist <- function(metrics_1, metrics_2) {
+# Bias for a/b parameters -------------------------------
+plot.bias.bar <- function(metrics_1, metrics_2) {
     metrics_1$item <- as.character(metrics_1$item)
     metrics_2$item <- as.character(metrics_2$item)
-    
+
     cross_param <- metrics_1 %>%
         select(item, true_a = true.a, true_b = true.b) %>%
         distinct(item, .keep_all = TRUE)
-    
+
     combined_metrics <- full_join(metrics_1, metrics_2, by = "item", suffix = c("_1", "_2"))
     combined_long <- combined_metrics %>%
         pivot_longer(cols = c("bias.a_1", "bias.a_2", "bias.b_1", "bias.b_2"),
-                     names_to = "Parameter_Method", values_to = "Value") %>%
+                                 names_to = "Parameter_Method", values_to = "Value") %>%
         mutate(Method = ifelse(str_detect(Parameter_Method, "_1"), "1", "2"),
-               Parameter = case_when(
-                   str_detect(Parameter_Method, "a_") ~ "a",
-                   str_detect(Parameter_Method, "b_") ~ "b",
-                   TRUE ~ NA_character_)) %>%
+                     Parameter = case_when(
+                         str_detect(Parameter_Method, "a_") ~ "a",
+                         str_detect(Parameter_Method, "b_") ~ "b",
+                         TRUE ~ NA_character_)) %>%
         left_join(cross_param, by = "item") %>%
         mutate(AB_Label = factor(paste("a =", true_a, "b =", true_b), levels = unique(paste("a =", true_a, "b =", true_b))),
-               Text_Y_Pos = ifelse(Value < 0, 0, Value))  # Determine Y position based on Value
-    
+                     Text_Y_Pos = ifelse(Value < 0, 0, Value))  # Determine Y position based on Value
+
     p2 <- ggplot(combined_long, aes(x = Parameter, y = Value, fill = Method)) +
         geom_col(position = position_dodge(width = 0.8)) +
         facet_wrap(~ AB_Label, scales = "fixed", ncol = length(unique(combined_long$true_a))) +
         geom_text(aes(label = Parameter, y = Text_Y_Pos),  # Use the conditional Y position
-                  position = position_dodge(width = 0.8), vjust = -0.75, size = 4.5, angle = 0) +
+                            position = position_dodge(width = 0.8), vjust = -0.75, size = 4.5, angle = 0) +
         scale_fill_manual(values = c("blue", "red")) +
         labs(title = "Bias for Each Item", x = "Parameter", y = "Bias") +
         theme_minimal() +
         theme(legend.position = "bottom",
-              strip.background = element_blank(),
-              strip.text.x = element_text(size = 8)) +
+                    strip.background = element_blank(),
+                    strip.text.x = element_text(size = 8)) +
         expand_limits(y = 0)
-    
+
     print(p2)
     return(p2)
 }
-
-p.rmse <- plot.rmse.hist(metrics.stnd[[1]], metrics.stnd[[1]])
-p.bias <- plot.bias.hist(metrics.stnd[[1]], metrics.stnd[[1]])
-
-
+# testing
+# p.rmse <- plot.rmse.bar(metrics.stnd[[1]], metrics.stnd[[1]])
+# p.bias <- plot.bias.bar(metrics.stnd[[1]], metrics.stnd[[1]])
 # ----------------------------------------------------
 
 
@@ -850,7 +802,7 @@ cross.param <- expand.grid(a = c(0.5, 1, 1.5, 2.5),b = c(-2.5, -1.25, 0, 1.25, 2
 # cross.param$b <- with(cross.param, -d/a)
 
 # simulate response data: for each dist, has 300 rows of 20 item responses
-# response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123)
+# response.dataframes <- simulate.response.data(all.distributions, cross.param, seed = 123) # obsolete
 sim <- simulate.response.data(all.distributions, cross.param)
 response.dataframes <- sim$response
 probabilities.dataframes <- sim$probabilities
@@ -861,22 +813,49 @@ dist.data <- quick.gen.dist(300, dist.type='stnd.norm', seed=123)
 dist.stnd <- dist.data
 dist.right <-  quick.gen.dist(300, dist.type='right.skew', seed=123)
 dist.left <- quick.gen.dist(300, dist.type='left.skew', seed=123)
-
+# so far, dist.stnd, dist.right, dist.left are dataframes with 300 rows of theta values and distribution type
 sim <- quick.sim.response(dist.data$theta, cross.param, seed=123)
 response.data <- sim$response
 probabilities.data <- sim$probabilities
 export.data(cross.param, output.dir='response_data', n=300, replications=10, seed=123) # calls quick.sim.response and quick.gen.dist
 
-
-methods <- c("BL", "EM") 
+# Methods/Dentypes/Distributions -------------------------------
+methods <- c("BL", "EM")
 dentypes <- c("Gaussian")
 dist.types <- c("stnd.norm", "left.skew", "right.skew")
 
+# MIRT Models ---------------------------------------------------
+# Methods:
+#   BL: Bayesian likelihood: common MLE
+#   EM: Expectation Maximization (EM): common MLE
+#   MCEM: Monte Carlo EM: variant of the EM algorithm that uses Monte Carlo simulation for the E-step.
+#   QMCEM: Quasi Monte Carlo EM: quasi-random sequences to improve efficiency of the Monte Carlo integration in the E-step
+#   MHRM: Metropolis Hastings Random Walk Metropolis: stochastic, combines the Robbins-Monro(RH) stochastic approximation with Metropolis-Hastings (MH) sampling.
+#   SEM: Stochastic EM: stochastic version EM algorithm
+methods <- c("BL", "EM", "MCEM", "QMCEM", "MHRM", "SEM")
+
+# Dentypes:
+# Gaussian ("Gaussian"): normal distribution: assumes a multivariate Gaussian w/ assoc. mean vector and var-covariance matrix
+# empiricalhist ("EH"): empirical histogram: estimates latent distribution using the empirical histogram of the data
+# empiricalhist_Woods ("EHW"): est. latent distribution using the empirical histogram of the data w/ Woods correction (extrapolation-interpolation)
+#   - improve stability in the presence of extreme response styles (i.e., all highest or lowest in each item)
+# Davidian-# ("Davidian-2"): Davidian distribution: 2-parameter distribution
+#  - estimates semi-parametric Davidian curves described by Woods
+#  - the '#' placeholder, assumes a #-parameter distribution for the latent trait 
+
+
+# Simulations ---------------------------------------------------
 metrics.stnd <- fit.mirt(dist.type=dist.types[1], cross.param, methods, dentypes, 10) 
 metrics.left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
-# throwing error for response_data/response_left_skew_rep_01.txt where "I20" contains all 0's
 metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10)
 
+# Error:
+    # throwing error for response_data/response_left_skew_rep_01.txt where "I20" contains all 0's
+    # Solution: 
+    # Bayesian Priors: https://cran.r-project.org/web/packages/mirt/vignettes/priors.html
+    # Handle Error: https://stackoverflow.com/questions/64669882/how-to-handle-error-in-r-when-reading-data-from-a-file
+
+# all metrics
 metrics <- list(stnd.norm = metrics.stnd, left.skew = metrics.left, right.skew = metrics.right)
 metrics 
 
@@ -886,6 +865,8 @@ p2 <- plot.rmse.diff(metrics.stnd, parameter="b")
 plot.rmse <- ggpubr::ggarrange(p1, p2, nrow = 2, ncol = 1)
 print(plot.rmse)
 
+ggsave("~/Desktop/plot_rmse.png", plot.rmse)
+
 # BIAS ----------------------------------------------------
 p1 <- plot.bias.diff(metrics.stnd, parameter="a")
 p2 <- plot.bias.diff(metrics.stnd, parameter="b")
@@ -894,29 +875,7 @@ print(plot.bias)
 
 # HISTOGRAMS ----------------------------------------------------
 # visualize the rmse and bias differences between different methods 
-p1 <- plot.rmse.bias.given.metrics.dfs(metrics.stnd[[1]], metrics.stnd[[1]])
-print(p1)
+p.rmse <- plot.rmse.bar(metrics.stnd[[1]], metrics.stnd[[1]])
+p.bias <- plot.bias.bar(metrics.stnd[[1]], metrics.stnd[[1]])
 
-
-
-
-
-
-
-
-
-
-
-
-plot.rmse.bias.differences(metrics.stnd)
-plot.rmse.bias.differences(metrics.stnd)
-
-
-# distribution
-plot.dist(dist.stnd)
-plot.dist(dist.left)
-plot.dist(dist.right)
-
-dist.list <- list(stnd.norm=dist.stnd, left.skew=dist.left, right.skew=dist.right)
-plot.dist.combined(dist.list)
-
+# ----------------------------------------------------
