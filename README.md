@@ -12,6 +12,7 @@ The main goals of this repository are:
 4. Read the response data from the .txt files and analyze it using R's `mirt`, or `flexMIRT` packages. 
 
 ## File Structure
+```bash
 .
 |__ .gitignore
 |__ flex/
@@ -50,7 +51,7 @@ The main goals of this repository are:
     |__ response_standard_normal_rep_02.txt
     |__ response_standard_normal_rep_03.txt
     ...
-
+```
 #### **flex/**
 The `flex/` directory contains several subdirectories, each with a specific purpose:
 
