@@ -206,6 +206,7 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
 
             total.time <- numeric(n.replications)
             successful.run <- TRUE
+            extreme.case <- FALSE
             failed.due.to.data.0 <- 0
             failed.due.to.data.1 <- 0
             failed.due.to.error <- 0
@@ -283,24 +284,22 @@ fit.mirt <- function(dist.type,  cross.param, methods, dentypes, n.replications=
 
                 # Store metrics in the results list with a unique name
                 results[[paste0("method_", method, "_dentype_", dentype)]] <- metrics
-                    # calculating the average bias and RMSE for each item
-                    # summarizing over replications for each item not accross all items!
-                
                 message(paste("\nMethod:", method, "with dentype:", dentype, "-- Successful iteration"))
             } else {
                 message(paste("Method:", method, "with dentype:", dentype, "had issues. Check warnings."))
             }
-            message(paste('\t', failed.due.to.data.0, "replications failed due to all 0's."))
-            message(paste('\t', failed.due.to.data.1, "replications failed due to all 1's."))
-            message(paste('\t', failed.due.to.error, "replications failed due to error.\n"))
+            # Print summary of failed replications
+            if(extreme.case == TRUE) {
+                message(paste('\t', failed.due.to.data.0, "replications failed due to all 0's."))
+                message(paste('\t', failed.due.to.data.1, "replications failed due to all 1's."))
+                message(paste('\t', failed.due.to.error, "replications failed due to error.\n"))
+            }
+            
         } # end for dentype loop
     } # end for method loop
   
   return(results)
 } # end fit.mirt
-
-metrics.left <- fit.mirt(dist.type=dist.types[2], cross.param, methods, dentypes, 10) 
-metrics.right <- fit.mirt(dist.type=dist.types[3], cross.param, methods, dentypes, 10) 
 
 fit.mirt.parallel <- function(all.distributions, cross.param, methods, dentypes) {
     require(parallel, quietly = TRUE)
