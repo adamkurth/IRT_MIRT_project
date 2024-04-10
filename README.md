@@ -1,6 +1,6 @@
 # MIRT Iterations
 
-This repository contains scripts for running simulations using Multidimensional Item Response Theory (MIRT). The scripts are written in R and are used to generate and analyze response data.
+This repository contains scripts for running simulations using Multidimensional Item Response Theory (MIRT). The scripts are written in R and flexMIRT and are used to generate and analyze response data.
 
 ## Goals
 
@@ -52,6 +52,7 @@ The main goals of this repository are:
     |__ response_standard_normal_rep_03.txt
     ...
 ```
+
 #### **flex/**
 The `flex/` directory contains several subdirectories, each with a specific purpose:
 
