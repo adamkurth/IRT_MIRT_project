@@ -75,4 +75,4 @@ cat("Number of columns:", ncol(results.df), "\n")
 cat("Number of rows:", nrow(results.df), "\n")
 
 # write to file
-write.csv(results.df, file = paste(cwd, "/data/20varn300result_intercepts_slopes.csv", sep = ""), row.names = TRUE)
+write.csv(results.df, file = paste(cwd, "/data/results_fllexmirt_intercepts_slopes.csv", sep = ""), row.names = TRUE)
