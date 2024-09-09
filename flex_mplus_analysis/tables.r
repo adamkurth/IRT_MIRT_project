@@ -40,7 +40,10 @@ create.package.table <- function(data.intercepts, data.slopes, package) {
     )
     
     # Save LaTeX code to file
-    writeLines(latex.code, paste0("flex_mplus_analysis/data/tables/", tolower(package), "_se_stats.tex"))
+    wd <- getwd()
+    tex.save.path <- paste0(wd, "/flex_mplus_analysis/data/tables/tex/")
+    file.save <- paste0(tex.save.path, tolower(package), "_se_stats.tex")
+    writeLines(latex.code, file.save)
     
     cat("LaTeX table for", package, "has been generated and saved.\n")
 }
