@@ -4,7 +4,7 @@ cwd <- getwd()
 
 # read data
 # path <- paste(cwd, "/data/Mplus20varn300estimatesflexlongline.txt", sep = "")
-path <- paste(cwd, "/data/test_mplus.txt", sep = "")
+path <- paste(cwd, "/flex_mplus_analysis/data/Mplus20varn300estimatesflexlongline.txt", sep = "")
 data <- read.table(path, header = FALSE, sep = " ")
 
 # initialize vectors 
@@ -56,4 +56,4 @@ cat("Number of columns:", ncol(results.df), "\n")
 cat("Number of rows:", nrow(results.df), "\n")
 
 # write to file
-write.csv(results.df, file = paste(cwd, "/data/results_mplus_intercepts_slopes.csv", sep = ""), row.names = TRUE)
+write.csv(results.df, file = paste(cwd, "/flex_mplus_analysis/data/results_mplus_intercepts_slopes.csv", sep = ""), row.names = TRUE)

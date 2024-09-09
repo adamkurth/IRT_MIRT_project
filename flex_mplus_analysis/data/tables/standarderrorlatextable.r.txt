@@ -1,0 +1,70 @@
+﻿Itemnumber <- c(seq(1,npo),seq(1,npo))
+Parameter <- (c(rep("Intercept",npo),rep("Slope",npo)))
+  
+mirttable <- data.frame(Parameter,Itemnumber,TrueValue,Mean,bias,mse)
+mirtsetable <-      data.frame(Parameter,Itemnumber,intsemeans,intsevar,slopesemeans,slopesevar)
+#write.table(mirttable,"mirt20varn300BLflex.csv",sep=',',row.names=FALSE)
+write.table(mirtsetable,
+"~/ASU Dropbox/MarkReiser/MEGA/work/catherine/mirt/20varn300standerr(flex)",
+sep=',',row.names=FALSE)
+
+library(xtable)
+colnames(mirtsetable) <- c("Parameter","Item Number","I SE Mean","I SE Var","S SE Mean","S SE Var")
+print(xtable(mirtsetable,digits=c(2,4,2,4,5,4,5)),include.rownames=FALSE)
+
+
+
+print(xtable) produces the following latex code:
+
+% latex table generated in R 4.4.0 by xtable 1.8-4 package
+% Sat Sep  7 14:54:53 2024
+\begin{table}[ht]
+\centering
+\begin{tabular}{lrrrrr}
+  \hline
+Parameter & Item Number & I SE Mean & I SE Var & S SE Mean & S SE Var \\ 
+  \hline
+Intercept &   1 & 0.2419 & 0.00141 & 0.2434 & 0.00068 \\ 
+  Intercept &   2 & 0.2755 & 0.00225 & 0.2617 & 0.00115 \\ 
+  Intercept &   3 & 0.3131 & 0.00377 & 0.3071 & 0.00283 \\ 
+  Intercept &   4 & 0.4248 & 0.02072 & 0.4996 & 0.02991 \\ 
+  Intercept &   5 & 0.1493 & 0.00009 & 0.1630 & 0.00010 \\ 
+  Intercept &   6 & 0.1711 & 0.00021 & 0.1959 & 0.00033 \\ 
+  Intercept &   7 & 0.2002 & 0.00051 & 0.2502 & 0.00112 \\ 
+  Intercept &   8 & 0.2710 & 0.00231 & 0.4248 & 0.00993 \\ 
+  Intercept &   9 & 0.1231 & 0.00001 & 0.1408 & 0.00006 \\ 
+  Intercept &  10 & 0.1413 & 0.00006 & 0.1786 & 0.00026 \\ 
+  Intercept &  11 & 0.1653 & 0.00016 & 0.2336 & 0.00089 \\ 
+  Intercept &  12 & 0.2233 & 0.00061 & 0.4045 & 0.00711 \\ 
+  Intercept &  13 & 0.1491 & 0.00009 & 0.1627 & 0.00010 \\ 
+  Intercept &  14 & 0.1706 & 0.00023 & 0.1951 & 0.00036 \\ 
+  Intercept &  15 & 0.2002 & 0.00057 & 0.2500 & 0.00124 \\ 
+  Intercept &  16 & 0.2727 & 0.00237 & 0.4284 & 0.00957 \\ 
+  Intercept &  17 & 0.2409 & 0.00109 & 0.2434 & 0.00061 \\ 
+  Intercept &  18 & 0.2763 & 0.00259 & 0.2626 & 0.00138 \\ 
+  Intercept &  19 & 0.3144 & 0.00410 & 0.3080 & 0.00312 \\ 
+  Intercept &  20 & 0.4181 & 0.01577 & 0.4913 & 0.02194 \\ 
+  Slope &   1 & 0.2419 & 0.00141 & 0.2434 & 0.00068 \\ 
+  Slope &   2 & 0.2755 & 0.00225 & 0.2617 & 0.00115 \\ 
+  Slope &   3 & 0.3131 & 0.00377 & 0.3071 & 0.00283 \\ 
+  Slope &   4 & 0.4248 & 0.02072 & 0.4996 & 0.02991 \\ 
+  Slope &   5 & 0.1493 & 0.00009 & 0.1630 & 0.00010 \\ 
+  Slope &   6 & 0.1711 & 0.00021 & 0.1959 & 0.00033 \\ 
+  Slope &   7 & 0.2002 & 0.00051 & 0.2502 & 0.00112 \\ 
+  Slope &   8 & 0.2710 & 0.00231 & 0.4248 & 0.00993 \\ 
+  Slope &   9 & 0.1231 & 0.00001 & 0.1408 & 0.00006 \\ 
+  Slope &  10 & 0.1413 & 0.00006 & 0.1786 & 0.00026 \\ 
+  Slope &  11 & 0.1653 & 0.00016 & 0.2336 & 0.00089 \\ 
+  Slope &  12 & 0.2233 & 0.00061 & 0.4045 & 0.00711 \\ 
+  Slope &  13 & 0.1491 & 0.00009 & 0.1627 & 0.00010 \\ 
+  Slope &  14 & 0.1706 & 0.00023 & 0.1951 & 0.00036 \\ 
+  Slope &  15 & 0.2002 & 0.00057 & 0.2500 & 0.00124 \\ 
+  Slope &  16 & 0.2727 & 0.00237 & 0.4284 & 0.00957 \\ 
+  Slope &  17 & 0.2409 & 0.00109 & 0.2434 & 0.00061 \\ 
+  Slope &  18 & 0.2763 & 0.00259 & 0.2626 & 0.00138 \\ 
+  Slope &  19 & 0.3144 & 0.00410 & 0.3080 & 0.00312 \\ 
+  Slope &  20 & 0.4181 & 0.01577 & 0.4913 & 0.02194 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
