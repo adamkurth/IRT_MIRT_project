@@ -1,103 +1,169 @@
 # analysis.r
-
 rm(list = ls()) 
-
 library(dplyr) 
 library(readr)
+library(tidyr)
 
 # working directory
 cwd <- getwd()
-data.path <- paste0(cwd, "/flex_mplus_analysis/data", sep = "")
+data.path <- paste0(cwd, "/flex_mplus_analysis/data/", sep = "")
 
 # specify paths
-path.flex <- paste0(data.path, "/results_fllexmirt_intercepts_slopes.csv")
-path.mplus <- paste0(data.path, "/results_mplus_intercepts_slopes.csv")
+path.flex <- paste0(data.path, "results_fllexmirt_intercepts_slopes.csv")
+path.mplus <- paste0(data.path, "results_mplus_intercepts_slopes.csv")
+path.mirt <- paste0(data.path, "mirt_processed_MR_copy.csv")
 
 # load data for flex/mplus
 data.flex <- read.csv(path.flex, header = TRUE, sep = ",")
 data.mplus <- read.csv(path.mplus, header = TRUE, sep = ",")
+data.mirt <- read.csv(path.mirt, header = TRUE, sep = ",")
 
-# flex intercept/slope data
-data.flex.se.intercepts <- data.flex %>% select(starts_with("intercept_")) 
-data.flex.se.slopes <- data.flex %>% select(starts_with("slope_")) 
+# rename columns
+colnames(data.mirt) <- c("Parameter", "Item", "Intercept_Mean", "Intercept_Var", "Intercept_RMSD", "Intercept_Ratio", "Slope_Mean", "Slope_Var", "Slope_RMSD", "Slope_Ratio")
 
-# flex intercept/slope data
-data.mplus.se.intercepts <- data.mplus %>% select(starts_with("intercept_")) 
-data.mplus.se.slopes <- data.mplus %>% select(starts_with("slope_")) 
-
-# Calculations 
-# calculate SE for each pair (intercept/slope)
+# Calculate SE (Standard Error)
 calc.se <- function(x){
-    R <- length(x)
-    mean.x <- mean(x)
-    se <- sqrt(sum((x - mean.x)^2) / (R - 1))
-    return(se)
+  R <- length(x)
+  mean.x <- mean(x)
+  se <- sqrt(sum((x - mean.x)^2) / (R - 1))  # add sqrt for SE
+  return(se)
 }
 
-# calculate avg SE for each pair (intercept/slope)
-calc.avg.se <- function(x){
-    R <- length(x)
-    mean.x <- mean(x)
-    se <- sqrt(sum((x - mean.x)^2) / (R - 1))
-    # normalize to get average se
-    se <- se / sqrt(R)
-    return(se)
-}
-
-# calculate var for each pair (intercept/slope)
+# Calculate Variance
 calc.var <- function(x){
-    R <- length(x)
-    mean.x <- mean(x)
-    var <- sum((x - mean.x)^2) / (R - 1)
-    return(var)
+  R <- length(x)
+  mean.x <- mean(x)
+  var <- sum((x - mean.x)^2) / (R - 1)  # without sqrt
+  return(var)
 }
 
-# calculate RMSD for each pair (intercept/slope)
-calc.rmsd <- function(x, se.true){
-    R <- length(x)
-    # use calc.se for each val until R
-    se.est <- sapply(x, function(est) calc.se(rep(est, R)))
-    rmsd <- sqrt(sum((se.est - se.true)^2) / R)
-    return(rmsd)
+# Calculate RMSD (Root Mean Square Deviation)
+calc.rmsd <- function(x) {
+  R <- length(x)
+  mean.x <- mean(x)
+  rmsd <- sqrt(sum((x - mean.x)^2) / R)  # RMSD calculation
+  return(rmsd)
 }
 
-# Central calculation
-# calculate the row of either intercept/slope data
-calc.col.stats <- function(col){
-    # call each calculation function
-    se <- calc.se(col)
-    avg.se <- calc.avg.se(col)
-    var <- calc.var(col)
-    rmsd <- calc.rmsd(col, se) 
-    return(c(se=se, avg.se=avg.se, var=var, rmsd=rmsd))
+# main function to process data
+process.data <- function(data){
+  results <- list()
+  for (i in 1:20){
+    for (param in c("intercept", "slope")) {
+      col <- paste0(param, "_", i)
+      col_data <- data[[col]]
+      
+      results[[col]] <- c(
+        SE = calc.se(col_data),
+        VAR = calc.var(col_data),
+        RMSD = calc.rmsd(col_data),
+        MEAN = mean(col_data)
+      )
+    }
+  }
+  data.processed <- as.data.frame(do.call(rbind, results))
+  colnames(data.processed) <- c('SE', 'RMSD', 'MEAN', 'VAR')
+  return(data.processed)
 }
 
-calc.pair.stats <- function(intercept.col, row.col){
-    # calculate 
+# reorder data to intercept_1, intercept_2, ..., slope_19, slope_20
+reorder.data <- function(data) {
+  # confirmed that this is working correctly
+  intercepts <- data[seq(1, 39, 2), ] # select every other row starting from 1
+  slopes <- data[seq(2, 40, 2), ]     # select every other row starting from 2
+  return(rbind(intercepts, slopes))   # combine the two dataframes
 }
 
-# calculate stats for each column
-intercept.flex.df <- as.data.frame(t(apply(data.flex.se.intercepts, 2, calc.col.stats)))
-slope.flex.df <- as.data.frame(t(apply(data.flex.se.slopes, 2, calc.col.stats)))
-
-intercept.mplus.df <- as.data.frame(t(apply(data.mplus.se.intercepts, 2, calc.col.stats)))
-slope.mplus.df <- as.data.frame(t(apply(data.mplus.se.slopes, 2, calc.col.stats)))
-
-# Rename rows for clarity
-colnames(intercept.flex.df) <- c("SE", "Avg.SE", "Variance", "RMSD")
-colnames(slope.flex.df) <- c("SE", "Avg.SE", "Variance", "RMSD")
-colnames(intercept.mplus.df) <- c("SE", "Avg.SE", "Variance", "RMSD")
-colnames(slope.mplus.df) <- c("SE", "Avg.SE", "Variance", "RMSD")
-
-# add row names
-rownames(intercept.flex.df) <- paste0("Intercept ", seq_len(nrow(intercept.flex.df)))
-rownames(slope.flex.df) <- paste0("Slope ", seq_len(nrow(intercept.flex.df)))
-rownames(intercept.mplus.df) <- paste0("Intercept ", seq_len(nrow(intercept.mplus.df)))
-rownames(slope.mplus.df) <- paste0("Slope ", seq_len(nrow(slope.mplus.df)))
+# Process flex and mplus data
+data.flex.processed <- process.data(data.flex)
+data.mplus.processed <- process.data(data.mplus)
+data.flex.processed <- reorder.data(data.flex.processed)
+data.mplus.processed <- reorder.data(data.mplus.processed)
 
 # write to csv
-save.path <- paste0(data.path, "/tables/")
-write.csv(intercept.flex.df, file = paste0(save.path, "intercept_flex.csv"), row.names = TRUE)
-write.csv(slope.flex.df, file = paste0(save.path, "slope_flex.csv"), row.names = TRUE)
-write.csv(intercept.mplus.df, file = paste0(save.path, "intercept_mplus.csv"), row.names = TRUE)
-write.csv(slope.mplus.df, file = paste0(save.path, "slope_mplus.csv"), row.names = TRUE)
+write.csv(data.flex.processed, file = paste0(data.path, "flex_processed.csv"), row.names = TRUE)
+write.csv(data.mplus.processed, file = paste0(data.path, "mplus_processed.csv"), row.names = TRUE)
+
+# prep mirt data
+data.mirt.processed <- data.frame(
+  SE = c(sqrt(data.mirt$Intercept_Var), sqrt(data.mirt$Slope_Var)),
+  MEAN = c(data.mirt$Intercept_Mean, data.mirt$Slope_Mean),
+  RMSD = c(data.mirt$Intercept_RMSD, data.mirt$Slope_RMSD),
+  VAR = c(data.mirt$Intercept_Var, data.mirt$Slope_Var)
+)
+# make rownames uniform
+rownames(data.flex.processed) <- paste0(rep(c("intercept_", "slope_"), each=20), rep(1:20, 2))
+rownames(data.mplus.processed) <- paste0(rep(c("intercept_", "slope_"), each=20), rep(1:20, 2))
+rownames(data.mirt.processed) <- paste0(rep(c("intercept_", "slope_"), each=20), rep(1:20, 2))
+
+# CLARIFICATION:
+# should create dataframes with 40 rows and 4 columns
+# data.processed should look like this:
+# 
+#               SE    RMSD  MEAN  VAR
+# intercept_1  0.1   0.2    0.3   0.4
+# intercept_2  0.1   0.2    0.3   0.4
+# ...
+# slope_19     0.1   0.2    0.3   0.4
+# slope_20     0.1   0.2    0.3   0.4 
+
+
+# safely calculate ratio of two vectors
+safe_ratio <- function(numerator, denominator) {
+  if (length(numerator) != length(denominator)) {
+    warning("Lengths of numerator and denominator do not match")
+    return(rep(NA, max(length(numerator), length(denominator))))
+  }
+  ifelse(denominator == 0, NA, numerator / denominator)
+}
+
+# Calculate ratios
+ratios <- tryCatch({
+  data.frame(
+    Ratio_MEAN_Flex_MIRT = safe_ratio(data.flex.processed$MEAN, data.mirt.processed$MEAN),
+    Ratio_MEAN_Flex_Mplus = safe_ratio(data.flex.processed$MEAN, data.mplus.processed$MEAN),
+    Ratio_MEAN_MIRT_Mplus = safe_ratio(data.mirt.processed$MEAN, data.mplus.processed$MEAN),
+    Ratio_RMSD_Flex_MIRT = safe_ratio(data.flex.processed$RMSD, data.mirt.processed$RMSD),
+    Ratio_RMSD_Flex_Mplus = safe_ratio(data.flex.processed$RMSD, data.mplus.processed$RMSD),
+    Ratio_RMSD_MIRT_Mplus = safe_ratio(data.mirt.processed$RMSD, data.mplus.processed$RMSD)
+  )
+}, error = function(e) {
+  print(paste("Error in creating ratios data frame:", e$message))
+  return(NULL)
+})
+
+# check if ratios were calculated successfully
+if (!is.null(ratios)) {
+  print("Ratios calculated successfully")
+  print(head(ratios))
+} else {
+  print("Failed to calculate ratios")
+}
+
+final.table <- data.frame(
+  Item = rep(1:20, each = 2),
+  Parameter = rep(c("Intercept", "Slope"), 20),
+  FlexMIRT_Mean = data.flex.processed$MEAN,
+  MIRT_Mean = data.mirt.processed$MEAN,
+  Mplus_Mean = data.mplus.processed$MEAN,
+  Ratio_MEAN_Flex_MIRT = ratios$Ratio_MEAN_Flex_MIRT,
+  Ratio_MEAN_Flex_Mplus = ratios$Ratio_MEAN_Flex_Mplus,
+  Ratio_MEAN_MIRT_Mplus = ratios$Ratio_MEAN_MIRT_Mplus,
+  FlexMIRT_SE = data.flex.processed$SE,
+  MIRT_SE = data.mirt.processed$SE,
+  Mplus_SE = data.mplus.processed$SE,
+  FlexMIRT_RMSD = data.flex.processed$RMSD,
+  MIRT_RMSD = data.mirt.processed$RMSD,
+  Mplus_RMSD = data.mplus.processed$RMSD,
+  FlexMIRT_VAR = data.flex.processed$VAR,
+  MIRT_VAR = data.mirt.processed$VAR,
+  Mplus_VAR = data.mplus.processed$VAR
+)
+
+# Group by Parameter
+final.table <- final.table %>%
+  group_by(Parameter) %>%
+  arrange(Parameter, Item)
+
+# write final to csv
+write.csv(final.table, file = paste0(data.path, "final_table.csv"), row.names = FALSE)
