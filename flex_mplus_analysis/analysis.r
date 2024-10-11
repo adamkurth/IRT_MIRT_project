@@ -25,19 +25,30 @@ colnames(data.mirt) <- c("Parameter", "Item", "Intercept_Mean", "Intercept_Var",
 calc.se <- function(x){
   R <- length(x)
   mean.x <- mean(x)
-  se <- sqrt(sum((x - mean.x)^2) / (R - 1))  # add sqrt for SE
+  se <- sqrt(sum((x - mean.x)^2) / (R - 1))  # sqrt for SE
   return(se)
+}
+
+calc.mean <- function(x){
+  n <- length(x)
+  mean.x <- sum(x) / n
+  return(mean.x)
 }
 
 # Calculate Variance
 calc.var <- function(x){
   R <- length(x)
   mean.x <- mean(x)
-  var <- sum((x - mean.x)^2) / (R - 1)  # without sqrt
+  var <- sum((x - mean.x)^2) / (R - 1)  # no sqrt
   return(var)
 }
 
-# Calculate RMSD (Root Mean Square Deviation)
+# Calculate Mean
+calc.mean <- function(x){
+  mean(x)
+}
+
+# Calculate RMSD
 calc.rmsd <- function(x) {
   R <- length(x)
   mean.x <- mean(x)
@@ -45,7 +56,7 @@ calc.rmsd <- function(x) {
   return(rmsd)
 }
 
-# main function to process data
+#  main function to process data
 process.data <- function(data){
   results <- list()
   for (i in 1:20){
@@ -57,28 +68,33 @@ process.data <- function(data){
         SE = calc.se(col_data),
         VAR = calc.var(col_data),
         RMSD = calc.rmsd(col_data),
-        MEAN = mean(col_data)
+        MEAN = calc.mean(col_data)  # Use calc.mean function
       )
     }
   }
   data.processed <- as.data.frame(do.call(rbind, results))
-  colnames(data.processed) <- c('SE', 'RMSD', 'MEAN', 'VAR')
+  colnames(data.processed) <- c('SE', 'VAR', 'RMSD', 'MEAN')  # Reorder columns to match MIRT output
   return(data.processed)
 }
 
+
 # reorder data to intercept_1, intercept_2, ..., slope_19, slope_20
-reorder.data <- function(data) {
-  # confirmed that this is working correctly
-  intercepts <- data[seq(1, 39, 2), ] # select every other row starting from 1
-  slopes <- data[seq(2, 40, 2), ]     # select every other row starting from 2
-  return(rbind(intercepts, slopes))   # combine the two dataframes
-}
+# reorder.data <- function(data) {
+#   # confirmed that this is working correctly
+#   intercepts <- data[seq(1, 39, 2), ] # select every other row starting from 1
+#   slopes <- data[seq(2, 40, 2), ]     # select every other row starting from 2
+#   return(rbind(intercepts, slopes))   # combine the two dataframes
+# }
 
 # Process flex and mplus data
 data.flex.processed <- process.data(data.flex)
 data.mplus.processed <- process.data(data.mplus)
-data.flex.processed <- reorder.data(data.flex.processed)
-data.mplus.processed <- reorder.data(data.mplus.processed)
+# data.flex.processed <- reorder.data(data.flex.processed)
+# data.mplus.processed <- reorder.data(data.mplus.processed)
+
+print(summary(data.flex.processed))
+print(summary(data.mplus.processed))
+print(summary(data.mirt.processed))
 
 # write to csv
 write.csv(data.flex.processed, file = paste0(data.path, "flex_processed.csv"), row.names = TRUE)
@@ -131,7 +147,6 @@ ratios <- tryCatch({
   print(paste("Error in creating ratios data frame:", e$message))
   return(NULL)
 })
-
 # check if ratios were calculated successfully
 if (!is.null(ratios)) {
   print("Ratios calculated successfully")
@@ -164,6 +179,11 @@ final.table <- data.frame(
 final.table <- final.table %>%
   group_by(Parameter) %>%
   arrange(Parameter, Item)
+  
+final.table <- as.data.frame(final.table)
 
 # write final to csv
 write.csv(final.table, file = paste0(data.path, "final_table.csv"), row.names = FALSE)
+write.csv(ratios, file=paste0(data.path, "ratios.csv"), row.names = FALSE)
+
+head(final.table, 20)

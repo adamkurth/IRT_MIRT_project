@@ -3,7 +3,8 @@ rm(list = ls())
 cwd <- getwd()
 
 # read data
-path <- paste(cwd, "/data/20varn300result.txt", sep = "")
+path <- "/Users/adamkurth/Documents/vscode/code/IRT_MIRT_project/flex_mplus_analysis/data/20varn300result.txt"
+# path <- paste(cwd, "/data/20varn300result.txt", sep = "")
 data <- read.table(path, header = FALSE, sep = "\t")
 
 # initialize vectors 
