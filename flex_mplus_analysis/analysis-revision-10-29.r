@@ -18,15 +18,33 @@ data.flex <- read.csv(path.flex, header = TRUE, sep = ",")
 data.mplus <- read.csv(path.mplus, header = TRUE, sep = ",")
 data.mirt <- read.csv(path.mirt, header = TRUE, sep = ",")
 
-# rename columns
-colnames(data.mirt) <- c("Parameter", "Item", "Intercept_Mean", "Intercept_Var", "Intercept_RMSD", "Intercept_Ratio", 
-                        "Slope_Mean", "Slope_Var", "Slope_RMSD", "Slope_Ratio")
+data.mirt.processed <- data.frame(
+    MEAN = c(
+        data.mirt$intsemeans[data.mirt$Parameter == "Intercept"],  # First 20 intercepts
+        data.mirt$slopesemeans[data.mirt$Parameter == "Intercept"] # Then 20 slopes
+    ),
+    RMSD = c(
+        data.mirt$intRMSSD[data.mirt$Parameter == "Intercept"],
+        data.mirt$slopeRMSSD[data.mirt$Parameter == "Intercept"]
+    ),
+    VAR = c(
+        data.mirt$intsevar[data.mirt$Parameter == "Intercept"],
+        data.mirt$slopesevar[data.mirt$Parameter == "Intercept"]
+    )
+)
 
-# calc.mean <- function(x){
-#   n <- length(x)
-#   mean.x <- sum(x) / n
-#   return(mean.x)
-# }
+# rename columns
+# data.mirt.processed <- data.mirt
+# colnames(data.mirt) <- c("Parameter", "Item", "Intercept_Mean", "Intercept_Var", "Intercept_RMSD", "Intercept_Ratio", 
+                        # "Slope_Mean", "Slope_Var", "Slope_RMSD", "Slope_Ratio")
+
+# rownames(data.mirt) <- paste0(
+#     rep(c("intercept_", "slope_"), each=20),
+#     rep(1:20, 2)
+# )
+
+# print("First few rows of processed MIRT data:")
+# print(head(data.mirt))
 
 # Calculate Variance
 calc.var <- function(x){
@@ -81,36 +99,15 @@ process.data <- function(data){
 data.flex.processed <- process.data(data.flex)
 data.mplus.processed <- process.data(data.mplus)
 
-print(summary(data.flex.processed))
-print(summary(data.mplus.processed))
-print(summary(data.mirt.processed))
-
 # write to csv
 write.csv(data.flex.processed, file = paste0(data.path, "flex_processed.csv"), row.names = TRUE)
 write.csv(data.mplus.processed, file = paste0(data.path, "mplus_processed.csv"), row.names = TRUE)
-
-# prep mirt data
-data.mirt.processed <- data.frame(
-  MEAN = c(data.mirt$Intercept_Mean, data.mirt$Slope_Mean),
-  RMSD = c(data.mirt$Intercept_RMSD, data.mirt$Slope_RMSD),
-  VAR = c(data.mirt$Intercept_Var, data.mirt$Slope_Var)
-)
+write.csv(data.mirt.processed, file = paste0(data.path, "mirt_processed.csv"), row.names = TRUE)
 
 # make rownames uniform
 rownames(data.flex.processed) <- paste0(rep(c("intercept_", "slope_"), each=20), rep(1:20, 2))
 rownames(data.mplus.processed) <- paste0(rep(c("intercept_", "slope_"), each=20), rep(1:20, 2))
 rownames(data.mirt.processed) <- paste0(rep(c("intercept_", "slope_"), each=20), rep(1:20, 2))
-
-# CLARIFICATION:
-# should create dataframes with 40 rows and 4 columns
-# data.processed should look like this:
-# 
-#               SE    RMSD  MEAN  VAR
-# intercept_1  0.1   0.2    0.3   0.4
-# intercept_2  0.1   0.2    0.3   0.4
-# ...
-# slope_19     0.1   0.2    0.3   0.4
-# slope_20     0.1   0.2    0.3   0.4 
 
 # safely calculate ratio of two vectors
 safe_ratio <- function(numerator, denominator) {
@@ -124,8 +121,8 @@ safe_ratio <- function(numerator, denominator) {
 # Calculate ratios
 ratios <- tryCatch({
   data.frame(
-    Parameter = rep(c("Intercept", "Slope"), 20),
-    Item = rep(1:20, each = 2),
+    Parameter = rep(c("Intercept", "Slope"), each=20),  # Changed to each=20
+    Item = rep(1:20, times=2),                          # Changed to times=2
     Ratio_MEAN_Flex_MIRT = safe_ratio(data.flex.processed$MEAN, data.mirt.processed$MEAN),
     Ratio_MEAN_Flex_Mplus = safe_ratio(data.flex.processed$MEAN, data.mplus.processed$MEAN),
     Ratio_MEAN_MIRT_Mplus = safe_ratio(data.mirt.processed$MEAN, data.mplus.processed$MEAN),
@@ -133,23 +130,14 @@ ratios <- tryCatch({
     Ratio_RMSD_Flex_Mplus = safe_ratio(data.flex.processed$RMSD, data.mplus.processed$RMSD),
     Ratio_RMSD_MIRT_Mplus = safe_ratio(data.mirt.processed$RMSD, data.mplus.processed$RMSD)
   )
-  
 }, error = function(e) {
   print(paste("Error in creating ratios data frame:", e$message))
   return(NULL)
 })
 
+
 # group by parameter and item
 ratios <- ratios %>% group_by(Parameter) %>% arrange(Parameter, Item)
-
-
-# # check if ratios were calculated successfully
-# if (!is.null(ratios)) {
-#   print("Ratios calculated successfully")
-#   print(head(ratios))
-# } else {
-#   print("Failed to calculate ratios")
-# }
 
 # 1. After loading the data and before the data processing, add true parameter values:
 true.parameters <- data.frame(
@@ -168,9 +156,9 @@ true.parameters <- data.frame(
 
 # 2. Modify the final.table creation section to include true values:
 final.table <- data.frame(
-    Parameter = rep(c("Intercept", "Slope"), 20),
-    Item = rep(1:20, each = 2),
-    True_Value = c(true.parameters$intercept, true.parameters$slope),  # Add this line
+    Parameter = rep(c("Intercept", "Slope"), each=20),  # Changed to each=20
+    Item = rep(1:20, times=2),                          # Changed to times=2
+    True_Value = c(true.parameters$intercept, true.parameters$slope),
     FlexMIRT_Mean = data.flex.processed$MEAN,
     MIRT_Mean = data.mirt.processed$MEAN,
     Mplus_Mean = data.mplus.processed$MEAN,
@@ -184,6 +172,7 @@ final.table <- data.frame(
     MIRT_VAR = data.mirt.processed$VAR,
     Mplus_VAR = data.mplus.processed$VAR
 )
+
 # group by parameter and item
 final.table <- final.table %>% group_by(Parameter) %>% arrange(Parameter, Item)
 final.table <- as.data.frame(final.table)
@@ -260,15 +249,15 @@ write.csv(var.overall, file = paste0(data.path, "variance_overall_ratios.csv"), 
 
 # 6. Add these print statements at the end to verify the output:
 print("Means Table (first few rows):")
-print(head(means.table))
+print(head(means.table,10))
 print("\nRMSD Table (first few rows):")
-print(head(rmsd.table))
+print(head(rmsd.table,10))
 print("\nVariance Table (first few rows):")
-print(head(var.table))
+print(head(var.table,10))
 print("\nOverall Ratios:")
 print("Means:")
-print(means.overall)
+print(head(means.overall,20))
 print("RMSD:")
-print(rmsd.overall)
+print(head(rmsd.overall,20))
 print("Variance:")
-print(var.overall)
+print(head(var.overall,20))
