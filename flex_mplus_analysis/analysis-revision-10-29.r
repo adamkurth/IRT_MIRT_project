@@ -246,6 +246,7 @@ var.overall <- calculate_overall_ratios(var.table)
 write.csv(means.overall, file = paste0(data.path, "means_overall_ratios.csv"), row.names = FALSE)
 write.csv(rmsd.overall, file = paste0(data.path, "rmsd_overall_ratios.csv"), row.names = FALSE)
 write.csv(var.overall, file = paste0(data.path, "variance_overall_ratios.csv"), row.names = FALSE)
+write.csv(final.table, file = paste0(data.path, "final_table.csv"), row.names = FALSE)
 
 # 6. Add these print statements at the end to verify the output:
 print("Means Table (first few rows):")
@@ -261,3 +262,4 @@ print("RMSD:")
 print(head(rmsd.overall,20))
 print("Variance:")
 print(head(var.overall,20))
+
